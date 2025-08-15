@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
-import { calculateRouletteRotation, getContrastColor, getGradientColors } from '../../utils/helpers';
+import { calculateRouletteRotation, getContrastColor } from '../../utils/helpers';
 
 interface RouletteProps {
   participants: Participant[];
@@ -27,19 +27,28 @@ const RouletteWrapper = styled.div`
   justify-content: center;
 `;
 
-const RouletteSVG = styled(motion.svg)<{ size: number }>`
+const WheelContainer = styled.div<{ size: number }>`
   width: ${props => props.size}px;
   height: ${props => props.size}px;
+  position: relative;
   border-radius: 50%;
+  overflow: hidden;
   box-shadow: 
     0 0 50px rgba(102, 126, 234, 0.3),
     inset 0 0 30px rgba(255, 255, 255, 0.1),
     0 20px 40px rgba(0, 0, 0, 0.1);
-  background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   border: 8px solid rgba(255, 255, 255, 0.2);
 `;
 
-const CenterCircle = styled.div<{ size: number }>`
+const WheelSVG = styled(motion.svg)<{ size: number }>`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+
+const CenterCircle = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -79,13 +88,13 @@ const RoulettePointer = styled.div`
   }
 `;
 
-const ParticipantText = styled.text<{ textColor: string }>`
+const ParticipantText = styled.text<{ textColor: string; fontSize: number }>`
   fill: ${props => props.textColor};
-  font-size: 14px;
+  font-size: ${props => props.fontSize}px;
   font-weight: 600;
   text-anchor: middle;
   dominant-baseline: middle;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
   pointer-events: none;
 `;
 
@@ -156,6 +165,13 @@ const EmptyWheel = styled.div<{ size: number }>`
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 `;
 
+const colors = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+  '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE',
+  '#AED6F1', '#A3E4D7', '#F9E79F', '#FADBD8', '#D5DBDB'
+];
+
 function createSegmentPath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): string {
   const x1 = centerX + radius * Math.cos(startAngle);
   const y1 = centerY + radius * Math.sin(startAngle);
@@ -222,75 +238,70 @@ export const Roulette: React.FC<RouletteProps> = ({
     );
   }
 
-  const radius = (wheelSize - 16) / 2; // Subtract border width
+  const radius = wheelSize / 2 - 4; // Account for border
   const centerX = wheelSize / 2;
   const centerY = wheelSize / 2;
   const segmentAngle = (2 * Math.PI) / participants.length;
-  const gradients = getGradientColors(participants.length);
+  
+  // Calculate appropriate font size based on wheel size and number of participants
+  const fontSize = Math.max(10, Math.min(16, wheelSize / participants.length / 3));
 
   return (
     <RouletteContainer>
       <RouletteWrapper>
         <RoulettePointer />
-        <RouletteSVG
-          size={wheelSize}
-          animate={{ rotate: rotation }}
-          transition={{
-            duration: isSpinning ? 3 : 0,
-            ease: [0.25, 0.46, 0.45, 0.94],
-          }}
-        >
-          {/* Create gradient definitions */}
-          <defs>
-            {participants.map((participant, index) => (
-              <linearGradient
-                key={`gradient-${participant.id}`}
-                id={`gradient-${participant.id}`}
-                x1="0%" y1="0%" x2="100%" y2="100%"
-              >
-                <stop offset="0%" stopColor={participant.color || '#667eea'} />
-                <stop offset="100%" stopColor={participant.color || '#764ba2'} />
-              </linearGradient>
-            ))}
-          </defs>
-
-          {/* Create segments */}
-          {participants.map((participant, index) => {
-            const startAngle = index * segmentAngle - Math.PI / 2; // Start from top
-            const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
-            const isSelected = selectedParticipant?.id === participant.id;
-            
-            // Calculate text position
-            const textAngle = startAngle + segmentAngle / 2;
-            const textRadius = radius * 0.7;
-            const textX = centerX + textRadius * Math.cos(textAngle);
-            const textY = centerY + textRadius * Math.sin(textAngle);
-            
-            return (
-              <g key={participant.id}>
-                <path
-                  d={createSegmentPath(centerX, centerY, radius, startAngle, endAngle)}
-                  fill={`url(#gradient-${participant.id})`}
-                  stroke="rgba(255, 255, 255, 0.2)"
-                  strokeWidth="1"
-                  style={{
-                    filter: isSelected ? 'brightness(1.2) saturate(1.3)' : 'none',
-                    transition: 'filter 0.3s ease',
-                  }}
-                />
-                <ParticipantText
-                  x={textX}
-                  y={textY}
-                  textColor={getContrastColor(participant.color || '#000000')}
-                  transform={`rotate(${(textAngle * 180) / Math.PI + 90}, ${textX}, ${textY})`}
-                >
-                  {participant.name.length > 12 ? `${participant.name.slice(0, 12)}...` : participant.name}
-                </ParticipantText>
-              </g>
-            );
-          })}
-        </RouletteSVG>
-        <CenterCircle size={wheelSize} />
+        <WheelContainer size={wheelSize}>
+          <WheelSVG
+            size={wheelSize}
+            viewBox={`0 0 ${wheelSize} ${wheelSize}`}
+            animate={{ rotate: rotation }}
+            transition={{
+              duration: isSpinning ? 3 : 0,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+          >
+            {/* Create segments */}
+            {participants.map((participant, index) => {
+              const startAngle = index * segmentAngle - Math.PI / 2; // Start from top
+              const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
+              const isSelected = selectedParticipant?.id === participant.id;
+              
+              // Calculate text position
+              const textAngle = startAngle + segmentAngle / 2;
+              const textRadius = radius * 0.65;
+              const textX = centerX + textRadius * Math.cos(textAngle);
+              const textY = centerY + textRadius * Math.sin(textAngle);
+              
+              // Get color for this participant
+              const participantColor = participant.color || colors[index % colors.length];
+              
+              return (
+                <g key={participant.id}>
+                  <path
+                    d={createSegmentPath(centerX, centerY, radius, startAngle, endAngle)}
+                    fill={participantColor}
+                    stroke="rgba(255, 255, 255, 0.3)"
+                    strokeWidth="2"
+                    style={{
+                      filter: isSelected ? 'brightness(1.3) saturate(1.4)' : 'brightness(1.1)',
+                      transition: 'filter 0.3s ease',
+                    }}
+                  />
+                  <ParticipantText
+                    x={textX}
+                    y={textY}
+                    textColor={getContrastColor(participantColor)}
+                    fontSize={fontSize}
+                    transform={`rotate(${(textAngle * 180) / Math.PI + 90}, ${textX}, ${textY})`}
+                  >
+                    {participant.name.length > 15 ? `${participant.name.slice(0, 15)}...` : participant.name}
+                  </ParticipantText>
+                </g>
+              );
+            })}
+          </WheelSVG>
+        </WheelContainer>
+        <CenterCircle />
       </RouletteWrapper>
 
       <SpinButton
