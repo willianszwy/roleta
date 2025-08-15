@@ -192,12 +192,13 @@ const PortalDropdown = styled(motion.div)<{ $top: number; $left: number }>`
   position: fixed;
   top: ${props => props.$top}px;
   left: ${props => props.$left}px;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
   padding: 0.5rem;
   min-width: 140px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
   z-index: 999999;
 `;
 
@@ -206,17 +207,22 @@ const MenuItem = styled(motion.button)`
   background: none;
   border: none;
   padding: 0.5rem 0.75rem;
-  border-radius: 0.3rem;
+  border-radius: 0.5rem;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   text-align: left;
-  color: #374151;
+  color: white;
   transition: all 0.2s ease;
   
   &:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #1f2937;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
