@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
@@ -69,14 +69,14 @@ const MenuDropdown = styled(motion.div)`
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 0.6rem;
   padding: 0.5rem;
   min-width: 140px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  z-index: 10000;
 `;
 
 const MenuItem = styled(motion.button)`
@@ -89,12 +89,12 @@ const MenuItem = styled(motion.button)`
   font-weight: 600;
   cursor: pointer;
   text-align: left;
-  color: #374151;
+  color: #1f2937;
   transition: all 0.2s ease;
   
   &:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #1f2937;
+    background: rgba(102, 126, 234, 0.15);
+    color: #111827;
   }
   
   &:disabled {
@@ -229,14 +229,14 @@ const ItemMenuDropdown = styled(motion.div)`
   position: absolute;
   top: calc(100% + 0.25rem);
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 0.4rem;
   padding: 0.25rem;
   min-width: 120px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  z-index: 1001;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  z-index: 10001;
 `;
 
 const EmptyState = styled.div`
@@ -298,6 +298,19 @@ export const History: React.FC<HistoryProps> = ({
   const toggleItemMenu = (itemId: string) => {
     setOpenItemMenu(openItemMenu === itemId ? null : itemId);
   };
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setMenuOpen(false);
+      setOpenItemMenu(null);
+    };
+
+    if (menuOpen || openItemMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [menuOpen, openItemMenu]);
 
   return (
     <HistoryContainer>
