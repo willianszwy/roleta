@@ -69,13 +69,13 @@ const MenuDropdown = styled(motion.div)`
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.6rem;
   padding: 0.5rem;
   min-width: 140px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   z-index: 1000;
 `;
 
@@ -86,14 +86,14 @@ const MenuItem = styled(motion.button)`
   padding: 0.5rem 0.75rem;
   border-radius: 0.4rem;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   text-align: left;
   color: #374151;
   transition: all 0.2s ease;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(102, 126, 234, 0.1);
     color: #1f2937;
   }
   
@@ -229,13 +229,13 @@ const ItemMenuDropdown = styled(motion.div)`
   position: absolute;
   top: calc(100% + 0.25rem);
   right: 0;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.4rem;
   padding: 0.25rem;
-  min-width: 100px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   z-index: 1001;
 `;
 
