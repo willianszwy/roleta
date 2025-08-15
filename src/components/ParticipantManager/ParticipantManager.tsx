@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Participant } from '../../types';
+import type { Participant } from '../../types';
 
 interface ParticipantManagerProps {
   participants: Participant[];

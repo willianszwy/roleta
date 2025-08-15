@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RouletteHistory } from '../../types';
+import type { RouletteHistory } from '../../types';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 interface HistoryProps {

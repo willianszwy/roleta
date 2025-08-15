@@ -1,16 +1,50 @@
-import { useState, useCallback } from 'react';
-import { Participant, RouletteHistory, RouletteState } from '../types';
-import { useLocalStorageWithDate } from './useLocalStorage';
+import { useState, useCallback, useEffect } from 'react';
+import type { Participant, RouletteHistory, RouletteState } from '../types';
 import { generateId, getRandomColor, selectRandomParticipant } from '../utils/helpers';
 
 const PARTICIPANTS_KEY = 'roulette-participants';
 const HISTORY_KEY = 'roulette-history';
 
+function loadFromStorage<T>(key: string, defaultValue: T): T {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item) return defaultValue;
+    return JSON.parse(item, (_key, value) => {
+      if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
+        return new Date(value);
+      }
+      return value;
+    });
+  } catch {
+    return defaultValue;
+  }
+}
+
+function saveToStorage<T>(key: string, value: T): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error saving to localStorage:`, error);
+  }
+}
+
 export function useRoulette() {
-  const [participants, setParticipants] = useLocalStorageWithDate<Participant[]>(PARTICIPANTS_KEY, []);
-  const [history, setHistory] = useLocalStorageWithDate<RouletteHistory[]>(HISTORY_KEY, []);
+  const [participants, setParticipants] = useState<Participant[]>(() => 
+    loadFromStorage(PARTICIPANTS_KEY, [])
+  );
+  const [history, setHistory] = useState<RouletteHistory[]>(() => 
+    loadFromStorage(HISTORY_KEY, [])
+  );
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | undefined>();
+
+  useEffect(() => {
+    saveToStorage(PARTICIPANTS_KEY, participants);
+  }, [participants]);
+
+  useEffect(() => {
+    saveToStorage(HISTORY_KEY, history);
+  }, [history]);
 
   const addParticipant = useCallback((name: string) => {
     if (!name.trim()) return;
@@ -23,15 +57,15 @@ export function useRoulette() {
     };
     
     setParticipants(prev => [...prev, newParticipant]);
-  }, [setParticipants]);
+  }, []);
 
   const removeParticipant = useCallback((id: string) => {
     setParticipants(prev => prev.filter(p => p.id !== id));
-  }, [setParticipants]);
+  }, []);
 
   const clearParticipants = useCallback(() => {
     setParticipants([]);
-  }, [setParticipants]);
+  }, []);
 
   const spinRoulette = useCallback(async (): Promise<Participant | null> => {
     if (participants.length === 0 || isSpinning) return null;
@@ -39,7 +73,6 @@ export function useRoulette() {
     setIsSpinning(true);
     setSelectedParticipant(undefined);
 
-    // Simulate spinning animation duration
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const selected = selectRandomParticipant(participants);
@@ -58,30 +91,26 @@ export function useRoulette() {
     }
 
     return selected;
-  }, [participants, isSpinning, setHistory]);
+  }, [participants, isSpinning]);
 
   const finishSpin = useCallback(() => {
     setIsSpinning(false);
   }, []);
 
   const removeFromRouletteAfterSpin = useCallback((participantId: string) => {
-    // Remove participant from active list
     setParticipants(prev => prev.filter(p => p.id !== participantId));
-    
-    // Mark as removed in history
     setHistory(prev => prev.map(h => 
       h.participantId === participantId && !h.removed 
         ? { ...h, removed: true }
         : h
     ));
-  }, [setParticipants, setHistory]);
+  }, []);
 
   const clearHistory = useCallback(() => {
     setHistory([]);
-  }, [setHistory]);
+  }, []);
 
   const restoreParticipant = useCallback((participantName: string) => {
-    // Find a removed participant in history to restore their color
     const historyEntry = history.find(h => h.participantName === participantName && h.removed);
     
     const newParticipant: Participant = {
@@ -93,7 +122,6 @@ export function useRoulette() {
     
     setParticipants(prev => [...prev, newParticipant]);
     
-    // Update history to mark as restored (not removed)
     if (historyEntry) {
       setHistory(prev => prev.map(h => 
         h.id === historyEntry.id 
@@ -101,14 +129,14 @@ export function useRoulette() {
           : h
       ));
     }
-  }, [history, setParticipants, setHistory]);
+  }, [history]);
 
   const state: RouletteState = {
     participants,
     history,
     isSpinning,
     selectedParticipant,
-    animationDuration: 3000, // 3 seconds default
+    animationDuration: 3000,
   };
 
   return {

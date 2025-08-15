@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -33,7 +33,7 @@ export function useLocalStorageWithDate<T>(
       const item = window.localStorage.getItem(key);
       if (!item) return initialValue;
       
-      return JSON.parse(item, reviver || ((key, value) => {
+      return JSON.parse(item, reviver || ((_key, value) => {
         // Auto-convert ISO date strings back to Date objects
         if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
           return new Date(value);

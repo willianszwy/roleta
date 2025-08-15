@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Participant } from '../../types';
+import type { Participant } from '../../types';
 import { calculateRouletteRotation, getContrastColor, getGradientColors } from '../../utils/helpers';
 
 interface RouletteProps {
