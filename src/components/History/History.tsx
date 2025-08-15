@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
@@ -62,44 +63,6 @@ const MenuButton = styled(motion.button)`
   
   &:hover {
     background: rgba(255, 255, 255, 0.15);
-  }
-`;
-
-const MenuDropdown = styled(motion.div)`
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 0.6rem;
-  padding: 0.5rem;
-  min-width: 140px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-  z-index: 10000;
-`;
-
-const MenuItem = styled(motion.button)`
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.4rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-  color: #1f2937;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: rgba(102, 126, 234, 0.15);
-    color: #111827;
-  }
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 `;
 
@@ -225,18 +188,36 @@ const ItemMenuButton = styled(motion.button)<{ removed?: boolean }>`
   }
 `;
 
-const ItemMenuDropdown = styled(motion.div)`
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  right: 0;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 0.4rem;
-  padding: 0.25rem;
-  min-width: 120px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  z-index: 10001;
+const PortalDropdown = styled(motion.div)<{ $top: number; $left: number }>`
+  position: fixed;
+  top: ${props => props.$top}px;
+  left: ${props => props.$left}px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  min-width: 140px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 999999;
+`;
+
+const MenuItem = styled(motion.button)`
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  color: #374151;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #1f2937;
+  }
 `;
 
 const EmptyState = styled.div`
@@ -280,6 +261,8 @@ export const History: React.FC<HistoryProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
 
   const handleRemoveFromRoulette = (participantId: string, participantName: string) => {
     if (window.confirm(`Remover "${participantName}" da roleta?`)) {
@@ -295,18 +278,38 @@ export const History: React.FC<HistoryProps> = ({
     setMenuOpen(false);
   };
 
-  const toggleItemMenu = (itemId: string) => {
-    setOpenItemMenu(openItemMenu === itemId ? null : itemId);
+  const toggleItemMenu = (itemId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (openItemMenu === itemId) {
+      setOpenItemMenu(null);
+    } else {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setItemMenuPosition({
+        top: rect.bottom + 4,
+        left: Math.max(10, rect.right - 140),
+      });
+      setOpenItemMenu(itemId);
+    }
   };
 
-  // Close menus when clicking outside
+  const handleMainMenuClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (menuOpen) {
+      setMenuOpen(false);
+    } else {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setMenuPosition({
+        top: Math.max(10, rect.top - 70),
+        left: Math.max(10, rect.right - 140),
+      });
+      setMenuOpen(true);
+    }
+  };
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      // Don't close if clicking on a menu button or dropdown
-      if (target.closest('[data-menu-button]') || target.closest('[data-menu-dropdown]')) {
-        return;
-      }
+    const handleClickOutside = () => {
       setMenuOpen(false);
       setOpenItemMenu(null);
     };
@@ -318,121 +321,118 @@ export const History: React.FC<HistoryProps> = ({
   }, [menuOpen, openItemMenu]);
 
   return (
-    <HistoryContainer>
-      <Header>
-        <Title>
-          🏆 Histórico
-        </Title>
-        
-        {history.length > 0 && (
-          <MenuContainer>
-            <HistoryCount>
-              {history.length}
-            </HistoryCount>
-          </MenuContainer>
-        )}
-      </Header>
-
-      <HistoryList>
-        <AnimatePresence>
-          {history.length === 0 ? (
-            <EmptyState>
-              <EmptyIcon>📜</EmptyIcon>
-              <EmptyText>
-                Nenhum sorteio realizado ainda
-              </EmptyText>
-            </EmptyState>
-          ) : (
-            history.slice(0, 15).map((item, index) => (
-              <HistoryItem
-                key={item.id}
-                removed={item.removed}
-                initial={{ opacity: 0, x: -15, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 15, scale: 0.95 }}
-                transition={{ duration: 0.25, delay: index * 0.02 }}
-              >
-                <ItemContent>
-                  <WinnerInfo>
-                    <Trophy>{item.removed ? '❌' : '🏆'}</Trophy>
-                    <WinnerDetails>
-                      <WinnerName>{item.participantName}</WinnerName>
-                      <DateTime>{formatTime(item.selectedAt)}</DateTime>
-                    </WinnerDetails>
-                  </WinnerInfo>
-                  
-                  <ItemMenuContainer>
-                    <ItemMenuButton
-                      data-menu-button
-                      removed={item.removed}
-                      disabled={item.removed}
-                      onClick={() => toggleItemMenu(item.id)}
-                      whileHover={!item.removed ? { scale: 1.1 } : {}}
-                      whileTap={!item.removed ? { scale: 0.9 } : {}}
-                    >
-                      ⋮
-                    </ItemMenuButton>
-                    
-                    <AnimatePresence>
-                      {openItemMenu === item.id && !item.removed && (
-                        <ItemMenuDropdown
-                          data-menu-dropdown
-                          initial={{ opacity: 0, scale: 0.9, y: -5 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.9, y: -5 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <MenuItem
-                            onClick={() => handleRemoveFromRoulette(item.participantId, item.participantName)}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            Remover da roleta
-                          </MenuItem>
-                        </ItemMenuDropdown>
-                      )}
-                    </AnimatePresence>
-                  </ItemMenuContainer>
-                </ItemContent>
-              </HistoryItem>
-            ))
+    <>
+      <HistoryContainer>
+        <Header>
+          <Title>🏆 Histórico</Title>
+          {history.length > 0 && (
+            <HistoryCount>{history.length}</HistoryCount>
           )}
-        </AnimatePresence>
-      </HistoryList>
+        </Header>
 
-      {history.length > 0 && (
-        <MenuContainer>
-          <MenuButton
-            data-menu-button
-            onClick={() => setMenuOpen(!menuOpen)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
-          >
-            Opções ⋮
-          </MenuButton>
-          
+        <HistoryList>
           <AnimatePresence>
-            {menuOpen && (
-              <MenuDropdown
-                data-menu-dropdown
-                initial={{ opacity: 0, scale: 0.9, y: -5 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -5 }}
-                transition={{ duration: 0.15 }}
-              >
-                <MenuItem
-                  onClick={handleClearHistory}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+            {history.length === 0 ? (
+              <EmptyState>
+                <EmptyIcon>📜</EmptyIcon>
+                <EmptyText>Nenhum sorteio realizado ainda</EmptyText>
+              </EmptyState>
+            ) : (
+              history.slice(0, 15).map((item, index) => (
+                <HistoryItem
+                  key={item.id}
+                  removed={item.removed}
+                  initial={{ opacity: 0, x: -15, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 15, scale: 0.95 }}
+                  transition={{ duration: 0.25, delay: index * 0.02 }}
                 >
-                  Limpar histórico
-                </MenuItem>
-              </MenuDropdown>
+                  <ItemContent>
+                    <WinnerInfo>
+                      <Trophy>{item.removed ? '❌' : '🏆'}</Trophy>
+                      <WinnerDetails>
+                        <WinnerName>{item.participantName}</WinnerName>
+                        <DateTime>{formatTime(item.selectedAt)}</DateTime>
+                      </WinnerDetails>
+                    </WinnerInfo>
+                    
+                    <ItemMenuContainer>
+                      <ItemMenuButton
+                        removed={item.removed}
+                        disabled={item.removed}
+                        onClick={(e) => toggleItemMenu(item.id, e)}
+                        whileHover={!item.removed ? { scale: 1.1 } : {}}
+                        whileTap={!item.removed ? { scale: 0.9 } : {}}
+                      >
+                        ⋮
+                      </ItemMenuButton>
+                    </ItemMenuContainer>
+                  </ItemContent>
+                </HistoryItem>
+              ))
             )}
           </AnimatePresence>
-        </MenuContainer>
+        </HistoryList>
+
+        {history.length > 0 && (
+          <MenuContainer>
+            <MenuButton
+              onClick={handleMainMenuClick}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+            >
+              Opções ⋮
+            </MenuButton>
+          </MenuContainer>
+        )}
+      </HistoryContainer>
+
+      {/* Portal Dropdowns */}
+      {menuOpen && createPortal(
+        <PortalDropdown
+          $top={menuPosition.top}
+          $left={menuPosition.left}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
+        >
+          <MenuItem
+            onClick={handleClearHistory}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Limpar histórico
+          </MenuItem>
+        </PortalDropdown>,
+        document.body
       )}
-    </HistoryContainer>
+
+      {openItemMenu && createPortal(
+        <PortalDropdown
+          $top={itemMenuPosition.top}
+          $left={itemMenuPosition.left}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
+        >
+          <MenuItem
+            onClick={() => {
+              const item = history.find(h => h.id === openItemMenu);
+              if (item) {
+                handleRemoveFromRoulette(item.participantId, item.participantName);
+              }
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Remover da roleta
+          </MenuItem>
+        </PortalDropdown>,
+        document.body
+      )}
+    </>
   );
 };
