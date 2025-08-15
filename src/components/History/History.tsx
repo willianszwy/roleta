@@ -301,7 +301,12 @@ export const History: React.FC<HistoryProps> = ({
 
   // Close menus when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      // Don't close if clicking on a menu button or dropdown
+      if (target.closest('[data-menu-button]') || target.closest('[data-menu-dropdown]')) {
+        return;
+      }
       setMenuOpen(false);
       setOpenItemMenu(null);
     };
@@ -358,6 +363,7 @@ export const History: React.FC<HistoryProps> = ({
                   
                   <ItemMenuContainer>
                     <ItemMenuButton
+                      data-menu-button
                       removed={item.removed}
                       disabled={item.removed}
                       onClick={() => toggleItemMenu(item.id)}
@@ -370,6 +376,7 @@ export const History: React.FC<HistoryProps> = ({
                     <AnimatePresence>
                       {openItemMenu === item.id && !item.removed && (
                         <ItemMenuDropdown
+                          data-menu-dropdown
                           initial={{ opacity: 0, scale: 0.9, y: -5 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.9, y: -5 }}
@@ -396,6 +403,7 @@ export const History: React.FC<HistoryProps> = ({
       {history.length > 0 && (
         <MenuContainer>
           <MenuButton
+            data-menu-button
             onClick={() => setMenuOpen(!menuOpen)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -407,6 +415,7 @@ export const History: React.FC<HistoryProps> = ({
           <AnimatePresence>
             {menuOpen && (
               <MenuDropdown
+                data-menu-dropdown
                 initial={{ opacity: 0, scale: 0.9, y: -5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -5 }}
