@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
-import { formatTime } from '../../utils/helpers';
+import { formatDate } from '../../utils/helpers';
 
 interface HistoryProps {
   history: RouletteHistory[];
@@ -15,7 +15,7 @@ const HistoryContainer = styled.div`
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 1.25rem;
   box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
   max-height: 400px;
@@ -50,7 +50,7 @@ const MenuContainer = styled.div`
 const MenuButton = styled(motion.button)`
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #374151;
+  color: #1f2937;
   padding: 0.4rem 0.6rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -63,6 +63,7 @@ const MenuButton = styled(motion.button)`
   
   &:hover {
     background: rgba(255, 255, 255, 0.15);
+    color: #111827;
   }
 `;
 
@@ -70,8 +71,8 @@ const HistoryList = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  max-height: 280px;
+  gap: 0.375rem;
+  max-height: 300px;
   overflow-y: auto;
   padding-right: 0.25rem;
   
@@ -92,7 +93,7 @@ const HistoryList = styled.div`
 
 const HistoryItem = styled(motion.div)<{ removed?: boolean }>`
   position: relative;
-  padding: 0.7rem;
+  padding: 0.5rem;
   background: ${props => props.removed 
     ? 'rgba(255, 154, 158, 0.08)' 
     : 'rgba(255, 255, 255, 0.06)'
@@ -101,7 +102,7 @@ const HistoryItem = styled(motion.div)<{ removed?: boolean }>`
     ? 'rgba(255, 154, 158, 0.2)' 
     : 'rgba(255, 255, 255, 0.1)'
   };
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -117,7 +118,7 @@ const HistoryItem = styled(motion.div)<{ removed?: boolean }>`
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
+    width: 2px;
     background: ${props => props.removed 
       ? 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
       : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
@@ -130,19 +131,19 @@ const ItemContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.5rem;
 `;
 
 const WinnerInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex: 1;
   min-width: 0;
 `;
 
 const Trophy = styled.div`
-  font-size: 1rem;
+  font-size: 0.9rem;
   flex-shrink: 0;
 `;
 
@@ -152,20 +153,20 @@ const WinnerDetails = styled.div`
 `;
 
 const WinnerName = styled.div`
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #374151;
+  color: #1f2937;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.1;
 `;
 
 const DateTime = styled.div`
   font-size: 0.65rem;
-  color: #6b7280;
-  font-weight: 500;
-  margin-top: 0.1rem;
+  color: #1f2937;
+  font-weight: 600;
+  margin-top: 0.05rem;
 `;
 
 const ItemMenuContainer = styled.div`
@@ -175,16 +176,16 @@ const ItemMenuContainer = styled.div`
 const ItemMenuButton = styled(motion.button)<{ removed?: boolean }>`
   background: none;
   border: none;
-  color: ${props => props.removed ? '#9ca3af' : '#6b7280'};
+  color: ${props => props.removed ? '#9ca3af' : '#4b5563'};
   padding: 0.2rem;
-  border-radius: 0.3rem;
+  border-radius: 0.25rem;
   font-size: 0.8rem;
   cursor: ${props => props.removed ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.removed ? 0.5 : 1};
   
   &:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
-    color: #374151;
+    color: #1f2937;
   }
 `;
 
@@ -195,7 +196,7 @@ const PortalDropdown = styled(motion.div)<{ $top: number; $left: number }>`
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.75rem;
+  border-radius: 0.375rem;
   padding: 0.5rem;
   min-width: 140px;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
@@ -248,13 +249,14 @@ const EmptyText = styled.p`
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.4;
+  color: #4b5563;
 `;
 
 const HistoryCount = styled.div`
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   padding: 0.2rem 0.5rem;
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   font-size: 0.65rem;
   font-weight: 600;
   text-align: center;
@@ -358,7 +360,7 @@ export const History: React.FC<HistoryProps> = ({
                       <Trophy>{item.removed ? '❌' : '🏆'}</Trophy>
                       <WinnerDetails>
                         <WinnerName>{item.participantName}</WinnerName>
-                        <DateTime>{formatTime(item.selectedAt)}</DateTime>
+                        <DateTime>{formatDate(item.selectedAt)}</DateTime>
                       </WinnerDetails>
                     </WinnerInfo>
                     

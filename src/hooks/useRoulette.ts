@@ -77,24 +77,26 @@ export function useRoulette() {
 
     const selected = selectRandomParticipant(participants);
     
-    if (selected) {
+    // Não adiciona ao histórico aqui - será adicionado no finishSpin
+    return selected;
+  }, [participants, isSpinning]);
+
+  const finishSpin = useCallback((selectedParticipant?: Participant) => {
+    setIsSpinning(false);
+    if (selectedParticipant) {
+      setSelectedParticipant(selectedParticipant);
+      
+      // Adiciona ao histórico apenas quando a animação termina
       const historyEntry: RouletteHistory = {
         id: generateId(),
-        participantId: selected.id,
-        participantName: selected.name,
+        participantId: selectedParticipant.id,
+        participantName: selectedParticipant.name,
         selectedAt: new Date(),
         removed: false,
       };
       
       setHistory(prev => [historyEntry, ...prev]);
-      setSelectedParticipant(selected);
     }
-
-    return selected;
-  }, [participants, isSpinning]);
-
-  const finishSpin = useCallback(() => {
-    setIsSpinning(false);
   }, []);
 
   const removeFromRouletteAfterSpin = useCallback((participantId: string) => {

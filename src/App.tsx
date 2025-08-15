@@ -7,6 +7,7 @@ import { Roulette } from './components/Roulette/Roulette';
 import { ParticipantManager } from './components/ParticipantManager/ParticipantManager';
 import { History } from './components/History/History';
 import { useRoulette } from './hooks/useRoulette';
+import type { Participant } from './types';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -70,7 +71,7 @@ const RouletteSection = styled.div`
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 2rem;
+  border-radius: 0.5rem;
   padding: 2rem;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 `;
@@ -78,8 +79,8 @@ const RouletteSection = styled.div`
 function App() {
   const { state, actions } = useRoulette();
 
-  const handleSpinComplete = () => {
-    actions.finishSpin();
+  const handleSpinComplete = (selected?: Participant) => {
+    actions.finishSpin(selected);
     
     // Trigger confetti animation
     const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];

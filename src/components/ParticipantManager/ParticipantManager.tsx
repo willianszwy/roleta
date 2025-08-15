@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
@@ -14,12 +15,19 @@ const ManagerContainer = styled.div`
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 1.25rem;
   box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
   max-height: 400px;
   display: flex;
   flex-direction: column;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 `;
 
 const Title = styled.h3`
@@ -29,8 +37,10 @@ const Title = styled.h3`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1rem;
-  text-align: center;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 `;
 
 const AddForm = styled.form`
@@ -46,13 +56,13 @@ const Input = styled.input`
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
-  color: #374151;
+  color: #1f2937;
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.3s ease;
   
   &::placeholder {
-    color: #9ca3af;
+    color: #6b7280;
     font-size: 0.8rem;
   }
   
@@ -61,6 +71,7 @@ const Input = styled.input`
     border-color: rgba(102, 126, 234, 0.4);
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     background: rgba(255, 255, 255, 0.12);
+    color: #111827;
   }
 `;
 
@@ -91,8 +102,8 @@ const ParticipantsList = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  max-height: 220px;
+  gap: 0.375rem;
+  max-height: 240px;
   overflow-y: auto;
   padding-right: 0.25rem;
   
@@ -111,94 +122,150 @@ const ParticipantsList = styled.div`
   }
 `;
 
-const ParticipantCard = styled(motion.div)<{ color: string }>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0.8rem;
+const ParticipantCard = styled(motion.div)`
+  position: relative;
+  padding: 0.5rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.6rem;
+  border-radius: 0.375rem;
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
-    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 0 1px 1px 0;
+  }
+`;
+
+const ItemContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 `;
 
 const ParticipantInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.4rem;
   flex: 1;
   min-width: 0;
 `;
 
 const ParticipantColor = styled.div<{ color: string }>`
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: ${props => props.color};
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
 `;
 
-const ParticipantName = styled.span`
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #374151;
+const ParticipantDetails = styled.div`
   flex: 1;
+  min-width: 0;
+`;
+
+const ParticipantName = styled.div`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1f2937;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.1;
 `;
 
-const RemoveButton = styled(motion.button)`
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-  color: white;
+const ItemMenuContainer = styled.div`
+  position: relative;
+`;
+
+const ItemMenuButton = styled(motion.button)`
+  background: none;
   border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.4rem;
-  font-size: 0.7rem;
-  font-weight: 500;
+  color: #4b5563;
+  padding: 0.2rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(255, 154, 158, 0.25);
   
   &:hover {
-    box-shadow: 0 3px 12px rgba(255, 154, 158, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: #1f2937;
   }
 `;
 
-const ActionsContainer = styled.div`
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+const MenuContainer = styled.div`
+  position: relative;
 `;
 
-const ClearButton = styled(motion.button)`
+const MenuButton = styled(motion.button)`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #1f2937;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #111827;
+  }
+`;
+
+const PortalDropdown = styled(motion.div)<{ $top: number; $left: number }>`
+  position: fixed;
+  top: ${props => props.$top}px;
+  left: ${props => props.$left}px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  min-width: 140px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  z-index: 999999;
+`;
+
+const MenuItem = styled(motion.button)`
   width: 100%;
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  color: white;
+  background: none;
   border: none;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(250, 112, 154, 0.25);
+  text-align: left;
+  color: white;
+  transition: all 0.2s ease;
   
   &:hover {
-    box-shadow: 0 4px 16px rgba(250, 112, 154, 0.35);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: translateY(-1px);
   }
   
-  &:disabled {
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-    cursor: not-allowed;
-    box-shadow: none;
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -224,17 +291,17 @@ const EmptyText = styled.p`
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.4;
+  color: #4b5563;
 `;
 
 const ParticipantCount = styled.div`
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  padding: 0.25rem 0.6rem;
-  border-radius: 1rem;
-  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 0.5rem;
 `;
 
 export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
@@ -244,6 +311,10 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
   onClear,
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,91 +324,191 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
     }
   };
 
-  const handleRemove = (id: string) => {
-    onRemove(id);
+  const handleRemove = (id: string, name: string) => {
+    if (window.confirm(`Remover "${name}" dos participantes?`)) {
+      onRemove(id);
+    }
+    setOpenItemMenu(null);
   };
 
   const handleClear = () => {
     if (window.confirm('Remover todos os participantes?')) {
       onClear();
     }
+    setMenuOpen(false);
   };
 
+  const toggleItemMenu = (itemId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (openItemMenu === itemId) {
+      setOpenItemMenu(null);
+    } else {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setItemMenuPosition({
+        top: rect.bottom + 4,
+        left: Math.max(10, rect.right - 140),
+      });
+      setOpenItemMenu(itemId);
+    }
+  };
+
+  const handleMainMenuClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (menuOpen) {
+      setMenuOpen(false);
+    } else {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setMenuPosition({
+        top: Math.max(10, rect.top - 70),
+        left: Math.max(10, rect.right - 140),
+      });
+      setMenuOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setMenuOpen(false);
+      setOpenItemMenu(null);
+    };
+
+    if (menuOpen || openItemMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [menuOpen, openItemMenu]);
+
   return (
-    <ManagerContainer>
-      <Title>👥 Participantes</Title>
-      
-      {participants.length > 0 && (
-        <ParticipantCount>
-          {participants.length} {participants.length === 1 ? 'participante' : 'participantes'}
-        </ParticipantCount>
-      )}
-      
-      <AddForm onSubmit={handleSubmit}>
-        <Input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Nome..."
-          maxLength={30}
-        />
-        <AddButton
-          type="submit"
-          disabled={!inputValue.trim()}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          +
-        </AddButton>
-      </AddForm>
-
-      <ParticipantsList>
-        <AnimatePresence>
-          {participants.length === 0 ? (
-            <EmptyState>
-              <EmptyIcon>🎯</EmptyIcon>
-              <EmptyText>
-                Adicione participantes para começar o sorteio
-              </EmptyText>
-            </EmptyState>
-          ) : (
-            participants.map((participant, index) => (
-              <ParticipantCard
-                key={participant.id}
-                color={participant.color || '#667eea'}
-                initial={{ opacity: 0, x: -15, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 15, scale: 0.95 }}
-                transition={{ duration: 0.25, delay: index * 0.03 }}
-              >
-                <ParticipantInfo>
-                  <ParticipantColor color={participant.color || '#667eea'} />
-                  <ParticipantName>{participant.name}</ParticipantName>
-                </ParticipantInfo>
-                <RemoveButton
-                  onClick={() => handleRemove(participant.id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  ×
-                </RemoveButton>
-              </ParticipantCard>
-            ))
+    <>
+      <ManagerContainer>
+        <Header>
+          <Title>👥 Participantes</Title>
+          {participants.length > 0 && (
+            <ParticipantCount>{participants.length}</ParticipantCount>
           )}
-        </AnimatePresence>
-      </ParticipantsList>
+        </Header>
+        
+        <AddForm onSubmit={handleSubmit}>
+          <Input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Nome..."
+            maxLength={30}
+          />
+          <AddButton
+            type="submit"
+            disabled={!inputValue.trim()}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            +
+          </AddButton>
+        </AddForm>
 
-      {participants.length > 1 && (
-        <ActionsContainer>
-          <ClearButton
+        <ParticipantsList>
+          <AnimatePresence>
+            {participants.length === 0 ? (
+              <EmptyState>
+                <EmptyIcon>🎯</EmptyIcon>
+                <EmptyText>
+                  Adicione participantes para começar o sorteio
+                </EmptyText>
+              </EmptyState>
+            ) : (
+              participants.map((participant, index) => (
+                <ParticipantCard
+                  key={participant.id}
+                  initial={{ opacity: 0, x: -15, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 15, scale: 0.95 }}
+                  transition={{ duration: 0.25, delay: index * 0.03 }}
+                >
+                  <ItemContent>
+                    <ParticipantInfo>
+                      <ParticipantColor color={participant.color || '#667eea'} />
+                      <ParticipantDetails>
+                        <ParticipantName>{participant.name}</ParticipantName>
+                      </ParticipantDetails>
+                    </ParticipantInfo>
+                    
+                    <ItemMenuContainer>
+                      <ItemMenuButton
+                        onClick={(e) => toggleItemMenu(participant.id, e)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        ⋮
+                      </ItemMenuButton>
+                    </ItemMenuContainer>
+                  </ItemContent>
+                </ParticipantCard>
+              ))
+            )}
+          </AnimatePresence>
+        </ParticipantsList>
+
+        {participants.length > 1 && (
+          <MenuContainer>
+            <MenuButton
+              onClick={handleMainMenuClick}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+            >
+              Opções ⋮
+            </MenuButton>
+          </MenuContainer>
+        )}
+      </ManagerContainer>
+
+      {/* Portal Dropdowns */}
+      {menuOpen && createPortal(
+        <PortalDropdown
+          $top={menuPosition.top}
+          $left={menuPosition.left}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
+        >
+          <MenuItem
             onClick={handleClear}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Limpar Todos
-          </ClearButton>
-        </ActionsContainer>
+            Limpar todos
+          </MenuItem>
+        </PortalDropdown>,
+        document.body
       )}
-    </ManagerContainer>
+
+      {openItemMenu && createPortal(
+        <PortalDropdown
+          $top={itemMenuPosition.top}
+          $left={itemMenuPosition.left}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
+        >
+          <MenuItem
+            onClick={() => {
+              const participant = participants.find(p => p.id === openItemMenu);
+              if (participant) {
+                handleRemove(participant.id, participant.name);
+              }
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Remover participante
+          </MenuItem>
+        </PortalDropdown>,
+        document.body
+      )}
+    </>
   );
 };

@@ -9,7 +9,7 @@ interface RouletteProps {
   isSpinning: boolean;
   selectedParticipant?: Participant;
   onSpin: () => Promise<Participant | null>;
-  onSpinComplete: () => void;
+  onSpinComplete: (selected?: Participant) => void;
 }
 
 const RouletteContainer = styled.div`
@@ -88,9 +88,9 @@ const RoulettePointer = styled.div`
   }
 `;
 
-const ParticipantText = styled.text<{ textColor: string; fontSize: number }>`
-  fill: ${props => props.textColor};
-  font-size: ${props => props.fontSize}px;
+const ParticipantText = styled.text<{ $textColor: string; $fontSize: number }>`
+  fill: ${props => props.$textColor};
+  font-size: ${props => props.$fontSize}px;
   font-weight: 600;
   text-anchor: middle;
   dominant-baseline: middle;
@@ -106,7 +106,7 @@ const SpinButton = styled(motion.button)<{ disabled: boolean }>`
   color: white;
   border: none;
   padding: 1rem 2rem;
-  border-radius: 50px;
+  border-radius: 0.5rem;
   font-size: 1.2rem;
   font-weight: 600;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
@@ -217,12 +217,14 @@ export const Roulette: React.FC<RouletteProps> = ({
     
     if (selected) {
       const selectedIndex = participants.findIndex(p => p.id === selected.id);
-      const newRotation = rotation + calculateRouletteRotation(selectedIndex, participants.length);
+      const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation);
+      const newRotation = rotation + rotationToAdd;
       setRotation(newRotation);
       
+      
       setTimeout(() => {
-        onSpinComplete();
-      }, 3000);
+        onSpinComplete(selected);
+      }, 4500);
     }
   };
 
@@ -244,7 +246,7 @@ export const Roulette: React.FC<RouletteProps> = ({
   const segmentAngle = (2 * Math.PI) / participants.length;
   
   // Calculate appropriate font size based on wheel size and number of participants
-  const fontSize = Math.max(10, Math.min(16, wheelSize / participants.length / 3));
+  const fontSize = Math.max(7, Math.min(12, (wheelSize * 0.6) / participants.length));
 
   return (
     <RouletteContainer>
@@ -256,19 +258,19 @@ export const Roulette: React.FC<RouletteProps> = ({
             viewBox={`0 0 ${wheelSize} ${wheelSize}`}
             animate={{ rotate: rotation }}
             transition={{
-              duration: isSpinning ? 3 : 0,
-              ease: [0.25, 0.46, 0.45, 0.94],
+              duration: isSpinning ? 4.5 : 0,
+              ease: [0.2, 0, 0.2, 1],
             }}
           >
             {/* Create segments */}
             {participants.map((participant, index) => {
-              const startAngle = index * segmentAngle - Math.PI / 2; // Start from top
+              const startAngle = index * segmentAngle - Math.PI / 2; // Start from top (-90 degrees)
               const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
-              const isSelected = selectedParticipant?.id === participant.id;
+              const isSelected = selectedParticipant?.id === participant.id && !isSpinning;
               
               // Calculate text position
               const textAngle = startAngle + segmentAngle / 2;
-              const textRadius = radius * 0.65;
+              const textRadius = radius * 0.45; // Closer to center for better visibility
               const textX = centerX + textRadius * Math.cos(textAngle);
               const textY = centerY + textRadius * Math.sin(textAngle);
               
@@ -290,11 +292,11 @@ export const Roulette: React.FC<RouletteProps> = ({
                   <ParticipantText
                     x={textX}
                     y={textY}
-                    textColor={getContrastColor(participantColor)}
-                    fontSize={fontSize}
-                    transform={`rotate(${(textAngle * 180) / Math.PI + 90}, ${textX}, ${textY})`}
+                    $textColor={getContrastColor(participantColor)}
+                    $fontSize={fontSize}
+                    transform={`rotate(${(textAngle * 180) / Math.PI}, ${textX}, ${textY})`}
                   >
-                    {participant.name.length > 15 ? `${participant.name.slice(0, 15)}...` : participant.name}
+                    {participant.name}
                   </ParticipantText>
                 </g>
               );

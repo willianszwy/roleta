@@ -24,23 +24,75 @@ export function selectRandomParticipant(participants: Participant[]): Participan
 export function calculateRouletteRotation(
   selectedIndex: number, 
   totalParticipants: number,
-  minRotations: number = 3,
-  maxRotations: number = 6
+  currentRotation: number = 0,
+  minRotations: number = 4,
+  maxRotations: number = 8
 ): number {
   if (totalParticipants === 0) return 0;
   
-  // Calculate the angle for each segment
+  // Calculate the angle for each segment in degrees
   const segmentAngle = 360 / totalParticipants;
   
-  // Calculate the target angle for the selected participant
-  // We want the selected segment to stop at the top (0 degrees)
-  const targetAngle = -(selectedIndex * segmentAngle);
+  // Where is the selected segment currently positioned?
+  // Segment center starts at: -90 + selectedIndex * segmentAngle + segmentAngle/2
+  const initialSegmentCenter = -90 + selectedIndex * segmentAngle + (segmentAngle / 2);
+  
+  // After current rotation, where is it now?
+  const currentSegmentCenter = (initialSegmentCenter + currentRotation) % 360;
+  
+  // How much do we need to rotate to get it to -90 degrees (pointer position)?
+  const targetPosition = -90;
+  let rotationNeeded = targetPosition - currentSegmentCenter;
+  
+  // Normalize to shortest path
+  if (rotationNeeded > 180) rotationNeeded -= 360;
+  if (rotationNeeded < -180) rotationNeeded += 360;
   
   // Add random full rotations for dramatic effect
   const extraRotations = Math.floor(Math.random() * (maxRotations - minRotations + 1)) + minRotations;
-  const totalRotation = (extraRotations * 360) + targetAngle;
+  const totalRotationToAdd = (extraRotations * 360) + rotationNeeded;
   
-  return totalRotation;
+  return totalRotationToAdd;
+}
+
+export function getSegmentAtTop(totalRotation: number, totalParticipants: number): number {
+  if (totalParticipants === 0) return 0;
+  
+  // Normalize rotation to 0-360 range
+  const normalizedRotation = ((totalRotation % 360) + 360) % 360;
+  
+  const segmentAngle = 360 / totalParticipants;
+  
+  // After rotation, find which segment center is closest to the pointer position (-90°)
+  // Segment i center is at: -90 + i * segmentAngle + segmentAngle/2
+  // After rotation by totalRotation, it moves to: initialPosition + totalRotation
+  
+  let closestSegment = 0;
+  let minDistance = Infinity;
+  
+  for (let i = 0; i < totalParticipants; i++) {
+    // Initial position of segment i center
+    const initialCenter = -90 + i * segmentAngle + segmentAngle / 2;
+    
+    // Position after rotation
+    const finalCenter = (initialCenter + normalizedRotation) % 360;
+    
+    // Distance to pointer position (-90° or 270°)
+    const targetPos = 270; // -90° in positive degrees
+    let distance = Math.abs(finalCenter - targetPos);
+    
+    // Handle wrap-around (shortest distance on circle)
+    if (distance > 180) {
+      distance = 360 - distance;
+    }
+    
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestSegment = i;
+    }
+  }
+  
+  return closestSegment;
 }
 
 export function formatDate(date: Date): string {
