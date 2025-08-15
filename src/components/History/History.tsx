@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
-import { formatDate, formatTime } from '../../utils/helpers';
+import { formatTime } from '../../utils/helpers';
 
 interface HistoryProps {
   history: RouletteHistory[];
@@ -11,75 +11,75 @@ interface HistoryProps {
 }
 
 const HistoryContainer = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-  min-height: 400px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
+  max-height: 400px;
   display: flex;
   flex-direction: column;
 `;
 
-const Title = styled.h2`
-  font-size: 1.5rem;
+const Title = styled.h3`
+  font-size: 1.1rem;
   font-weight: 600;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 `;
 
 const HistoryList = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-height: 350px;
+  gap: 0.6rem;
+  max-height: 250px;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding-right: 0.25rem;
   
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
   
   &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
   }
   
   &::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    border-radius: 3px;
+    border-radius: 2px;
   }
 `;
 
 const HistoryItem = styled(motion.div)<{ removed?: boolean }>`
   position: relative;
-  padding: 1.5rem;
+  padding: 0.8rem;
   background: ${props => props.removed 
-    ? 'rgba(255, 154, 158, 0.1)' 
-    : 'rgba(255, 255, 255, 0.1)'
+    ? 'rgba(255, 154, 158, 0.08)' 
+    : 'rgba(255, 255, 255, 0.06)'
   };
   border: 1px solid ${props => props.removed 
-    ? 'rgba(255, 154, 158, 0.3)' 
-    : 'rgba(255, 255, 255, 0.2)'
+    ? 'rgba(255, 154, 158, 0.2)' 
+    : 'rgba(255, 255, 255, 0.1)'
   };
-  border-radius: 1rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 0.6rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
   }
   
   &::before {
@@ -88,12 +88,12 @@ const HistoryItem = styled(motion.div)<{ removed?: boolean }>`
     left: 0;
     top: 0;
     bottom: 0;
-    width: 4px;
+    width: 3px;
     background: ${props => props.removed 
       ? 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
       : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
     };
-    border-radius: 0 2px 2px 0;
+    border-radius: 0 1px 1px 0;
   }
 `;
 
@@ -101,62 +101,56 @@ const ItemHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
 const WinnerInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
 `;
 
 const Trophy = styled.div`
-  font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  font-size: 1.1rem;
+  flex-shrink: 0;
 `;
 
-const WinnerName = styled.h3`
-  font-size: 1.25rem;
+const WinnerName = styled.h4`
+  font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Status = styled.span<{ removed?: boolean }>`
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.8rem;
+  font-size: 0.65rem;
   font-weight: 600;
   background: ${props => props.removed 
     ? 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
     : 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
   };
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const ItemMeta = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
 `;
 
 const DateTime = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-`;
-
-const Date = styled.span`
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.7rem;
   color: #6b7280;
-`;
-
-const Time = styled.span`
-  font-size: 0.75rem;
-  color: #9ca3af;
+  font-weight: 500;
 `;
 
 const RemoveButton = styled(motion.button)<{ removed?: boolean }>`
@@ -166,26 +160,26 @@ const RemoveButton = styled(motion.button)<{ removed?: boolean }>`
   };
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.65rem;
   font-weight: 500;
   cursor: ${props => props.removed ? 'not-allowed' : 'pointer'};
   box-shadow: ${props => props.removed 
     ? 'none'
-    : '0 2px 10px rgba(250, 112, 154, 0.3)'
+    : '0 2px 8px rgba(250, 112, 154, 0.25)'
   };
   opacity: ${props => props.removed ? 0.6 : 1};
   
   &:hover:not(:disabled) {
-    box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+    box-shadow: 0 3px 12px rgba(250, 112, 154, 0.35);
   }
 `;
 
 const ActionsContainer = styled.div`
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
 const ClearButton = styled(motion.button)`
@@ -193,15 +187,15 @@ const ClearButton = styled(motion.button)`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 3px 12px rgba(102, 126, 234, 0.25);
   
   &:hover {
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
   }
   
   &:disabled {
@@ -217,20 +211,33 @@ const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   color: #6b7280;
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem 1rem;
+  min-height: 120px;
 `;
 
 const EmptyIcon = styled.div`
-  font-size: 3rem;
-  opacity: 0.5;
+  font-size: 2rem;
+  opacity: 0.6;
 `;
 
 const EmptyText = styled.p`
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  line-height: 1.4;
+`;
+
+const HistoryCount = styled.div`
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 0.25rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.5rem;
 `;
 
 export const History: React.FC<HistoryProps> = ({
@@ -239,13 +246,13 @@ export const History: React.FC<HistoryProps> = ({
   onClearHistory,
 }) => {
   const handleRemoveFromRoulette = (participantId: string, participantName: string) => {
-    if (window.confirm(`Remover "${participantName}" da roleta permanentemente?`)) {
+    if (window.confirm(`Remover "${participantName}" da roleta?`)) {
       onRemoveFromRoulette(participantId);
     }
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('Tem certeza que deseja limpar todo o histórico?')) {
+    if (window.confirm('Limpar todo o histórico?')) {
       onClearHistory();
     }
   };
@@ -253,8 +260,14 @@ export const History: React.FC<HistoryProps> = ({
   return (
     <HistoryContainer>
       <Title>
-        🏆 Histórico de Sorteios
+        🏆 Histórico
       </Title>
+
+      {history.length > 0 && (
+        <HistoryCount>
+          {history.length} {history.length === 1 ? 'sorteio' : 'sorteios'}
+        </HistoryCount>
+      )}
 
       <HistoryList>
         <AnimatePresence>
@@ -262,20 +275,18 @@ export const History: React.FC<HistoryProps> = ({
             <EmptyState>
               <EmptyIcon>📜</EmptyIcon>
               <EmptyText>
-                Nenhum sorteio realizado ainda.
-                <br />
-                O histórico dos sorteios aparecerá aqui!
+                Nenhum sorteio realizado ainda
               </EmptyText>
             </EmptyState>
           ) : (
-            history.map((item, index) => (
+            history.slice(0, 10).map((item, index) => (
               <HistoryItem
                 key={item.id}
                 removed={item.removed}
-                initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                initial={{ opacity: 0, x: -15, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                exit={{ opacity: 0, x: 15, scale: 0.95 }}
+                transition={{ duration: 0.25, delay: index * 0.03 }}
               >
                 <ItemHeader>
                   <WinnerInfo>
@@ -289,8 +300,7 @@ export const History: React.FC<HistoryProps> = ({
 
                 <ItemMeta>
                   <DateTime>
-                    <Date>{formatDate(item.selectedAt)}</Date>
-                    <Time>{formatTime(item.selectedAt)}</Time>
+                    {formatTime(item.selectedAt)}
                   </DateTime>
                   
                   <RemoveButton
@@ -300,7 +310,7 @@ export const History: React.FC<HistoryProps> = ({
                     whileHover={!item.removed ? { scale: 1.05 } : {}}
                     whileTap={!item.removed ? { scale: 0.95 } : {}}
                   >
-                    {item.removed ? 'Removido' : 'Remover da Roleta'}
+                    {item.removed ? 'Removido' : 'Remover'}
                   </RemoveButton>
                 </ItemMeta>
               </HistoryItem>
@@ -316,7 +326,7 @@ export const History: React.FC<HistoryProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Limpar Histórico ({history.length} {history.length === 1 ? 'item' : 'itens'})
+            Limpar ({history.length})
           </ClearButton>
         </ActionsContainer>
       )}
