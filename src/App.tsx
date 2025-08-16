@@ -36,13 +36,33 @@ const AppContainer = styled.div`
   }
 `;
 
-const Header = styled(motion.header)`
-  text-align: center;
-  margin-bottom: 2rem;
+const AppHeader = styled(motion.header)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 768px) {
+    padding: 0 2.5rem;
+  }
+  
+  @media (min-width: 1920px) {
+    padding: 0 4rem;
+  }
 `;
 
-const MainTitle = styled.h1`
-  font-size: clamp(2.5rem, 6vw, 4rem);
+const HeaderTitle = styled.h1`
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
   font-weight: 700;
   margin: 0;
   background: linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%);
@@ -50,6 +70,39 @@ const MainTitle = styled.h1`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+`;
+
+const HeaderMenuButton = styled(motion.button)`
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.2);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+  }
+`;
+
+const MenuLine = styled(motion.div)<{ isOpen: boolean }>`
+  width: 18px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1px;
+  transition: all 0.3s ease;
 `;
 
 
@@ -87,15 +140,17 @@ const MainContent = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 70px);
   padding: 1.5rem;
+  padding-top: calc(70px + 1.5rem);
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
   
   @media (max-width: 768px) {
     padding: 0.5rem;
-    min-height: calc(100vh - 100px);
+    padding-top: calc(70px + 0.5rem);
+    min-height: calc(100vh - 70px);
   }
 `;
 
@@ -142,6 +197,7 @@ function App() {
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [specialResult, setSpecialResult] = useState<SpecialResultType | null>(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const handleSpinComplete = (selected?: Participant) => {
     actions.finishSpin(selected);
@@ -287,18 +343,47 @@ function App() {
     setSettings(defaultSettings);
   };
 
+  const togglePanel = () => setIsPanelOpen(!isPanelOpen);
+
   return (
     <>
       <GlobalStyles />
       <AppContainer>
-        <Container>
-          <Header
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+        <AppHeader
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <HeaderTitle>🎰 LuckyWheel</HeaderTitle>
+          <HeaderMenuButton
+            onClick={togglePanel}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <MainTitle>🎰 LuckyWheel</MainTitle>
-          </Header>
+            <MenuLine
+              isOpen={isPanelOpen}
+              animate={{
+                rotate: isPanelOpen ? 45 : 0,
+                y: isPanelOpen ? 8 : 0,
+              }}
+            />
+            <MenuLine
+              isOpen={isPanelOpen}
+              animate={{
+                opacity: isPanelOpen ? 0 : 1,
+              }}
+            />
+            <MenuLine
+              isOpen={isPanelOpen}
+              animate={{
+                rotate: isPanelOpen ? -45 : 0,
+                y: isPanelOpen ? -8 : 0,
+              }}
+            />
+          </HeaderMenuButton>
+        </AppHeader>
+        
+        <Container>
 
           <MainContent>
             <motion.div
@@ -329,6 +414,8 @@ function App() {
           </MainContent>
 
           <SidePanel
+            isOpen={isPanelOpen}
+            onToggle={togglePanel}
             participants={
               settings.rouletteMode === 'participants' ? state.participants :
               taskState.participants

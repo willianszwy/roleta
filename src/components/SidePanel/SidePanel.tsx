@@ -39,15 +39,6 @@ const PanelHeader = styled.div`
   padding: 2rem;
 `;
 
-const PanelTitle = styled.h2`
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-`;
 
 const MenuNav = styled.div`
   display: grid;
@@ -111,45 +102,6 @@ const NavButton = styled.button<{ active: boolean }>`
 `;
 
 
-const HamburgerButton = styled(motion.button)`
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px 0 0 12px;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  box-shadow: -4px 0 16px rgba(31, 38, 135, 0.2);
-  margin-top: 15vh;
-  transition: all 0.3s ease;
-  z-index: 1002;
-  position: relative;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(102, 126, 234, 0.4);
-    transform: translateX(-2px);
-    box-shadow: -6px 0 20px rgba(102, 126, 234, 0.2);
-  }
-  
-  @media (max-width: 768px) {
-    margin-top: 10vh;
-  }
-`;
-
-const HamburgerLine = styled(motion.div)<{ isOpen: boolean }>`
-  width: 18px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 1px;
-  transition: all 0.3s ease;
-`;
 
 const Overlay = styled(motion.div)`
   position: fixed;
@@ -189,6 +141,8 @@ const CloseButton = styled.button`
 `;
 
 interface SidePanelProps {
+  isOpen: boolean;
+  onToggle: () => void;
   participants: Participant[];
   history: RouletteHistory[];
   tasks?: Task[];
@@ -210,6 +164,8 @@ interface SidePanelProps {
 }
 
 export function SidePanel({
+  isOpen,
+  onToggle,
   participants,
   history,
   tasks = [],
@@ -229,10 +185,7 @@ export function SidePanel({
   onSettingsChange,
   onResetSettings,
 }: SidePanelProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<'participants' | 'tasks' | 'history' | 'taskHistory' | 'settings'>('participants');
-
-  const togglePanel = () => setIsOpen(!isOpen);
 
   return (
     <PanelContainer>
@@ -243,7 +196,7 @@ export function SidePanel({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={togglePanel}
+              onClick={onToggle}
             />
             <PanelContent
               initial={{ x: '100%' }}
@@ -251,12 +204,9 @@ export function SidePanel({
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             >
-              <CloseButton onClick={togglePanel}>×</CloseButton>
+              <CloseButton onClick={onToggle}>×</CloseButton>
               
               <PanelHeader>
-                <PanelTitle>
-                  🎰 LuckyWheel
-                </PanelTitle>
                 <MenuNav>
                   <NavButton
                     active={activeSection === 'participants'}
@@ -347,33 +297,6 @@ export function SidePanel({
           </>
         )}
       </AnimatePresence>
-      
-      <HamburgerButton
-        onClick={togglePanel}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <HamburgerLine
-          isOpen={isOpen}
-          animate={{
-            rotate: isOpen ? 45 : 0,
-            y: isOpen ? 8 : 0,
-          }}
-        />
-        <HamburgerLine
-          isOpen={isOpen}
-          animate={{
-            opacity: isOpen ? 0 : 1,
-          }}
-        />
-        <HamburgerLine
-          isOpen={isOpen}
-          animate={{
-            rotate: isOpen ? -45 : 0,
-            y: isOpen ? -8 : 0,
-          }}
-        />
-      </HamburgerButton>
     </PanelContainer>
   );
 }
