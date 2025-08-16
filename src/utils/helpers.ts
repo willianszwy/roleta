@@ -25,8 +25,7 @@ export function calculateRouletteRotation(
   selectedIndex: number, 
   totalParticipants: number,
   currentRotation: number = 0,
-  minRotations: number = 4,
-  maxRotations: number = 8
+  extraRotations: number = 4
 ): number {
   if (totalParticipants === 0) return 0;
   
@@ -48,8 +47,7 @@ export function calculateRouletteRotation(
   if (rotationNeeded > 180) rotationNeeded -= 360;
   if (rotationNeeded < -180) rotationNeeded += 360;
   
-  // Add random full rotations for dramatic effect
-  const extraRotations = Math.floor(Math.random() * (maxRotations - minRotations + 1)) + minRotations;
+  // Add specified rotations for dramatic effect
   const totalRotationToAdd = (extraRotations * 360) + rotationNeeded;
   
   return totalRotationToAdd;

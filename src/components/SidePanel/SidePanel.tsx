@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ParticipantManager } from '../ParticipantManager/ParticipantManager';
 import { History } from '../History/History';
+import { Settings, type SettingsConfig } from '../Settings/Settings';
 import type { Participant, RouletteHistory } from '../../types';
 
 const PanelContainer = styled.div`
@@ -163,24 +164,30 @@ const CloseButton = styled.button`
 interface SidePanelProps {
   participants: Participant[];
   history: RouletteHistory[];
+  settings: SettingsConfig;
   onAddParticipant: (name: string) => void;
   onRemoveParticipant: (id: string) => void;
   onClearParticipants: () => void;
   onRemoveFromRoulette: (participantId: string) => void;
   onClearHistory: () => void;
+  onSettingsChange: (settings: SettingsConfig) => void;
+  onResetSettings: () => void;
 }
 
 export function SidePanel({
   participants,
   history,
+  settings,
   onAddParticipant,
   onRemoveParticipant,
   onClearParticipants,
   onRemoveFromRoulette,
   onClearHistory,
+  onSettingsChange,
+  onResetSettings,
 }: SidePanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'participants' | 'history'>('participants');
+  const [activeSection, setActiveSection] = useState<'participants' | 'history' | 'settings'>('participants');
 
   const togglePanel = () => setIsOpen(!isOpen);
 
@@ -220,6 +227,12 @@ export function SidePanel({
                   >
                     📊 Histórico
                   </NavButton>
+                  <NavButton
+                    active={activeSection === 'settings'}
+                    onClick={() => setActiveSection('settings')}
+                  >
+                    ⚙️ Configurações
+                  </NavButton>
                 </MenuNav>
               </PanelHeader>
               
@@ -231,11 +244,17 @@ export function SidePanel({
                     onRemove={onRemoveParticipant}
                     onClear={onClearParticipants}
                   />
-                ) : (
+                ) : activeSection === 'history' ? (
                   <History
                     history={history}
                     onRemoveFromRoulette={onRemoveFromRoulette}
                     onClearHistory={onClearHistory}
+                  />
+                ) : (
+                  <Settings
+                    config={settings}
+                    onConfigChange={onSettingsChange}
+                    onResetSettings={onResetSettings}
                   />
                 )}
               </PanelBody>

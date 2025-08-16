@@ -101,6 +101,15 @@ const ParticipantText = styled.text<{ $textColor: string; $fontSize: number }>`
   pointer-events: none;
 `;
 
+const SpinButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+`;
+
+
 const SpinButton = styled(motion.button)<{ disabled: boolean }>`
   background: ${props => props.disabled 
     ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
@@ -117,14 +126,15 @@ const SpinButton = styled(motion.button)<{ disabled: boolean }>`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   min-width: 180px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-  }
-  
-  &:active:not(:disabled) {
-    transform: translateY(0);
   }
   
   @media (max-width: 768px) {
@@ -133,6 +143,7 @@ const SpinButton = styled(motion.button)<{ disabled: boolean }>`
     min-width: 160px;
   }
 `;
+
 
 const ResultDisplay = styled(motion.div)`
   text-align: center;
@@ -245,16 +256,19 @@ export const Roulette: React.FC<RouletteProps> = ({
     
     if (selected) {
       const selectedIndex = participants.findIndex(p => p.id === selected.id);
-      const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation);
+      const duration = 4.5; // Fixed duration
+      const extraRotations = 6; // Fixed number of extra rotations
+      
+      const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation, extraRotations);
       const newRotation = rotation + rotationToAdd;
       setRotation(newRotation);
       
-      
       setTimeout(() => {
         onSpinComplete(selected);
-      }, 4500);
+      }, duration * 1000);
     }
   };
+
 
   if (participants.length === 0) {
     return (
@@ -334,14 +348,16 @@ export const Roulette: React.FC<RouletteProps> = ({
         <CenterCircle size={wheelSize} />
       </RouletteWrapper>
 
-      <SpinButton
-        disabled={isSpinning || participants.length === 0}
-        onClick={handleSpin}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        {isSpinning ? 'Girando...' : 'Girar Roleta'}
-      </SpinButton>
+      <SpinButtonContainer>
+        <SpinButton
+          disabled={isSpinning || participants.length === 0}
+          onClick={handleSpin}
+          whileHover={!(isSpinning || participants.length === 0) ? { scale: 1.02 } : {}}
+          whileTap={!(isSpinning || participants.length === 0) ? { scale: 0.98 } : {}}
+        >
+          {isSpinning ? 'Girando...' : '🎰 Girar Roleta'}
+        </SpinButton>
+      </SpinButtonContainer>
 
       <AnimatePresence>
         {selectedParticipant && !isSpinning && (
