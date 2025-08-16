@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React + TypeScript + Vite roulette application called "Roleta Premium". It's a modern lottery/spin wheel app that allows users to add participants, spin a roulette wheel, and track winners.
+This is a React + TypeScript + Vite roulette application called "LuckyWheel". It's a modern lottery/spin wheel app that allows users to add participants, spin a roulette wheel, and track winners.
 
 ## Common Commands
 

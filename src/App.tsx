@@ -113,7 +113,7 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <MainTitle>🎰 Roleta Premium</MainTitle>
+            <MainTitle>🎰 LuckyWheel</MainTitle>
             <Subtitle>
               Sorteios justos e divertidos com a mais moderna interface.
               Adicione participantes, gire a roleta e descubra o vencedor!
