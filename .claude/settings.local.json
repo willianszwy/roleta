@@ -7,7 +7,9 @@
       "Bash(git push:*)",
       "Bash(npm run build:*)",
       "Bash(rm:*)",
-      "WebFetch(domain:www.flaticon.com)"
+      "WebFetch(domain:www.flaticon.com)",
+      "Bash(git commit:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

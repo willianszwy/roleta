@@ -30,6 +30,24 @@ export interface PrizeHistory {
   selectedAt: Date;
 }
 
+export interface Task {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  createdAt: Date;
+}
+
+export interface TaskHistory {
+  id: string;
+  participantId: string;
+  participantName: string;
+  taskId: string;
+  taskName: string;
+  taskDescription?: string;
+  selectedAt: Date;
+}
+
 export interface RouletteState {
   participants: Participant[];
   history: RouletteHistory[];
@@ -48,7 +66,17 @@ export interface PrizeRouletteState {
   animationDuration: number;
 }
 
-export type RouletteMode = 'participants' | 'prizes';
+export interface TaskRouletteState {
+  participants: Participant[];
+  tasks: Task[];
+  taskHistory: TaskHistory[];
+  isSpinning: boolean;
+  selectedParticipant?: Participant;
+  selectedTask?: Task;
+  animationDuration: number;
+}
+
+export type RouletteMode = 'participants' | 'prizes' | 'tasks';
 
 export interface ThemeColors {
   primary: string;

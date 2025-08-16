@@ -6,7 +6,9 @@ import { History } from '../History/History';
 import { Settings, type SettingsConfig } from '../Settings/Settings';
 import { PrizeManager } from '../PrizeManager/PrizeManager';
 import { PrizeHistory } from '../PrizeHistory/PrizeHistory';
-import type { Participant, RouletteHistory, Prize, PrizeHistory as PrizeHistoryType } from '../../types';
+import { TaskManager } from '../TaskManager/TaskManager';
+import { TaskHistory } from '../TaskHistory/TaskHistory';
+import type { Participant, RouletteHistory, Prize, PrizeHistory as PrizeHistoryType, Task, TaskHistory as TaskHistoryType } from '../../types';
 
 const PanelContainer = styled.div`
   position: fixed;
@@ -198,6 +200,8 @@ interface SidePanelProps {
   history: RouletteHistory[];
   prizes?: Prize[];
   prizeHistory?: PrizeHistoryType[];
+  tasks?: Task[];
+  taskHistory?: TaskHistoryType[];
   settings: SettingsConfig;
   onAddParticipant: (name: string) => void;
   onAddParticipantsBulk: (names: string[]) => void;
@@ -210,6 +214,11 @@ interface SidePanelProps {
   onRemovePrize?: (id: string) => void;
   onClearPrizes?: () => void;
   onClearPrizeHistory?: () => void;
+  onAddTask?: (name: string, description?: string) => void;
+  onAddTasksBulk?: (taskLines: string[]) => void;
+  onRemoveTask?: (id: string) => void;
+  onClearTasks?: () => void;
+  onClearTaskHistory?: () => void;
   onSettingsChange: (settings: SettingsConfig) => void;
   onResetSettings: () => void;
 }
@@ -219,6 +228,8 @@ export function SidePanel({
   history,
   prizes = [],
   prizeHistory = [],
+  tasks = [],
+  taskHistory = [],
   settings,
   onAddParticipant,
   onAddParticipantsBulk,
@@ -231,11 +242,16 @@ export function SidePanel({
   onRemovePrize,
   onClearPrizes,
   onClearPrizeHistory,
+  onAddTask,
+  onAddTasksBulk,
+  onRemoveTask,
+  onClearTasks,
+  onClearTaskHistory,
   onSettingsChange,
   onResetSettings,
 }: SidePanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'participants' | 'prizes' | 'history' | 'prizeHistory' | 'settings'>('participants');
+  const [activeSection, setActiveSection] = useState<'participants' | 'prizes' | 'tasks' | 'history' | 'prizeHistory' | 'taskHistory' | 'settings'>('participants');
 
   const togglePanel = () => setIsOpen(!isOpen);
 
@@ -279,9 +295,24 @@ export function SidePanel({
                       <span>Prêmios</span>
                     </NavButton>
                   )}
+                  {settings.rouletteMode === 'tasks' && (
+                    <NavButton
+                      active={activeSection === 'tasks'}
+                      onClick={() => setActiveSection('tasks')}
+                    >
+                      <i className="fi fi-tr-clipboard-list"></i>
+                      <span>Tarefas</span>
+                    </NavButton>
+                  )}
                   <NavButton
-                    active={activeSection === (settings.rouletteMode === 'prizes' ? 'prizeHistory' : 'history')}
-                    onClick={() => setActiveSection(settings.rouletteMode === 'prizes' ? 'prizeHistory' : 'history')}
+                    active={activeSection === (
+                      settings.rouletteMode === 'prizes' ? 'prizeHistory' : 
+                      settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
+                    )}
+                    onClick={() => setActiveSection(
+                      settings.rouletteMode === 'prizes' ? 'prizeHistory' : 
+                      settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
+                    )}
                   >
                     <i className="fi fi-tr-chart-histogram"></i>
                     <span>Histórico</span>
@@ -320,6 +351,25 @@ export function SidePanel({
                     prizeHistory={prizeHistory}
                     onClearHistory={onClearPrizeHistory!}
                   />
+                  </div>
+                )}
+                {activeSection === 'tasks' && settings.rouletteMode === 'tasks' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <TaskManager
+                    tasks={tasks}
+                    onAdd={onAddTask!}
+                    onAddBulk={onAddTasksBulk!}
+                    onRemove={onRemoveTask!}
+                    onClear={onClearTasks!}
+                    />
+                  </div>
+                )}
+                {activeSection === 'taskHistory' && settings.rouletteMode === 'tasks' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <TaskHistory
+                    taskHistory={taskHistory}
+                    onClearHistory={onClearTaskHistory!}
+                    />
                   </div>
                 )}
                 {activeSection === 'settings' && (

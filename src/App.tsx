@@ -5,12 +5,14 @@ import confetti from 'canvas-confetti';
 import { GlobalStyles, Container } from './styles/GlobalStyles';
 import { Roulette } from './components/Roulette/Roulette';
 import { PrizeRoulette } from './components/PrizeRoulette/PrizeRoulette';
+import { TaskRoulette } from './components/TaskRoulette/TaskRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
 import { WinnerModal, generateSpecialResult, type SpecialResultType } from './components/WinnerModal/WinnerModal';
 import { useRoulette } from './hooks/useRoulette';
 import { usePrizeRoulette } from './hooks/usePrizeRoulette';
+import { useTaskRoulette } from './hooks/useTaskRoulette';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Participant, Prize } from './types';
+import type { Participant, Prize, Task } from './types';
 import type { SettingsConfig } from './components/Settings/Settings';
 
 const AppContainer = styled.div`
@@ -145,10 +147,12 @@ const defaultSettings: SettingsConfig = {
 function App() {
   const { state, actions } = useRoulette();
   const { state: prizeState, actions: prizeActions } = usePrizeRoulette();
+  const { state: taskState, actions: taskActions } = useTaskRoulette();
   const [settings, setSettings] = useLocalStorage<SettingsConfig>('luckywheel-settings', defaultSettings);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentPrize, setCurrentPrize] = useState<Prize | null>(null);
+  const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [specialResult, setSpecialResult] = useState<SpecialResultType | null>(null);
 
   const handleSpinComplete = (selected?: Participant) => {
@@ -254,10 +258,46 @@ function App() {
     }
   };
 
+  const handleTaskSpinComplete = (selectedParticipant?: Participant, selectedTask?: Task) => {
+    taskActions.finishTaskSpin(selectedParticipant, selectedTask);
+    
+    if (selectedParticipant && selectedTask) {
+      setCurrentWinner(selectedParticipant);
+      setCurrentTask(selectedTask);
+      
+      // Show winner modal if enabled
+      if (settings.showWinnerModal) {
+        setShowWinnerModal(true);
+      }
+      
+      // Trigger confetti animation only if modal is disabled
+      if (!settings.showWinnerModal) {
+        const colors = ['#667eea', '#4facfe', '#00f2fe', '#8b5cf6', '#a855f7', '#3b82f6'];
+        
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: colors,
+        });
+        
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: colors,
+          });
+        }, 300);
+      }
+    }
+  };
+
   const handleCloseWinnerModal = () => {
     setShowWinnerModal(false);
     setCurrentWinner(null);
     setCurrentPrize(null);
+    setCurrentTask(null);
     setSpecialResult(null);
   };
 
@@ -297,7 +337,7 @@ function App() {
                     onSpin={actions.spinRoulette}
                     onSpinComplete={handleSpinComplete}
                   />
-                ) : (
+                ) : settings.rouletteMode === 'prizes' ? (
                   <PrizeRoulette
                     participants={prizeState.participants}
                     prizes={prizeState.prizes}
@@ -307,21 +347,53 @@ function App() {
                     onSpin={prizeActions.spinPrizeRoulette}
                     onSpinComplete={handlePrizeSpinComplete}
                   />
+                ) : (
+                  <TaskRoulette
+                    participants={taskState.participants}
+                    tasks={taskState.tasks}
+                    isSpinning={taskState.isSpinning}
+                    selectedParticipant={taskState.selectedParticipant}
+                    selectedTask={taskState.selectedTask}
+                    onSpin={taskActions.spinTaskRoulette}
+                    onSpinComplete={handleTaskSpinComplete}
+                  />
                 )}
               </RouletteSection>
             </motion.div>
           </MainContent>
 
           <SidePanel
-            participants={settings.rouletteMode === 'participants' ? state.participants : prizeState.participants}
+            participants={
+              settings.rouletteMode === 'participants' ? state.participants :
+              settings.rouletteMode === 'prizes' ? prizeState.participants :
+              taskState.participants
+            }
             history={state.history}
             prizes={prizeState.prizes}
             prizeHistory={prizeState.prizeHistory}
+            tasks={taskState.tasks}
+            taskHistory={taskState.taskHistory}
             settings={settings}
-            onAddParticipant={settings.rouletteMode === 'participants' ? actions.addParticipant : prizeActions.addParticipant}
-            onAddParticipantsBulk={settings.rouletteMode === 'participants' ? actions.addParticipantsBulk : prizeActions.addParticipantsBulk}
-            onRemoveParticipant={settings.rouletteMode === 'participants' ? actions.removeParticipant : prizeActions.removeParticipant}
-            onClearParticipants={settings.rouletteMode === 'participants' ? actions.clearParticipants : prizeActions.clearParticipants}
+            onAddParticipant={
+              settings.rouletteMode === 'participants' ? actions.addParticipant :
+              settings.rouletteMode === 'prizes' ? prizeActions.addParticipant :
+              taskActions.addParticipant
+            }
+            onAddParticipantsBulk={
+              settings.rouletteMode === 'participants' ? actions.addParticipantsBulk :
+              settings.rouletteMode === 'prizes' ? prizeActions.addParticipantsBulk :
+              taskActions.addParticipantsBulk
+            }
+            onRemoveParticipant={
+              settings.rouletteMode === 'participants' ? actions.removeParticipant :
+              settings.rouletteMode === 'prizes' ? prizeActions.removeParticipant :
+              taskActions.removeParticipant
+            }
+            onClearParticipants={
+              settings.rouletteMode === 'participants' ? actions.clearParticipants :
+              settings.rouletteMode === 'prizes' ? prizeActions.clearParticipants :
+              taskActions.clearParticipants
+            }
             onRemoveFromRoulette={actions.removeFromRouletteAfterSpin}
             onClearHistory={actions.clearHistory}
             onAddPrize={prizeActions.addPrize}
@@ -329,6 +401,11 @@ function App() {
             onRemovePrize={prizeActions.removePrize}
             onClearPrizes={prizeActions.clearPrizes}
             onClearPrizeHistory={prizeActions.clearPrizeHistory}
+            onAddTask={taskActions.addTask}
+            onAddTasksBulk={taskActions.addTasksBulk}
+            onRemoveTask={taskActions.removeTask}
+            onClearTasks={taskActions.clearTasks}
+            onClearTaskHistory={taskActions.clearTaskHistory}
             onSettingsChange={handleSettingsChange}
             onResetSettings={handleResetSettings}
           />
@@ -337,6 +414,7 @@ function App() {
             isOpen={showWinnerModal}
             winner={currentWinner}
             prize={currentPrize}
+            task={currentTask}
             specialResult={specialResult}
             autoCloseDuration={settings.winnerDisplayDuration}
             onClose={handleCloseWinnerModal}

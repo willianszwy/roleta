@@ -1,0 +1,374 @@
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import type { TaskHistory as TaskHistoryType } from '../../types';
+import { exportTaskHistory } from '../../utils/taskExportHelpers';
+
+interface TaskHistoryProps {
+  taskHistory: TaskHistoryType[];
+  onClearHistory: () => void;
+}
+
+const HistoryContainer = styled.div`
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+
+const Title = styled.h3`
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+`;
+
+const HistoryCount = styled.div`
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  min-width: 1.5rem;
+  text-align: center;
+`;
+
+const ActionButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' | 'danger' }>`
+  background: ${props => 
+    props.variant === 'danger' 
+      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+      : props.variant === 'secondary'
+      ? 'rgba(255, 255, 255, 0.1)'
+      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  };
+  color: white;
+  border: 1px solid ${props => 
+    props.variant === 'danger' 
+      ? 'rgba(239, 68, 68, 0.3)'
+      : props.variant === 'secondary'
+      ? 'rgba(255, 255, 255, 0.2)'
+      : 'rgba(102, 126, 234, 0.3)'
+  };
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: ${props => 
+    props.variant === 'secondary' 
+      ? 'none' 
+      : props.variant === 'danger'
+      ? '0 3px 12px rgba(239, 68, 68, 0.25)'
+      : '0 3px 12px rgba(102, 126, 234, 0.25)'
+  };
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => 
+      props.variant === 'danger' 
+        ? 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
+        : props.variant === 'secondary'
+        ? 'rgba(255, 255, 255, 0.15)'
+        : 'linear-gradient(135deg, #7c8aed 0%, #8a5aa8 100%)'
+    };
+    box-shadow: ${props => 
+      props.variant === 'secondary' 
+        ? 'none' 
+        : props.variant === 'danger'
+        ? '0 4px 16px rgba(239, 68, 68, 0.35)'
+        : '0 4px 16px rgba(102, 126, 234, 0.35)'
+    };
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+`;
+
+const ActionsContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+`;
+
+const HistoryList = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+`;
+
+const HistoryItem = styled(motion.div)`
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 0 1px 1px 0;
+  }
+`;
+
+const ItemHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+`;
+
+const ParticipantName = styled.div`
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+`;
+
+const TaskName = styled.div`
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 0.25rem;
+`;
+
+const TaskDescription = styled.div`
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+`;
+
+const DateTime = styled.div`
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: right;
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 2rem;
+  margin-bottom: 1rem;
+`;
+
+const EmptyText = styled.p`
+  font-size: 0.85rem;
+  margin: 0;
+  font-style: italic;
+`;
+
+const StatsContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+`;
+
+const StatValue = styled.div`
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.25rem;
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+`;
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export const TaskHistory: React.FC<TaskHistoryProps> = ({
+  taskHistory,
+  onClearHistory,
+}) => {
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+
+  const handleClear = () => {
+    if (window.confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
+      onClearHistory();
+    }
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    exportTaskHistory(taskHistory, format);
+    setShowExportDropdown(false);
+  };
+
+  // Calculate stats
+  const totalAssignments = taskHistory.length;
+  const uniqueParticipants = new Set(taskHistory.map(h => h.participantId)).size;
+  const uniqueTasks = new Set(taskHistory.map(h => h.taskId)).size;
+
+  if (taskHistory.length === 0) {
+    return (
+      <HistoryContainer>
+        <Header>
+          <Title>📊 Histórico de Tarefas</Title>
+          <HistoryCount>0</HistoryCount>
+        </Header>
+        
+        <EmptyState>
+          <EmptyIcon>📝</EmptyIcon>
+          <EmptyText>Nenhuma tarefa foi sorteada ainda</EmptyText>
+        </EmptyState>
+      </HistoryContainer>
+    );
+  }
+
+  return (
+    <HistoryContainer>
+      <Header>
+        <Title>📊 Histórico de Tarefas</Title>
+        <HistoryCount>{totalAssignments}</HistoryCount>
+      </Header>
+
+      <StatsContainer>
+        <StatItem>
+          <StatValue>{totalAssignments}</StatValue>
+          <StatLabel>Sorteios</StatLabel>
+        </StatItem>
+        <StatItem>
+          <StatValue>{uniqueParticipants}</StatValue>
+          <StatLabel>Pessoas</StatLabel>
+        </StatItem>
+        <StatItem>
+          <StatValue>{uniqueTasks}</StatValue>
+          <StatLabel>Tarefas</StatLabel>
+        </StatItem>
+      </StatsContainer>
+
+      <ActionsContainer>
+        <ActionButton
+          onClick={() => handleExport('csv')}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          📊 Exportar CSV
+        </ActionButton>
+        <ActionButton
+          variant="secondary"
+          onClick={() => handleExport('json')}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          📄 Exportar JSON
+        </ActionButton>
+        <ActionButton
+          variant="danger"
+          onClick={handleClear}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          🗑️ Limpar
+        </ActionButton>
+      </ActionsContainer>
+
+      <HistoryList>
+        {taskHistory.map((item) => (
+          <HistoryItem
+            key={item.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            layout
+          >
+            <ItemHeader>
+              <div>
+                <ParticipantName>{item.participantName}</ParticipantName>
+                <TaskName>{item.taskName}</TaskName>
+                {item.taskDescription && (
+                  <TaskDescription>{item.taskDescription}</TaskDescription>
+                )}
+              </div>
+              <DateTime>
+                {formatDate(item.selectedAt)}
+                <br />
+                {formatTime(item.selectedAt)}
+              </DateTime>
+            </ItemHeader>
+          </HistoryItem>
+        ))}
+      </HistoryList>
+    </HistoryContainer>
+  );
+};
