@@ -16,8 +16,11 @@ const RouletteContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2rem;
-  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  flex: 1;
 `;
 
 const RouletteWrapper = styled.div`
@@ -48,40 +51,40 @@ const WheelSVG = styled(motion.svg)<{ size: number }>`
   left: 0;
 `;
 
-const CenterCircle = styled.div`
+const CenterCircle = styled.div<{ size: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
+  width: ${props => Math.max(30, props.size * 0.08)}px;
+  height: ${props => Math.max(30, props.size * 0.08)}px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
   z-index: 10;
 `;
 
-const RoulettePointer = styled.div`
+const RoulettePointer = styled.div<{ size: number }>`
   position: absolute;
-  top: -15px;
+  top: ${props => Math.max(-12, -props.size * 0.03)}px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 30px solid #ff4757;
+  border-left: ${props => Math.max(12, props.size * 0.03)}px solid transparent;
+  border-right: ${props => Math.max(12, props.size * 0.03)}px solid transparent;
+  border-top: ${props => Math.max(24, props.size * 0.06)}px solid #ff4757;
   z-index: 20;
   filter: drop-shadow(0 4px 8px rgba(255, 71, 87, 0.4));
   
   &::after {
     content: '';
     position: absolute;
-    top: -30px;
+    top: ${props => -Math.max(24, props.size * 0.06)}px;
     left: 50%;
     transform: translateX(-50%);
-    width: 12px;
-    height: 12px;
+    width: ${props => Math.max(10, props.size * 0.025)}px;
+    height: ${props => Math.max(10, props.size * 0.025)}px;
     background: #ff4757;
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
@@ -105,15 +108,15 @@ const SpinButton = styled(motion.button)<{ disabled: boolean }>`
   };
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  font-size: 1.2rem;
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
   font-weight: 600;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  min-width: 160px;
+  min-width: 180px;
   
   &:hover:not(:disabled) {
     transform: translateY(-2px);
@@ -122,6 +125,12 @@ const SpinButton = styled(motion.button)<{ disabled: boolean }>`
   
   &:active:not(:disabled) {
     transform: translateY(0);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 2rem;
+    font-size: 1.125rem;
+    min-width: 160px;
   }
 `;
 
@@ -196,13 +205,32 @@ export const Roulette: React.FC<RouletteProps> = ({
   useEffect(() => {
     const updateSize = () => {
       const width = window.innerWidth;
-      if (width < 768) {
-        setWheelSize(280);
+      const height = window.innerHeight;
+      
+      // Use almost full screen, just reserve space for header and some padding
+      const availableHeight = height - 180; // Minimal space for header
+      const availableWidth = width - 60; // Minimal margins (30px each side)
+      
+      // Calculate optimal size to use most of the screen
+      const maxSize = Math.min(
+        availableWidth * 0.9,   // 90% of available width
+        availableHeight * 0.75, // 75% of available height
+        800 // Maximum size limit increased
+      );
+      
+      // Set minimum sizes based on screen size
+      let minSize;
+      if (width < 480) {
+        minSize = 300;
+      } else if (width < 768) {
+        minSize = 350;
       } else if (width < 1024) {
-        setWheelSize(350);
+        minSize = 420;
       } else {
-        setWheelSize(400);
+        minSize = 480;
       }
+      
+      setWheelSize(Math.max(minSize, maxSize));
     };
 
     updateSize();
@@ -246,12 +274,12 @@ export const Roulette: React.FC<RouletteProps> = ({
   const segmentAngle = (2 * Math.PI) / participants.length;
   
   // Calculate appropriate font size based on wheel size and number of participants
-  const fontSize = Math.max(7, Math.min(12, (wheelSize * 0.6) / participants.length));
+  const fontSize = Math.max(8, Math.min(16, (wheelSize * 0.8) / participants.length));
 
   return (
     <RouletteContainer>
       <RouletteWrapper>
-        <RoulettePointer />
+        <RoulettePointer size={wheelSize} />
         <WheelContainer size={wheelSize}>
           <WheelSVG
             size={wheelSize}
@@ -303,7 +331,7 @@ export const Roulette: React.FC<RouletteProps> = ({
             })}
           </WheelSVG>
         </WheelContainer>
-        <CenterCircle />
+        <CenterCircle size={wheelSize} />
       </RouletteWrapper>
 
       <SpinButton

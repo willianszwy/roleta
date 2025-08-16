@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { GlobalStyles, Container } from './styles/GlobalStyles';
 import { Roulette } from './components/Roulette/Roulette';
-import { ParticipantManager } from './components/ParticipantManager/ParticipantManager';
-import { History } from './components/History/History';
+import { SidePanel } from './components/SidePanel/SidePanel';
 import { useRoulette } from './hooks/useRoulette';
 import type { Participant } from './types';
 
@@ -21,13 +20,13 @@ const AppContainer = styled.div`
 
 const Header = styled(motion.header)`
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
 `;
 
 const MainTitle = styled.h1`
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin: 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -45,22 +44,16 @@ const Subtitle = styled.p`
 `;
 
 const MainContent = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 2rem;
-  align-items: start;
-  
-  @media (max-width: 1200px) {
-    grid-template-columns: 1fr 1fr;
-    
-    > :last-child {
-      grid-column: 1 / -1;
-    }
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 1rem;
+  width: 100vw;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    padding: 0.5rem;
+    min-height: calc(100vh - 100px);
   }
 `;
 
@@ -68,12 +61,27 @@ const RouletteSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  padding: 2rem;
+  border-radius: 1rem;
+  padding: 1.5rem;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 160px);
+  
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 130px);
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    min-height: calc(100vh - 110px);
+  }
 `;
 
 function App() {
@@ -114,26 +122,9 @@ function App() {
             transition={{ duration: 0.6 }}
           >
             <MainTitle>🎰 LuckyWheel</MainTitle>
-            <Subtitle>
-              Sorteios justos e divertidos com a mais moderna interface.
-              Adicione participantes, gire a roleta e descubra o vencedor!
-            </Subtitle>
           </Header>
 
           <MainContent>
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <ParticipantManager
-                participants={state.participants}
-                onAdd={actions.addParticipant}
-                onRemove={actions.removeParticipant}
-                onClear={actions.clearParticipants}
-              />
-            </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -149,19 +140,17 @@ function App() {
                 />
               </RouletteSection>
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <History
-                history={state.history}
-                onRemoveFromRoulette={actions.removeFromRouletteAfterSpin}
-                onClearHistory={actions.clearHistory}
-              />
-            </motion.div>
           </MainContent>
+
+          <SidePanel
+            participants={state.participants}
+            history={state.history}
+            onAddParticipant={actions.addParticipant}
+            onRemoveParticipant={actions.removeParticipant}
+            onClearParticipants={actions.clearParticipants}
+            onRemoveFromRoulette={actions.removeFromRouletteAfterSpin}
+            onClearHistory={actions.clearHistory}
+          />
         </Container>
       </AppContainer>
     </>
