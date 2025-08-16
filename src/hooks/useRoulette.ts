@@ -49,15 +49,68 @@ export function useRoulette() {
   const addParticipant = useCallback((name: string) => {
     if (!name.trim()) return;
     
+    const trimmedName = name.trim();
+    
+    // Verificar se já existe um participante com o mesmo nome
+    const existingNames = participants.map(p => p.name.toLowerCase());
+    let finalName = trimmedName;
+    
+    // Se o nome já existe, adicionar número
+    if (existingNames.includes(trimmedName.toLowerCase())) {
+      let counter = 2;
+      while (existingNames.includes(`${trimmedName} (${counter})`.toLowerCase())) {
+        counter++;
+      }
+      finalName = `${trimmedName} (${counter})`;
+    }
+    
     const newParticipant: Participant = {
       id: generateId(),
-      name: name.trim(),
+      name: finalName,
       color: getRandomColor(),
       createdAt: new Date(),
     };
     
     setParticipants(prev => [...prev, newParticipant]);
-  }, []);
+  }, [participants]);
+
+  const addParticipantsBulk = useCallback((names: string[]) => {
+    if (names.length === 0) return;
+    
+    const existingNames = participants.map(p => p.name.toLowerCase());
+    const newParticipants: Participant[] = [];
+    const usedNames = [...existingNames];
+    
+    names.forEach(name => {
+      const trimmedName = name.trim();
+      if (!trimmedName) return;
+      
+      let finalName = trimmedName;
+      
+      // Se o nome já existe, adicionar número
+      if (usedNames.includes(trimmedName.toLowerCase())) {
+        let counter = 2;
+        while (usedNames.includes(`${trimmedName} (${counter})`.toLowerCase())) {
+          counter++;
+        }
+        finalName = `${trimmedName} (${counter})`;
+      }
+      
+      // Adicionar o nome usado à lista para evitar duplicatas dentro do próprio lote
+      usedNames.push(finalName.toLowerCase());
+      
+      const newParticipant: Participant = {
+        id: generateId(),
+        name: finalName,
+        color: getRandomColor(),
+        createdAt: new Date(),
+      };
+      
+      newParticipants.push(newParticipant);
+    });
+    
+    setParticipants(prev => [...prev, ...newParticipants]);
+  }, [participants]);
 
   const removeParticipant = useCallback((id: string) => {
     setParticipants(prev => prev.filter(p => p.id !== id));
@@ -145,6 +198,7 @@ export function useRoulette() {
     state,
     actions: {
       addParticipant,
+      addParticipantsBulk,
       removeParticipant,
       clearParticipants,
       spinRoulette,

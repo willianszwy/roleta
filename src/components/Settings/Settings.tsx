@@ -106,6 +106,7 @@ interface SettingsConfig {
   sorteioBomRuim: boolean;
   autoRemoveWinner: boolean;
   winnerDisplayDuration: number;
+  rouletteMode: 'participants' | 'prizes';
 }
 
 interface SettingsProps {
@@ -124,6 +125,29 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
 
   return (
     <SettingsContainer>
+      <SettingSection>
+        <SectionTitle>
+          🎯 Modalidade de Sorteio
+        </SectionTitle>
+        
+        <SettingItem>
+          <SettingLabel>
+            {config.rouletteMode === 'participants' ? "Sorteio de Pessoas" : "Sorteio de Prêmios"}
+            <ToggleSwitch
+              enabled={config.rouletteMode === 'prizes'}
+              onClick={() => updateConfig('rouletteMode', config.rouletteMode === 'participants' ? 'prizes' : 'participants')}
+              whileTap={{ scale: 0.95 }}
+            />
+          </SettingLabel>
+          <SettingDescription>
+            {config.rouletteMode === 'participants' 
+              ? "Modo tradicional: sorteia uma pessoa da lista de participantes"
+              : "Modo prêmios: sorteia uma pessoa para ganhar um prêmio específico da lista. Cada prêmio só pode ser sorteado uma vez."
+            }
+          </SettingDescription>
+        </SettingItem>
+      </SettingSection>
+
       <SettingSection>
         <SectionTitle>
           🎉 Exibição do Vencedor
@@ -162,25 +186,27 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
         </SettingItem>
       </SettingSection>
 
-      <SettingSection>
-        <SectionTitle>
-          🎲 Sorteio de Sorte
-        </SectionTitle>
-        
-        <SettingItem>
-          <SettingLabel>
-            {config.sorteioBomRuim ? "Sorteio de Sortudo" : "Sorteio de Azarado"}
-            <ToggleSwitch
-              enabled={config.sorteioBomRuim}
-              onClick={() => updateConfig('sorteioBomRuim', !config.sorteioBomRuim)}
-              whileTap={{ scale: 0.95 }}
-            />
-          </SettingLabel>
-          <SettingDescription>
-            Define o tipo do sorteio: {config.sorteioBomRuim ? "encontrar uma pessoa sortuda 🍀" : "encontrar uma pessoa azarada 😅"}. O vencedor sempre será mostrado como {config.sorteioBomRuim ? "sortudo" : "azarado"}.
-          </SettingDescription>
-        </SettingItem>
-      </SettingSection>
+      {config.rouletteMode === 'participants' && (
+        <SettingSection>
+          <SectionTitle>
+            🎲 Sorteio de Sorte
+          </SectionTitle>
+          
+          <SettingItem>
+            <SettingLabel>
+              {config.sorteioBomRuim ? "Sorteio de Sortudo" : "Sorteio de Azarado"}
+              <ToggleSwitch
+                enabled={config.sorteioBomRuim}
+                onClick={() => updateConfig('sorteioBomRuim', !config.sorteioBomRuim)}
+                whileTap={{ scale: 0.95 }}
+              />
+            </SettingLabel>
+            <SettingDescription>
+              Define o tipo do sorteio: {config.sorteioBomRuim ? "encontrar uma pessoa sortuda 🍀" : "encontrar uma pessoa azarada 😅"}. O vencedor sempre será mostrado como {config.sorteioBomRuim ? "sortudo" : "azarado"}.
+            </SettingDescription>
+          </SettingItem>
+        </SettingSection>
+      )}
 
       <SettingSection>
         <SectionTitle>

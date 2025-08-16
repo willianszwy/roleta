@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import type { Participant } from '../../types';
+import type { Participant, Prize } from '../../types';
 
 const confettiAnimation = keyframes`
   0% { transform: translateY(-100vh) rotate(0deg); }
@@ -67,6 +67,32 @@ const WinnerName = styled(motion.div)`
   border-radius: 1rem;
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+`;
+
+const PrizeDisplay = styled(motion.div)`
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%);
+  border: 2px solid rgba(240, 147, 251, 0.4);
+  border-radius: 1rem;
+  text-align: center;
+`;
+
+const PrizeLabel = styled.div`
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+`;
+
+const PrizeName = styled.div`
+  font-size: clamp(1.2rem, 5vw, 2rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
 `;
 
 const SpecialResult = styled(motion.div)<{ isGood: boolean }>`
@@ -175,9 +201,11 @@ interface SpecialResultType {
 interface WinnerModalProps {
   isOpen: boolean;
   winner: Participant | null;
+  prize?: Prize | null;
   specialResult: SpecialResultType | null;
   autoCloseDuration: number; // 0 = manual close
   onClose: () => void;
+  mode?: 'participants' | 'prizes';
 }
 
 const goodResults: Omit<SpecialResultType, 'isGood'>[] = [
@@ -199,9 +227,11 @@ const badResults: Omit<SpecialResultType, 'isGood'>[] = [
 export function WinnerModal({ 
   isOpen, 
   winner, 
+  prize,
   specialResult, 
   autoCloseDuration, 
-  onClose 
+  onClose,
+  mode = 'participants'
 }: WinnerModalProps) {
   const [sparkles, setSparkles] = useState<Array<{x: number, y: number, delay: number}>>([]);
 
@@ -274,7 +304,10 @@ export function WinnerModal({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {specialResult?.isGood ? "🎉 VENCEDOR! 🎉" : "😈 QUE AZAR! 😈"}
+              {mode === 'prizes' 
+                ? "🎁 PARABÉNS! 🎁"
+                : specialResult?.isGood ? "🎉 VENCEDOR! 🎉" : "😈 QUE AZAR! 😈"
+              }
             </WinnerTitle>
 
             <WinnerName
@@ -285,12 +318,23 @@ export function WinnerModal({
               {winner.name}
             </WinnerName>
 
-            {specialResult && (
+            {mode === 'prizes' && prize && (
+              <PrizeDisplay
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <PrizeLabel>ganhou</PrizeLabel>
+                <PrizeName>🎁 {prize.name}</PrizeName>
+              </PrizeDisplay>
+            )}
+
+            {mode === 'participants' && specialResult && (
               <SpecialResult
                 isGood={specialResult.isGood}
                 initial={{ x: -50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.8 }}
               >
                 <SpecialTitle isGood={specialResult.isGood}>
                   {specialResult.emoji} {specialResult.title}
@@ -305,11 +349,14 @@ export function WinnerModal({
               onClick={onClose}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 1.0 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {specialResult?.isGood ? "✨ Fantástico! ✨" : "😏 Que Pena! 😏"}
+              {mode === 'prizes' 
+                ? "🎁 Incrível! 🎁"
+                : specialResult?.isGood ? "✨ Fantástico! ✨" : "😏 Que Pena! 😏"
+              }
             </CloseButton>
 
             {autoCloseDuration > 0 && (

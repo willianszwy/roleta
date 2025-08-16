@@ -4,7 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ParticipantManager } from '../ParticipantManager/ParticipantManager';
 import { History } from '../History/History';
 import { Settings, type SettingsConfig } from '../Settings/Settings';
-import type { Participant, RouletteHistory } from '../../types';
+import { PrizeManager } from '../PrizeManager/PrizeManager';
+import { PrizeHistory } from '../PrizeHistory/PrizeHistory';
+import type { Participant, RouletteHistory, Prize, PrizeHistory as PrizeHistoryType } from '../../types';
 
 const PanelContainer = styled.div`
   position: fixed;
@@ -164,12 +166,20 @@ const CloseButton = styled.button`
 interface SidePanelProps {
   participants: Participant[];
   history: RouletteHistory[];
+  prizes?: Prize[];
+  prizeHistory?: PrizeHistoryType[];
   settings: SettingsConfig;
   onAddParticipant: (name: string) => void;
+  onAddParticipantsBulk: (names: string[]) => void;
   onRemoveParticipant: (id: string) => void;
   onClearParticipants: () => void;
   onRemoveFromRoulette: (participantId: string) => void;
   onClearHistory: () => void;
+  onAddPrize?: (name: string, description?: string) => void;
+  onAddPrizesBulk?: (names: string[]) => void;
+  onRemovePrize?: (id: string) => void;
+  onClearPrizes?: () => void;
+  onClearPrizeHistory?: () => void;
   onSettingsChange: (settings: SettingsConfig) => void;
   onResetSettings: () => void;
 }
@@ -177,17 +187,25 @@ interface SidePanelProps {
 export function SidePanel({
   participants,
   history,
+  prizes = [],
+  prizeHistory = [],
   settings,
   onAddParticipant,
+  onAddParticipantsBulk,
   onRemoveParticipant,
   onClearParticipants,
   onRemoveFromRoulette,
   onClearHistory,
+  onAddPrize,
+  onAddPrizesBulk,
+  onRemovePrize,
+  onClearPrizes,
+  onClearPrizeHistory,
   onSettingsChange,
   onResetSettings,
 }: SidePanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'participants' | 'history' | 'settings'>('participants');
+  const [activeSection, setActiveSection] = useState<'participants' | 'prizes' | 'history' | 'prizeHistory' | 'settings'>('participants');
 
   const togglePanel = () => setIsOpen(!isOpen);
 
@@ -221,9 +239,17 @@ export function SidePanel({
                   >
                     👥 Participantes
                   </NavButton>
+                  {settings.rouletteMode === 'prizes' && (
+                    <NavButton
+                      active={activeSection === 'prizes'}
+                      onClick={() => setActiveSection('prizes')}
+                    >
+                      🎁 Prêmios
+                    </NavButton>
+                  )}
                   <NavButton
-                    active={activeSection === 'history'}
-                    onClick={() => setActiveSection('history')}
+                    active={activeSection === (settings.rouletteMode === 'prizes' ? 'prizeHistory' : 'history')}
+                    onClick={() => setActiveSection(settings.rouletteMode === 'prizes' ? 'prizeHistory' : 'history')}
                   >
                     📊 Histórico
                   </NavButton>
@@ -241,14 +267,28 @@ export function SidePanel({
                   <ParticipantManager
                     participants={participants}
                     onAdd={onAddParticipant}
+                    onAddBulk={onAddParticipantsBulk}
                     onRemove={onRemoveParticipant}
                     onClear={onClearParticipants}
                   />
-                ) : activeSection === 'history' ? (
+                ) : activeSection === 'prizes' && settings.rouletteMode === 'prizes' ? (
+                  <PrizeManager
+                    prizes={prizes}
+                    onAdd={onAddPrize!}
+                    onAddBulk={onAddPrizesBulk!}
+                    onRemove={onRemovePrize!}
+                    onClear={onClearPrizes!}
+                  />
+                ) : activeSection === 'history' && settings.rouletteMode === 'participants' ? (
                   <History
                     history={history}
                     onRemoveFromRoulette={onRemoveFromRoulette}
                     onClearHistory={onClearHistory}
+                  />
+                ) : activeSection === 'prizeHistory' && settings.rouletteMode === 'prizes' ? (
+                  <PrizeHistory
+                    prizeHistory={prizeHistory}
+                    onClearHistory={onClearPrizeHistory!}
                   />
                 ) : (
                   <Settings

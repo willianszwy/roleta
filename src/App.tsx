@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { GlobalStyles, Container } from './styles/GlobalStyles';
 import { Roulette } from './components/Roulette/Roulette';
+import { PrizeRoulette } from './components/PrizeRoulette/PrizeRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
 import { WinnerModal, generateSpecialResult, type SpecialResultType } from './components/WinnerModal/WinnerModal';
 import { useRoulette } from './hooks/useRoulette';
+import { usePrizeRoulette } from './hooks/usePrizeRoulette';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Participant } from './types';
+import type { Participant, Prize } from './types';
 import type { SettingsConfig } from './components/Settings/Settings';
 
 const AppContainer = styled.div`
@@ -91,14 +93,17 @@ const defaultSettings: SettingsConfig = {
   showWinnerModal: true,
   sorteioBomRuim: true,
   autoRemoveWinner: false,
-  winnerDisplayDuration: 5
+  winnerDisplayDuration: 5,
+  rouletteMode: 'participants'
 };
 
 function App() {
   const { state, actions } = useRoulette();
+  const { state: prizeState, actions: prizeActions } = usePrizeRoulette();
   const [settings, setSettings] = useLocalStorage<SettingsConfig>('luckywheel-settings', defaultSettings);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
+  const [currentPrize, setCurrentPrize] = useState<Prize | null>(null);
   const [specialResult, setSpecialResult] = useState<SpecialResultType | null>(null);
 
   const handleSpinComplete = (selected?: Participant) => {
@@ -169,9 +174,45 @@ function App() {
     }
   };
 
+  const handlePrizeSpinComplete = (selectedParticipant?: Participant, selectedPrize?: Prize) => {
+    prizeActions.finishPrizeSpin(selectedParticipant, selectedPrize);
+    
+    if (selectedParticipant && selectedPrize) {
+      setCurrentWinner(selectedParticipant);
+      setCurrentPrize(selectedPrize);
+      
+      // Show winner modal if enabled
+      if (settings.showWinnerModal) {
+        setShowWinnerModal(true);
+      }
+      
+      // Trigger confetti animation only if modal is disabled
+      if (!settings.showWinnerModal) {
+        const colors = ['#f093fb', '#f5576c', '#667eea', '#764ba2', '#4facfe', '#00f2fe'];
+        
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: colors,
+        });
+        
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: colors,
+          });
+        }, 300);
+      }
+    }
+  };
+
   const handleCloseWinnerModal = () => {
     setShowWinnerModal(false);
     setCurrentWinner(null);
+    setCurrentPrize(null);
     setSpecialResult(null);
   };
 
@@ -203,26 +244,46 @@ function App() {
               transition={{ duration: 0.6, delay: 0.1 }}
             >
               <RouletteSection>
-                <Roulette
-                  participants={state.participants}
-                  isSpinning={state.isSpinning}
-                  selectedParticipant={state.selectedParticipant}
-                  onSpin={actions.spinRoulette}
-                  onSpinComplete={handleSpinComplete}
-                />
+                {settings.rouletteMode === 'participants' ? (
+                  <Roulette
+                    participants={state.participants}
+                    isSpinning={state.isSpinning}
+                    selectedParticipant={state.selectedParticipant}
+                    onSpin={actions.spinRoulette}
+                    onSpinComplete={handleSpinComplete}
+                  />
+                ) : (
+                  <PrizeRoulette
+                    participants={prizeState.participants}
+                    prizes={prizeState.prizes}
+                    isSpinning={prizeState.isSpinning}
+                    selectedParticipant={prizeState.selectedParticipant}
+                    selectedPrize={prizeState.selectedPrize}
+                    onSpin={prizeActions.spinPrizeRoulette}
+                    onSpinComplete={handlePrizeSpinComplete}
+                  />
+                )}
               </RouletteSection>
             </motion.div>
           </MainContent>
 
           <SidePanel
-            participants={state.participants}
+            participants={settings.rouletteMode === 'participants' ? state.participants : prizeState.participants}
             history={state.history}
+            prizes={prizeState.prizes}
+            prizeHistory={prizeState.prizeHistory}
             settings={settings}
-            onAddParticipant={actions.addParticipant}
-            onRemoveParticipant={actions.removeParticipant}
-            onClearParticipants={actions.clearParticipants}
+            onAddParticipant={settings.rouletteMode === 'participants' ? actions.addParticipant : prizeActions.addParticipant}
+            onAddParticipantsBulk={settings.rouletteMode === 'participants' ? actions.addParticipantsBulk : prizeActions.addParticipantsBulk}
+            onRemoveParticipant={settings.rouletteMode === 'participants' ? actions.removeParticipant : prizeActions.removeParticipant}
+            onClearParticipants={settings.rouletteMode === 'participants' ? actions.clearParticipants : prizeActions.clearParticipants}
             onRemoveFromRoulette={actions.removeFromRouletteAfterSpin}
             onClearHistory={actions.clearHistory}
+            onAddPrize={prizeActions.addPrize}
+            onAddPrizesBulk={prizeActions.addPrizesBulk}
+            onRemovePrize={prizeActions.removePrize}
+            onClearPrizes={prizeActions.clearPrizes}
+            onClearPrizeHistory={prizeActions.clearPrizeHistory}
             onSettingsChange={handleSettingsChange}
             onResetSettings={handleResetSettings}
           />
@@ -230,9 +291,11 @@ function App() {
           <WinnerModal
             isOpen={showWinnerModal}
             winner={currentWinner}
+            prize={currentPrize}
             specialResult={specialResult}
             autoCloseDuration={settings.winnerDisplayDuration}
             onClose={handleCloseWinnerModal}
+            mode={settings.rouletteMode}
           />
         </Container>
       </AppContainer>

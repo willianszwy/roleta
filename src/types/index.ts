@@ -13,6 +13,23 @@ export interface RouletteHistory {
   removed?: boolean;
 }
 
+export interface Prize {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  createdAt: Date;
+}
+
+export interface PrizeHistory {
+  id: string;
+  participantId: string;
+  participantName: string;
+  prizeId: string;
+  prizeName: string;
+  selectedAt: Date;
+}
+
 export interface RouletteState {
   participants: Participant[];
   history: RouletteHistory[];
@@ -20,6 +37,18 @@ export interface RouletteState {
   selectedParticipant?: Participant;
   animationDuration: number;
 }
+
+export interface PrizeRouletteState {
+  participants: Participant[];
+  prizes: Prize[];
+  prizeHistory: PrizeHistory[];
+  isSpinning: boolean;
+  selectedParticipant?: Participant;
+  selectedPrize?: Prize;
+  animationDuration: number;
+}
+
+export type RouletteMode = 'participants' | 'prizes';
 
 export interface ThemeColors {
   primary: string;
