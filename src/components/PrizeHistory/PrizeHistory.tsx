@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { PrizeHistory } from '../../types';
+import type { PrizeHistory as PrizeHistoryType } from '../../types';
 import { exportPrizeHistory } from '../../utils/exportHelpers';
 
 interface PrizeHistoryProps {
-  prizeHistory: PrizeHistory[];
+  prizeHistory: PrizeHistoryType[];
   onClearHistory: () => void;
 }
 
