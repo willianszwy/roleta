@@ -222,6 +222,31 @@ function App() {
       setCurrentWinner(selectedParticipant);
       setCurrentPrize(selectedPrize);
       
+      // Generate special result based on toggle setting
+      if (settings.showWinnerModal && settings.sorteioBomRuim !== undefined) {
+        const isGoodResult = settings.sorteioBomRuim;
+        const results = isGoodResult ? 
+          [
+            { title: "Sortudo!", description: "A sorte está com você hoje! 🎉", emoji: "🍀", isGood: true },
+            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "✨", isGood: true },
+            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "🌟", isGood: true },
+            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "👑", isGood: true },
+            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "⭐", isGood: true }
+          ] :
+          [
+            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar! 😏", emoji: "😅", isGood: false },
+            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "🎲", isGood: false },
+            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar! 🤭", emoji: "🌪️", isGood: false },
+            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "⚖️", isGood: false },
+            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda! 😈", emoji: "🎭", isGood: false }
+          ];
+        
+        const randomResult = results[Math.floor(Math.random() * results.length)];
+        setSpecialResult(randomResult);
+      } else {
+        setSpecialResult(null);
+      }
+      
       // Show winner modal if enabled
       if (settings.showWinnerModal) {
         setShowWinnerModal(true);
@@ -256,6 +281,31 @@ function App() {
     if (selectedParticipant && selectedTask) {
       setCurrentWinner(selectedParticipant);
       setCurrentTask(selectedTask);
+      
+      // Generate special result based on toggle setting
+      if (settings.showWinnerModal && settings.sorteioBomRuim !== undefined) {
+        const isGoodResult = settings.sorteioBomRuim;
+        const results = isGoodResult ? 
+          [
+            { title: "Sortudo!", description: "A sorte está com você hoje! 🎉", emoji: "🍀", isGood: true },
+            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "✨", isGood: true },
+            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "🌟", isGood: true },
+            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "👑", isGood: true },
+            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "⭐", isGood: true }
+          ] :
+          [
+            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar! 😏", emoji: "😅", isGood: false },
+            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "🎲", isGood: false },
+            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar! 🤭", emoji: "🌪️", isGood: false },
+            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "⚖️", isGood: false },
+            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda! 😈", emoji: "🎭", isGood: false }
+          ];
+        
+        const randomResult = results[Math.floor(Math.random() * results.length)];
+        setSpecialResult(randomResult);
+      } else {
+        setSpecialResult(null);
+      }
       
       // Show winner modal if enabled
       if (settings.showWinnerModal) {

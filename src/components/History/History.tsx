@@ -50,7 +50,7 @@ const MenuContainer = styled.div`
 const MenuButton = styled(motion.button)`
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.9);
   padding: 0.4rem 0.6rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -63,7 +63,7 @@ const MenuButton = styled(motion.button)`
   
   &:hover {
     background: rgba(255, 255, 255, 0.15);
-    color: #111827;
+    color: rgba(255, 255, 255, 1);
   }
 `;
 
@@ -155,7 +155,7 @@ const WinnerDetails = styled.div`
 const WinnerName = styled.div`
   font-size: 0.8rem;
   font-weight: 600;
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -164,7 +164,7 @@ const WinnerName = styled.div`
 
 const DateTime = styled.div`
   font-size: 0.65rem;
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
   margin-top: 0.05rem;
 `;
@@ -176,7 +176,7 @@ const ItemMenuContainer = styled.div`
 const ItemMenuButton = styled(motion.button)<{ removed?: boolean }>`
   background: none;
   border: none;
-  color: ${props => props.removed ? '#9ca3af' : '#4b5563'};
+  color: ${props => props.removed ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)'};
   padding: 0.2rem;
   border-radius: 0.25rem;
   font-size: 0.8rem;
@@ -185,7 +185,7 @@ const ItemMenuButton = styled(motion.button)<{ removed?: boolean }>`
   
   &:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
-    color: #1f2937;
+    color: rgba(255, 255, 255, 0.9);
   }
 `;
 
@@ -249,7 +249,7 @@ const EmptyText = styled.p`
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.4;
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.6);
 `;
 
 const HistoryCount = styled.div`
@@ -330,14 +330,14 @@ export const History: React.FC<HistoryProps> = ({
 
   return (
     <>
-        <Header>
-          <Title>🏆 Histórico</Title>
-          {history.length > 0 && (
-            <HistoryCount>{history.length}</HistoryCount>
-          )}
-        </Header>
+      <Header>
+        <Title>🏆 Histórico</Title>
+        {history.length > 0 && (
+          <HistoryCount>{history.length}</HistoryCount>
+        )}
+      </Header>
 
-        <HistoryList>
+      <HistoryList>
           <AnimatePresence>
             {history.length === 0 ? (
               <EmptyState>
@@ -378,21 +378,21 @@ export const History: React.FC<HistoryProps> = ({
                 </HistoryItem>
               ))
             )}
-          </AnimatePresence>
-        </HistoryList>
+        </AnimatePresence>
+      </HistoryList>
 
-        {history.length > 0 && (
-          <MenuContainer>
-            <MenuButton
-              onClick={handleMainMenuClick}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
-            >
-              Opções ⋮
-            </MenuButton>
-          </MenuContainer>
-        )}
+      {history.length > 0 && (
+        <MenuContainer>
+          <MenuButton
+            onClick={handleMainMenuClick}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+          >
+            Opções ⋮
+          </MenuButton>
+        </MenuContainer>
+      )}
 
       {/* Portal Dropdowns */}
       {menuOpen && createPortal(

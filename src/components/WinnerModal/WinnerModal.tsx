@@ -376,7 +376,7 @@ export function WinnerModal({
               </TaskDisplay>
             )}
 
-            {mode === 'participants' && specialResult && (
+            {specialResult && (
               <SpecialResult
                 isGood={specialResult.isGood}
                 initial={{ x: -50, opacity: 0 }}
@@ -401,9 +401,9 @@ export function WinnerModal({
               whileTap={{ scale: 0.95 }}
             >
               {mode === 'prizes' 
-                ? "🎁 Incrível! 🎁"
+                ? (specialResult?.isGood ? "🎁✨ Sortudo! ✨🎁" : "🎁😏 Azarado! 😏🎁")
                 : mode === 'tasks'
-                ? "🎯 Perfeito! 🎯"
+                ? (specialResult?.isGood ? "🎯✨ Sortudo! ✨🎯" : "🎯😏 Azarado! 😏🎯")
                 : specialResult?.isGood ? "✨ Fantástico! ✨" : "😏 Que Pena! 😏"
               }
             </CloseButton>

@@ -523,153 +523,153 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
   return (
     <>
-        <Header>
-          <Title>📋 Tarefas</Title>
-          {tasks.length > 0 && (
-            <TaskCount>{tasks.length}</TaskCount>
-          )}
-        </Header>
-        
-        <AddForm onSubmit={handleSubmit}>
-          <InputRow>
-            <Input
-              type="text"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              placeholder="Nome da tarefa..."
-              maxLength={50}
-            />
-            <AddButton
-              type="submit"
-              disabled={!taskName.trim()}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              +
-            </AddButton>
-          </InputRow>
-          <DescriptionInput
+      <Header>
+        <Title>📋 Tarefas</Title>
+        {tasks.length > 0 && (
+          <TaskCount>{tasks.length}</TaskCount>
+        )}
+      </Header>
+      
+      <AddForm onSubmit={handleSubmit}>
+        <InputRow>
+          <Input
             type="text"
-            value={taskDescription}
-            onChange={(e) => setTaskDescription(e.target.value)}
-            placeholder="Descrição (opcional)..."
-            maxLength={100}
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            placeholder="Nome da tarefa..."
+            maxLength={50}
           />
-        </AddForm>
-
-        <BulkActions style={{ marginBottom: '1rem' }}>
-          <BulkButton
-            variant="secondary"
-            onClick={toggleBulkImport}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <AddButton
+            type="submit"
+            disabled={!taskName.trim()}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
-            📋 {showBulkImport ? 'Fechar' : 'Importar Lista'}
-          </BulkButton>
-        </BulkActions>
+            +
+          </AddButton>
+        </InputRow>
+        <DescriptionInput
+          type="text"
+          value={taskDescription}
+          onChange={(e) => setTaskDescription(e.target.value)}
+          placeholder="Descrição (opcional)..."
+          maxLength={100}
+        />
+      </AddForm>
 
-        <AnimatePresence>
-          {showBulkImport && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <BulkImportSection>
-                <BulkTitle>📝 Importar Tarefas</BulkTitle>
-                <BulkTextarea
-                  value={bulkValue}
-                  onChange={(e) => setBulkValue(e.target.value)}
-                  placeholder={`Digite as tarefas, uma por linha:
+      <BulkActions style={{ marginBottom: '1rem' }}>
+        <BulkButton
+          variant="secondary"
+          onClick={toggleBulkImport}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          📋 {showBulkImport ? 'Fechar' : 'Importar Lista'}
+        </BulkButton>
+      </BulkActions>
+
+      <AnimatePresence>
+        {showBulkImport && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BulkImportSection>
+              <BulkTitle>📝 Importar Tarefas</BulkTitle>
+              <BulkTextarea
+                value={bulkValue}
+                onChange={(e) => setBulkValue(e.target.value)}
+                placeholder={`Digite as tarefas, uma por linha:
 Limpar a casa
 Fazer relatório | Entregar até sexta-feira
 Comprar mantimentos | Supermercado do bairro`}
-                />
-                <BulkHint>
-                  💡 Use "Nome da tarefa | Descrição" para adicionar descrições (opcional)
-                </BulkHint>
-                <BulkActions>
-                  <BulkButton
-                    onClick={handleBulkImport}
-                    disabled={!bulkValue.trim()}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    ✅ Adicionar ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
-                  </BulkButton>
-                  <BulkButton
-                    variant="secondary"
-                    onClick={handleClearBulk}
-                    disabled={!bulkValue.trim()}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    🗑️ Limpar
-                  </BulkButton>
-                </BulkActions>
-              </BulkImportSection>
-            </motion.div>
+              />
+              <BulkHint>
+                💡 Use "Nome da tarefa | Descrição" para adicionar descrições (opcional)
+              </BulkHint>
+              <BulkActions>
+                <BulkButton
+                  onClick={handleBulkImport}
+                  disabled={!bulkValue.trim()}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ✅ Adicionar ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
+                </BulkButton>
+                <BulkButton
+                  variant="secondary"
+                  onClick={handleClearBulk}
+                  disabled={!bulkValue.trim()}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  🗑️ Limpar
+                </BulkButton>
+              </BulkActions>
+            </BulkImportSection>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <TasksList>
+        <AnimatePresence>
+          {tasks.length === 0 ? (
+            <EmptyState>
+              <EmptyIcon>📋</EmptyIcon>
+              <EmptyText>
+                Adicione tarefas para começar o sorteio
+              </EmptyText>
+            </EmptyState>
+          ) : (
+            tasks.map((task, index) => (
+              <TaskCard
+                key={task.id}
+                initial={{ opacity: 0, x: -15, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 15, scale: 0.95 }}
+                transition={{ duration: 0.25, delay: index * 0.03 }}
+              >
+                <ItemContent>
+                  <TaskInfo>
+                    <TaskColor color={task.color || '#4facfe'} />
+                    <TaskDetails>
+                      <TaskName>{task.name}</TaskName>
+                      {task.description && (
+                        <TaskDescription>{task.description}</TaskDescription>
+                      )}
+                    </TaskDetails>
+                  </TaskInfo>
+                  
+                  <ItemMenuContainer>
+                    <ItemMenuButton
+                      onClick={(e) => toggleItemMenu(task.id, e)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      ⋮
+                    </ItemMenuButton>
+                  </ItemMenuContainer>
+                </ItemContent>
+              </TaskCard>
+            ))
           )}
         </AnimatePresence>
+      </TasksList>
 
-        <TasksList>
-          <AnimatePresence>
-            {tasks.length === 0 ? (
-              <EmptyState>
-                <EmptyIcon>📋</EmptyIcon>
-                <EmptyText>
-                  Adicione tarefas para começar o sorteio
-                </EmptyText>
-              </EmptyState>
-            ) : (
-              tasks.map((task, index) => (
-                <TaskCard
-                  key={task.id}
-                  initial={{ opacity: 0, x: -15, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 15, scale: 0.95 }}
-                  transition={{ duration: 0.25, delay: index * 0.03 }}
-                >
-                  <ItemContent>
-                    <TaskInfo>
-                      <TaskColor color={task.color || '#4facfe'} />
-                      <TaskDetails>
-                        <TaskName>{task.name}</TaskName>
-                        {task.description && (
-                          <TaskDescription>{task.description}</TaskDescription>
-                        )}
-                      </TaskDetails>
-                    </TaskInfo>
-                    
-                    <ItemMenuContainer>
-                      <ItemMenuButton
-                        onClick={(e) => toggleItemMenu(task.id, e)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        ⋮
-                      </ItemMenuButton>
-                    </ItemMenuContainer>
-                  </ItemContent>
-                </TaskCard>
-              ))
-            )}
-          </AnimatePresence>
-        </TasksList>
-
-        {tasks.length > 1 && (
-          <MenuContainer>
-            <MenuButton
-              onClick={handleMainMenuClick}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
-            >
-              Opções ⋮
-            </MenuButton>
-          </MenuContainer>
-        )}
+      {tasks.length > 1 && (
+        <MenuContainer>
+          <MenuButton
+            onClick={handleMainMenuClick}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+          >
+            Opções ⋮
+          </MenuButton>
+        </MenuContainer>
+      )}
 
       {/* Portal Dropdowns */}
       {menuOpen && createPortal(

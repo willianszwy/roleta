@@ -513,138 +513,138 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
 
   return (
     <>
-        <Header>
-          <Title>👥 Participantes</Title>
-          {participants.length > 0 && (
-            <ParticipantCount>{participants.length}</ParticipantCount>
-          )}
-        </Header>
-        
-        <AddForm onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Nome..."
-            maxLength={30}
-          />
-          <AddButton
-            type="submit"
-            disabled={!inputValue.trim()}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            +
-          </AddButton>
-        </AddForm>
+      <Header>
+        <Title>👥 Participantes</Title>
+        {participants.length > 0 && (
+          <ParticipantCount>{participants.length}</ParticipantCount>
+        )}
+      </Header>
+      
+      <AddForm onSubmit={handleSubmit}>
+        <Input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Nome..."
+          maxLength={30}
+        />
+        <AddButton
+          type="submit"
+          disabled={!inputValue.trim()}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          +
+        </AddButton>
+      </AddForm>
 
-        <BulkActions style={{ marginBottom: '1rem' }}>
-          <BulkButton
-            variant="secondary"
-            onClick={toggleBulkImport}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            📋 {showBulkImport ? 'Fechar' : 'Importar Lista'}
-          </BulkButton>
-        </BulkActions>
+      <BulkActions style={{ marginBottom: '1rem' }}>
+        <BulkButton
+          variant="secondary"
+          onClick={toggleBulkImport}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          📋 {showBulkImport ? 'Fechar' : 'Importar Lista'}
+        </BulkButton>
+      </BulkActions>
 
+      <AnimatePresence>
+        {showBulkImport && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BulkImportSection>
+              <BulkTitle>📝 Importar Participantes</BulkTitle>
+              <BulkTextarea
+                value={bulkValue}
+                onChange={(e) => setBulkValue(e.target.value)}
+                placeholder="Digite os nomes separados por linha ou vírgula:&#10;João Silva&#10;Maria Santos&#10;Pedro, Ana, Carlos"
+              />
+              <BulkHint>
+                💡 Nomes duplicados receberão números automaticamente (ex: João, João (2), João (3))
+              </BulkHint>
+              <BulkActions>
+                <BulkButton
+                  onClick={handleBulkImport}
+                  disabled={!bulkValue.trim()}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ✅ Adicionar ({bulkValue.split(/[\n,]/).filter(n => n.trim()).length} nomes)
+                </BulkButton>
+                <BulkButton
+                  variant="secondary"
+                  onClick={handleClearBulk}
+                  disabled={!bulkValue.trim()}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  🗑️ Limpar
+                </BulkButton>
+              </BulkActions>
+            </BulkImportSection>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ParticipantsList>
         <AnimatePresence>
-          {showBulkImport && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <BulkImportSection>
-                <BulkTitle>📝 Importar Participantes</BulkTitle>
-                <BulkTextarea
-                  value={bulkValue}
-                  onChange={(e) => setBulkValue(e.target.value)}
-                  placeholder="Digite os nomes separados por linha ou vírgula:&#10;João Silva&#10;Maria Santos&#10;Pedro, Ana, Carlos"
-                />
-                <BulkHint>
-                  💡 Nomes duplicados receberão números automaticamente (ex: João, João (2), João (3))
-                </BulkHint>
-                <BulkActions>
-                  <BulkButton
-                    onClick={handleBulkImport}
-                    disabled={!bulkValue.trim()}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    ✅ Adicionar ({bulkValue.split(/[\n,]/).filter(n => n.trim()).length} nomes)
-                  </BulkButton>
-                  <BulkButton
-                    variant="secondary"
-                    onClick={handleClearBulk}
-                    disabled={!bulkValue.trim()}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    🗑️ Limpar
-                  </BulkButton>
-                </BulkActions>
-              </BulkImportSection>
-            </motion.div>
+          {participants.length === 0 ? (
+            <EmptyState>
+              <EmptyIcon>🎯</EmptyIcon>
+              <EmptyText>
+                Adicione participantes para começar o sorteio
+              </EmptyText>
+            </EmptyState>
+          ) : (
+            participants.map((participant, index) => (
+              <ParticipantCard
+                key={participant.id}
+                initial={{ opacity: 0, x: -15, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 15, scale: 0.95 }}
+                transition={{ duration: 0.25, delay: index * 0.03 }}
+              >
+                <ItemContent>
+                  <ParticipantInfo>
+                    <ParticipantColor color={participant.color || '#667eea'} />
+                    <ParticipantDetails>
+                      <ParticipantName>{participant.name}</ParticipantName>
+                    </ParticipantDetails>
+                  </ParticipantInfo>
+                  
+                  <ItemMenuContainer>
+                    <ItemMenuButton
+                      onClick={(e) => toggleItemMenu(participant.id, e)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      ⋮
+                    </ItemMenuButton>
+                  </ItemMenuContainer>
+                </ItemContent>
+              </ParticipantCard>
+            ))
           )}
         </AnimatePresence>
+      </ParticipantsList>
 
-        <ParticipantsList>
-          <AnimatePresence>
-            {participants.length === 0 ? (
-              <EmptyState>
-                <EmptyIcon>🎯</EmptyIcon>
-                <EmptyText>
-                  Adicione participantes para começar o sorteio
-                </EmptyText>
-              </EmptyState>
-            ) : (
-              participants.map((participant, index) => (
-                <ParticipantCard
-                  key={participant.id}
-                  initial={{ opacity: 0, x: -15, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 15, scale: 0.95 }}
-                  transition={{ duration: 0.25, delay: index * 0.03 }}
-                >
-                  <ItemContent>
-                    <ParticipantInfo>
-                      <ParticipantColor color={participant.color || '#667eea'} />
-                      <ParticipantDetails>
-                        <ParticipantName>{participant.name}</ParticipantName>
-                      </ParticipantDetails>
-                    </ParticipantInfo>
-                    
-                    <ItemMenuContainer>
-                      <ItemMenuButton
-                        onClick={(e) => toggleItemMenu(participant.id, e)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        ⋮
-                      </ItemMenuButton>
-                    </ItemMenuContainer>
-                  </ItemContent>
-                </ParticipantCard>
-              ))
-            )}
-          </AnimatePresence>
-        </ParticipantsList>
-
-        {participants.length > 1 && (
-          <MenuContainer>
-            <MenuButton
-              onClick={handleMainMenuClick}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
-            >
-              Opções ⋮
-            </MenuButton>
-          </MenuContainer>
-        )}
+      {participants.length > 1 && (
+        <MenuContainer>
+          <MenuButton
+            onClick={handleMainMenuClick}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+          >
+            Opções ⋮
+          </MenuButton>
+        </MenuContainer>
+      )}
 
       {/* Portal Dropdowns */}
       {menuOpen && createPortal(
