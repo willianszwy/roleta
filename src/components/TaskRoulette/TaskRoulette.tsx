@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, Task } from '../../types';
-import { getContrastColor, selectRandomParticipant } from '../../utils/helpers';
+import { calculateRouletteRotation, getContrastColor } from '../../utils/helpers';
 
 interface TaskRouletteProps {
   participants: Participant[];
@@ -28,65 +28,42 @@ const RouletteContainer = styled.div`
   }
 `;
 
-const MainContent = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 4rem;
-  width: 100%;
-  max-width: 1400px;
-  
-  @media (max-width: 1024px) {
-    gap: 3rem;
-  }
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-  }
-`;
-
-const RouletteSection = styled.div`
+const WheelSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.5rem;
-  
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
 `;
 
-const TasksSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 420px;
-  max-height: 600px;
-  
-  @media (max-width: 1024px) {
-    width: 350px;
-    max-height: 500px;
-  }
-  
-  @media (max-width: 768px) {
-    width: 100%;
-    max-width: 400px;
-    max-height: 450px;
-  }
-`;
-
-const SectionTitle = styled.h3`
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 1rem 0;
+const CurrentTaskDisplay = styled(motion.div)`
   text-align: center;
+  padding: 1rem 2rem;
+  background: rgba(79, 172, 254, 0.2);
+  border: 2px solid rgba(79, 172, 254, 0.4);
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const CurrentTaskLabel = styled.div`
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const CurrentTaskName = styled.div`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 1);
+`;
+
+const RouletteWrapper = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
 `;
 
 const WheelContainer = styled.div<{ size: number }>`
@@ -99,7 +76,7 @@ const WheelContainer = styled.div<{ size: number }>`
     0 0 50px rgba(102, 126, 234, 0.3),
     inset 0 0 30px rgba(255, 255, 255, 0.1),
     0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 6px solid rgba(255, 255, 255, 0.2);
+  border: 8px solid rgba(255, 255, 255, 0.2);
   margin: 1rem;
 `;
 
@@ -116,8 +93,8 @@ const CenterCircle = styled.div<{ size: number }>`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: ${props => Math.max(25, props.size * 0.08)}px;
-  height: ${props => Math.max(25, props.size * 0.08)}px;
+  width: ${props => Math.max(30, props.size * 0.08)}px;
+  height: ${props => Math.max(30, props.size * 0.08)}px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
@@ -126,28 +103,28 @@ const CenterCircle = styled.div<{ size: number }>`
 
 const RoulettePointer = styled.div<{ size: number }>`
   position: absolute;
-  top: ${props => Math.max(-10, -props.size * 0.025)}px;
+  top: ${props => Math.max(-12, -props.size * 0.03)}px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: ${props => Math.max(10, props.size * 0.025)}px solid transparent;
-  border-right: ${props => Math.max(10, props.size * 0.025)}px solid transparent;
-  border-top: ${props => Math.max(20, props.size * 0.05)}px solid #667eea;
+  border-left: ${props => Math.max(12, props.size * 0.03)}px solid transparent;
+  border-right: ${props => Math.max(12, props.size * 0.03)}px solid transparent;
+  border-top: ${props => Math.max(24, props.size * 0.06)}px solid #ff4757;
   z-index: 20;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 4px 8px rgba(255, 71, 87, 0.4));
   
   &::after {
     content: '';
     position: absolute;
-    top: ${props => -Math.max(20, props.size * 0.05)}px;
+    top: ${props => -Math.max(24, props.size * 0.06)}px;
     left: 50%;
     transform: translateX(-50%);
-    width: ${props => Math.max(8, props.size * 0.02)}px;
-    height: ${props => Math.max(8, props.size * 0.02)}px;
-    background: #667eea;
+    width: ${props => Math.max(10, props.size * 0.025)}px;
+    height: ${props => Math.max(10, props.size * 0.025)}px;
+    background: #ff4757;
     border-radius: 50%;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
   }
 `;
 
@@ -157,17 +134,70 @@ const ParticipantText = styled.text<{ $textColor: string; $fontSize: number }>`
   font-weight: 600;
   text-anchor: middle;
   dominant-baseline: middle;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
   pointer-events: none;
 `;
 
-const TasksList = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 1rem;
-  padding: 2rem;
+const SpinButton = styled(motion.button)<{ disabled: boolean }>`
+  background: ${props => props.disabled 
+    ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  };
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 180px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 2rem;
+    font-size: 1.125rem;
+    min-width: 160px;
+  }
+`;
+
+const TaskListSection = styled.div`
+  width: 100%;
+  max-width: 600px;
+  margin-top: 2rem;
+`;
+
+const TaskCounter = styled.div`
+  text-align: center;
+  padding: 1rem;
+  background: rgba(79, 172, 254, 0.1);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+`;
+
+const TaskList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
   overflow-y: auto;
-  max-height: 520px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
   
   &::-webkit-scrollbar {
     width: 4px;
@@ -184,145 +214,32 @@ const TasksList = styled.div`
   }
 `;
 
-const CurrentTaskCard = styled(motion.div)`
-  background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%);
-  border: 2px solid rgba(79, 172, 254, 0.4);
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(79, 172, 254, 0.1);
-`;
-
-const CurrentTaskLabel = styled.div`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const CurrentTaskName = styled.div`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 1);
-  margin-bottom: 0.75rem;
-  line-height: 1.2;
-`;
-
-const CurrentTaskDescription = styled.div`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.4;
-  font-style: italic;
-`;
-
-const TaskItem = styled(motion.div)<{ completed?: boolean }>`
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  background: ${props => props.completed 
-    ? 'rgba(34, 197, 94, 0.1)' 
-    : 'rgba(255, 255, 255, 0.06)'
-  };
-  border: 1px solid ${props => props.completed 
-    ? 'rgba(34, 197, 94, 0.3)' 
-    : 'rgba(255, 255, 255, 0.1)'
-  };
+const TaskItem = styled(motion.div)`
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.5rem;
   backdrop-filter: blur(8px);
-  opacity: ${props => props.completed ? 0.6 : 1};
+  display: flex;
+  align-items: center;
   
   &::before {
     content: '';
     width: 3px;
     height: 100%;
-    background: ${props => props.completed 
-      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-      : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-    };
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     border-radius: 1.5px;
     margin-right: 0.75rem;
   }
 `;
 
-const TaskItemContent = styled.div`
-  flex: 1;
-`;
-
-const TaskItemName = styled.div<{ completed?: boolean }>`
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${props => props.completed 
-    ? 'rgba(255, 255, 255, 0.6)' 
-    : 'rgba(255, 255, 255, 0.9)'
-  };
-  margin-bottom: 0.25rem;
-  text-decoration: ${props => props.completed ? 'line-through' : 'none'};
-`;
-
-const TaskItemDescription = styled.div<{ completed?: boolean }>`
-  font-size: 0.85rem;
-  color: ${props => props.completed 
-    ? 'rgba(255, 255, 255, 0.4)' 
-    : 'rgba(255, 255, 255, 0.6)'
-  };
-  line-height: 1.3;
-`;
-
-const TaskStatus = styled.div<{ completed?: boolean }>`
-  font-size: 1.2rem;
-  margin-left: 0.5rem;
-`;
-
-const TasksCounter = styled.div`
-  text-align: center;
-  padding: 1rem;
-  background: rgba(79, 172, 254, 0.1);
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+const TaskName = styled.div`
+  font-size: 0.9rem;
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
 `;
 
-const SpinButton = styled(motion.button)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 1.25rem 2.5rem;
-  border-radius: 3rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 
-    0 8px 25px rgba(102, 126, 234, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 1.5rem;
-  
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 12px 35px rgba(102, 126, 234, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  
-  &:disabled {
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-
-const EmptyStateContainer = styled.div`
+const EmptyState = styled.div`
   text-align: center;
   padding: 3rem 2rem;
   color: rgba(255, 255, 255, 0.6);
@@ -338,6 +255,73 @@ const EmptyStateText = styled.p`
   margin: 0;
 `;
 
+const EmptyWheel = styled.div<{ size: number }>`
+  width: ${props => props.size}px;
+  height: ${props => props.size}px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+`;
+
+const CompletionMessage = styled(motion.div)`
+  text-align: center;
+  padding: 2rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 1rem;
+  margin-top: 2rem;
+`;
+
+const CompletionTitle = styled.div`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #4ade80;
+  margin-bottom: 1rem;
+`;
+
+const ResetButton = styled(motion.button)`
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  border-radius: 6px;
+  color: #a5b4fc;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
+  }
+`;
+
+const colors = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+  '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE',
+  '#AED6F1', '#A3E4D7', '#F9E79F', '#FADBD8', '#D5DBDB'
+];
+
+function createSegmentPath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): string {
+  const x1 = centerX + radius * Math.cos(startAngle);
+  const y1 = centerY + radius * Math.sin(startAngle);
+  const x2 = centerX + radius * Math.cos(endAngle);
+  const y2 = centerY + radius * Math.sin(endAngle);
+  
+  const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+  
+  return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+}
+
 export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   participants,
   tasks,
@@ -346,16 +330,43 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   onSpinComplete,
 }) => {
   const [rotation, setRotation] = useState(0);
+  const [wheelSize, setWheelSize] = useState(400);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
-  const wheelSize = 320;
 
+  // Responsive wheel sizing
+  useEffect(() => {
+    const updateSize = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      
+      const availableHeight = height - 180;
+      const availableWidth = width - 60;
+      
+      const maxSize = Math.min(
+        availableWidth * 0.9,
+        availableHeight * 0.75,
+        800
+      );
+      
+      let minSize;
+      if (width < 480) {
+        minSize = 300;
+      } else if (width < 768) {
+        minSize = 350;
+      } else if (width < 1024) {
+        minSize = 420;
+      } else {
+        minSize = 480;
+      }
+      
+      setWheelSize(Math.max(minSize, maxSize));
+    };
 
-  // Reset completed tasks when all tasks are done
-  const resetTasks = () => {
-    setCompletedTasks([]);
-    setCurrentTask(tasks.length > 0 ? tasks[0] : null);
-  };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   // Set current task when tasks change
   useEffect(() => {
@@ -366,32 +377,33 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     }
   }, [tasks, completedTasks, currentTask]);
 
+  // Handle spinning logic
   useEffect(() => {
-    if (isSpinning && currentTask) {
-      // Start spinning animation
-      const duration = 3000;
-      const finalRotation = Math.random() * 360 + 1440; // At least 4 full rotations
+    if (isSpinning && currentTask && participants.length > 0) {
+      // Select random participant
+      const selectedParticipant = participants[Math.floor(Math.random() * participants.length)];
+      const selectedIndex = participants.findIndex(p => p.id === selectedParticipant.id);
       
-      setRotation(finalRotation);
-
-      // After animation, determine winner and complete spin
+      const duration = 4.5;
+      const extraRotations = 6;
+      
+      const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation, extraRotations);
+      const newRotation = rotation + rotationToAdd;
+      setRotation(newRotation);
+      
       setTimeout(() => {
-        if (participants.length > 0) {
-          const selectedParticipant = selectRandomParticipant(participants);
-          
-          // Complete the current task
-          setCompletedTasks(prev => [...prev, currentTask.id]);
-          
-          // Move to next task
-          const remainingTasks = tasks.filter(task => !completedTasks.includes(task.id) && task.id !== currentTask.id);
-          const nextTask = remainingTasks.length > 0 ? remainingTasks[0] : null;
-          setCurrentTask(nextTask);
-          
-          onSpinComplete(selectedParticipant || undefined, currentTask);
-        }
-      }, duration);
+        // Complete the current task
+        setCompletedTasks(prev => [...prev, currentTask.id]);
+        
+        // Move to next task
+        const remainingTasks = tasks.filter(task => !completedTasks.includes(task.id) && task.id !== currentTask.id);
+        const nextTask = remainingTasks.length > 0 ? remainingTasks[0] : null;
+        setCurrentTask(nextTask);
+        
+        onSpinComplete(selectedParticipant, currentTask);
+      }, duration * 1000);
     }
-  }, [isSpinning, participants, currentTask, onSpinComplete, tasks, completedTasks]);
+  }, [isSpinning, participants, currentTask, onSpinComplete, tasks, completedTasks, rotation]);
 
   const handleSpin = () => {
     if (!isSpinning && participants.length > 0 && currentTask) {
@@ -399,68 +411,18 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     }
   };
 
-  const renderWheel = () => {
-    if (participants.length === 0) return null;
-
-    const segmentAngle = 360 / participants.length;
-    const radius = wheelSize / 2 - 20;
-    const centerX = wheelSize / 2;
-    const centerY = wheelSize / 2;
-    const fontSize = Math.max(10, Math.min(16, 120 / participants.length));
-
-    return (
-      <WheelSVG
-        size={wheelSize}
-        animate={{ rotate: rotation }}
-        transition={{ duration: isSpinning ? 3 : 0, ease: "easeOut" }}
-      >
-        {participants.map((participant, index) => {
-          const startAngle = index * segmentAngle;
-          const endAngle = (index + 1) * segmentAngle;
-          const midAngle = (startAngle + endAngle) / 2;
-          
-          const x1 = centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180);
-          const y1 = centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180);
-          const x2 = centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180);
-          const y2 = centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180);
-          
-          const textX = centerX + (radius * 0.7) * Math.cos((midAngle - 90) * Math.PI / 180);
-          const textY = centerY + (radius * 0.7) * Math.sin((midAngle - 90) * Math.PI / 180);
-          
-          const largeArcFlag = segmentAngle > 180 ? 1 : 0;
-          const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-          
-          return (
-            <g key={participant.id}>
-              <path
-                d={pathData}
-                fill={participant.color || '#667eea'}
-                stroke="rgba(255, 255, 255, 0.2)"
-                strokeWidth="1"
-              />
-              <ParticipantText
-                x={textX}
-                y={textY}
-                $textColor={getContrastColor(participant.color || '#667eea')}
-                $fontSize={fontSize}
-                transform={`rotate(${midAngle}, ${textX}, ${textY})`}
-              >
-                {participant.name}
-              </ParticipantText>
-            </g>
-          );
-        })}
-      </WheelSVG>
-    );
+  const resetTasks = () => {
+    setCompletedTasks([]);
+    setCurrentTask(tasks.length > 0 ? tasks[0] : null);
   };
 
   const availableTasks = tasks.filter(task => !completedTasks.includes(task.id));
-  const hasCompletedTasks = completedTasks.length > 0;
+  const allTasksCompleted = availableTasks.length === 0 && tasks.length > 0;
 
   if (participants.length === 0 || tasks.length === 0) {
     return (
       <RouletteContainer>
-        <EmptyStateContainer>
+        <EmptyState>
           <EmptyStateIcon>●</EmptyStateIcon>
           <EmptyStateText>
             {participants.length === 0 && tasks.length === 0 
@@ -470,124 +432,144 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
               : "Adicione tarefas para começar o sorteio"
             }
           </EmptyStateText>
-        </EmptyStateContainer>
+        </EmptyState>
       </RouletteContainer>
     );
   }
 
+  if (participants.length === 0) {
+    return (
+      <RouletteContainer>
+        <RouletteWrapper>
+          <EmptyWheel size={wheelSize}>
+            Adicione participantes para começar
+          </EmptyWheel>
+        </RouletteWrapper>
+      </RouletteContainer>
+    );
+  }
+
+  const radius = wheelSize / 2 - 4;
+  const centerX = wheelSize / 2;
+  const centerY = wheelSize / 2;
+  const segmentAngle = (2 * Math.PI) / participants.length;
+  const fontSize = Math.max(8, Math.min(16, (wheelSize * 0.8) / participants.length));
+
   return (
     <RouletteContainer>
-      <MainContent>
-        <RouletteSection>
-          <SectionTitle>Quem vai fazer?</SectionTitle>
-          <WheelContainer size={wheelSize}>
-            {renderWheel()}
-            <CenterCircle size={wheelSize} />
-            <RoulettePointer size={wheelSize} />
-          </WheelContainer>
-          
-          <SpinButton
-            onClick={handleSpin}
-            disabled={isSpinning || !currentTask}
-            whileHover={{ scale: (isSpinning || !currentTask) ? 1 : 1.05 }}
-            whileTap={{ scale: (isSpinning || !currentTask) ? 1 : 0.95 }}
+      <WheelSection>
+        {currentTask && (
+          <CurrentTaskDisplay
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
           >
-            {isSpinning ? 'Sorteando...' : currentTask ? 'Sortear Responsável' : 'Sem tarefas'}
-          </SpinButton>
-        </RouletteSection>
+            <CurrentTaskLabel>Próxima Tarefa</CurrentTaskLabel>
+            <CurrentTaskName>{currentTask.name}</CurrentTaskName>
+          </CurrentTaskDisplay>
+        )}
 
-        <TasksSection>
-          <SectionTitle>Lista de Tarefas</SectionTitle>
-          <TasksList>
-            {currentTask && (
-              <CurrentTaskCard
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-              >
-                <CurrentTaskLabel>Próxima Tarefa</CurrentTaskLabel>
-                <CurrentTaskName>{currentTask.name}</CurrentTaskName>
-                {currentTask.description && (
-                  <CurrentTaskDescription>{currentTask.description}</CurrentTaskDescription>
-                )}
-              </CurrentTaskCard>
-            )}
-
-            <TasksCounter>
-              {availableTasks.length} pendente{availableTasks.length !== 1 ? 's' : ''} • {completedTasks.length} concluída{completedTasks.length !== 1 ? 's' : ''}
-            </TasksCounter>
-
-            <AnimatePresence>
-              {tasks.map((task, index) => {
-                const isCompleted = completedTasks.includes(task.id);
-                const isCurrent = currentTask?.id === task.id;
+        <RouletteWrapper>
+          <RoulettePointer size={wheelSize} />
+          <WheelContainer size={wheelSize}>
+            <WheelSVG
+              size={wheelSize}
+              viewBox={`0 0 ${wheelSize} ${wheelSize}`}
+              animate={{ rotate: rotation }}
+              transition={{
+                duration: isSpinning ? 4.5 : 0,
+                ease: [0.2, 0, 0.2, 1],
+              }}
+            >
+              {participants.map((participant, index) => {
+                const startAngle = index * segmentAngle - Math.PI / 2;
+                const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
                 
-                if (isCurrent) return null; // Don't show current task in the list
+                const textAngle = startAngle + segmentAngle / 2;
+                const textRadius = radius * 0.45;
+                const textX = centerX + textRadius * Math.cos(textAngle);
+                const textY = centerY + textRadius * Math.sin(textAngle);
+                
+                const participantColor = participant.color || colors[index % colors.length];
                 
                 return (
-                  <TaskItem
-                    key={task.id}
-                    completed={isCompleted}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <TaskItemContent>
-                      <TaskItemName completed={isCompleted}>
-                        {task.name}
-                      </TaskItemName>
-                      {task.description && (
-                        <TaskItemDescription completed={isCompleted}>
-                          {task.description}
-                        </TaskItemDescription>
-                      )}
-                    </TaskItemContent>
-                    <TaskStatus completed={isCompleted}>
-                      {isCompleted ? '✓' : '○'}
-                    </TaskStatus>
-                  </TaskItem>
+                  <g key={participant.id}>
+                    <path
+                      d={createSegmentPath(centerX, centerY, radius, startAngle, endAngle)}
+                      fill={participantColor}
+                      stroke="rgba(255, 255, 255, 0.3)"
+                      strokeWidth="2"
+                      style={{
+                        filter: 'brightness(1.1)',
+                        transition: 'filter 0.3s ease',
+                      }}
+                    />
+                    <ParticipantText
+                      x={textX}
+                      y={textY}
+                      $textColor={getContrastColor(participantColor)}
+                      $fontSize={fontSize}
+                      transform={`rotate(${(textAngle * 180) / Math.PI}, ${textX}, ${textY})`}
+                    >
+                      {participant.name}
+                    </ParticipantText>
+                  </g>
                 );
               })}
-            </AnimatePresence>
+            </WheelSVG>
+          </WheelContainer>
+          <CenterCircle size={wheelSize} />
+        </RouletteWrapper>
 
-            {availableTasks.length === 0 && hasCompletedTasks && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                style={{ 
-                  textAlign: 'center', 
-                  padding: '2rem',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  fontSize: '0.9rem'
-                }}
-              >
-                <div style={{ marginBottom: '1rem' }}>
-                  Todas as tarefas foram concluídas!
-                </div>
-                <motion.button
-                  onClick={resetTasks}
-                  style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.85rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    boxShadow: '0 3px 12px rgba(102, 126, 234, 0.25)'
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+        <SpinButton
+          disabled={isSpinning || !currentTask}
+          onClick={handleSpin}
+          whileHover={!(isSpinning || !currentTask) ? { scale: 1.02 } : {}}
+          whileTap={!(isSpinning || !currentTask) ? { scale: 0.98 } : {}}
+        >
+          {isSpinning ? 'Sorteando...' : currentTask ? 'Sortear Responsável' : 'Sem tarefas'}
+        </SpinButton>
+      </WheelSection>
+
+      <TaskListSection>
+        <TaskCounter>
+          {availableTasks.length} pendente{availableTasks.length !== 1 ? 's' : ''} • {completedTasks.length} concluída{completedTasks.length !== 1 ? 's' : ''}
+        </TaskCounter>
+
+        {availableTasks.length > 0 && (
+          <TaskList>
+            <AnimatePresence>
+              {availableTasks.map((task, index) => (
+                <TaskItem
+                  key={task.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  Reiniciar Tarefas
-                </motion.button>
-              </motion.div>
-            )}
-          </TasksList>
-        </TasksSection>
-      </MainContent>
+                  <TaskName>{task.name}</TaskName>
+                </TaskItem>
+              ))}
+            </AnimatePresence>
+          </TaskList>
+        )}
+
+        {allTasksCompleted && (
+          <CompletionMessage
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <CompletionTitle>Todas as tarefas foram concluídas!</CompletionTitle>
+            <ResetButton
+              onClick={resetTasks}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Reiniciar Tarefas
+            </ResetButton>
+          </CompletionMessage>
+        )}
+      </TaskListSection>
     </RouletteContainer>
   );
 };
