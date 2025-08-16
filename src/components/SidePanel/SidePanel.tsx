@@ -24,11 +24,11 @@ const PanelContent = styled(motion.div)`
   backdrop-filter: blur(16px);
   border-left: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: -8px 0 32px rgba(31, 38, 135, 0.37);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   z-index: 1001;
   position: relative;
+  height: 100vh;
   
   @media (max-width: 768px) {
     width: 100vw;
@@ -36,7 +36,33 @@ const PanelContent = styled(motion.div)`
 `;
 
 const PanelHeader = styled.div`
-  padding: 2rem;
+  padding: 2rem 2rem 1rem 2rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const PanelBody = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 2rem 2rem 2rem;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
 `;
 
 
@@ -44,11 +70,19 @@ const MenuNav = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 0.5rem;
-  margin-top: 1rem;
   
   @media (max-width: 480px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.25rem;
+  }
+  
+  @media (max-height: 600px) {
+    gap: 0.25rem;
+  }
+  
+  @media (max-height: 500px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.125rem;
   }
 `;
 
@@ -63,19 +97,11 @@ const NavButton = styled.button<{ active: boolean }>`
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
   text-align: center;
   min-height: 60px;
   white-space: nowrap;
-  
-  i {
-    font-size: 1.25rem;
-    line-height: 1;
-    color: inherit;
-  }
   
   span {
     font-size: inherit;
@@ -93,11 +119,18 @@ const NavButton = styled.button<{ active: boolean }>`
     font-size: 0.75rem;
     padding: 0.5rem 0.25rem;
     min-height: 50px;
-    gap: 0.375rem;
-    
-    i {
-      font-size: 1rem;
-    }
+  }
+  
+  @media (max-height: 600px) {
+    padding: 0.5rem 0.25rem;
+    min-height: 45px;
+    font-size: 0.75rem;
+  }
+  
+  @media (max-height: 500px) {
+    padding: 0.375rem 0.125rem;
+    min-height: 40px;
+    font-size: 0.7rem;
   }
 `;
 
@@ -115,10 +148,10 @@ const Overlay = styled(motion.div)`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 40px;
-  height: 40px;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 36px;
+  height: 36px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -127,8 +160,9 @@ const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   transition: all 0.3s ease;
+  z-index: 10;
   
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -212,7 +246,6 @@ export function SidePanel({
                     active={activeSection === 'participants'}
                     onClick={() => setActiveSection('participants')}
                   >
-                    <i className="fi fi-tr-users"></i>
                     <span>Participantes</span>
                   </NavButton>
                   {settings.rouletteMode === 'tasks' && (
@@ -220,7 +253,6 @@ export function SidePanel({
                       active={activeSection === 'tasks'}
                       onClick={() => setActiveSection('tasks')}
                     >
-                      <i className="fi fi-tr-clipboard-list"></i>
                       <span>Tarefas</span>
                     </NavButton>
                   )}
@@ -232,17 +264,18 @@ export function SidePanel({
                       settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
                     )}
                   >
-                    <i className="fi fi-tr-chart-histogram"></i>
                     <span>Histórico</span>
                   </NavButton>
                   <NavButton
                     active={activeSection === 'settings'}
                     onClick={() => setActiveSection('settings')}
                   >
-                    <i className="fi fi-tr-settings"></i>
                     <span>Config</span>
                   </NavButton>
                 </MenuNav>
+              </PanelHeader>
+              
+              <PanelBody>
                 {activeSection === 'participants' && (
                   <div style={{ marginTop: '1.5rem' }}>
                     <ParticipantManager
@@ -291,7 +324,7 @@ export function SidePanel({
                     />
                   </div>
                 )}
-              </PanelHeader>
+              </PanelBody>
               
             </PanelContent>
           </>

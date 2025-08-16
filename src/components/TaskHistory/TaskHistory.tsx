@@ -9,17 +9,6 @@ interface TaskHistoryProps {
   onClearHistory: () => void;
 }
 
-const HistoryContainer = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.5rem;
-  padding: 1.25rem;
-  box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
-  max-height: 400px;
-  display: flex;
-  flex-direction: column;
-`;
 
 const Header = styled.div`
   display: flex;
@@ -55,56 +44,55 @@ const HistoryCount = styled.div`
 const ActionButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' | 'danger' }>`
   background: ${props => 
     props.variant === 'danger' 
-      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+      ? 'rgba(239, 68, 68, 0.2)'
       : props.variant === 'secondary'
       ? 'rgba(255, 255, 255, 0.1)'
-      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      : 'rgba(102, 126, 234, 0.2)'
   };
-  color: white;
   border: 1px solid ${props => 
     props.variant === 'danger' 
-      ? 'rgba(239, 68, 68, 0.3)'
+      ? 'rgba(239, 68, 68, 0.4)'
       : props.variant === 'secondary'
       ? 'rgba(255, 255, 255, 0.2)'
-      : 'rgba(102, 126, 234, 0.3)'
+      : 'rgba(102, 126, 234, 0.4)'
   };
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
+  border-radius: 6px;
+  color: ${props => 
+    props.variant === 'danger' 
+      ? '#fca5a5'
+      : props.variant === 'secondary'
+      ? 'rgba(255, 255, 255, 0.9)'
+      : '#a5b4fc'
+  };
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: ${props => 
-    props.variant === 'secondary' 
-      ? 'none' 
-      : props.variant === 'danger'
-      ? '0 3px 12px rgba(239, 68, 68, 0.25)'
-      : '0 3px 12px rgba(102, 126, 234, 0.25)'
-  };
-  backdrop-filter: blur(8px);
   white-space: nowrap;
   transition: all 0.3s ease;
   
   &:hover {
     background: ${props => 
       props.variant === 'danger' 
-        ? 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
+        ? 'rgba(239, 68, 68, 0.3)'
         : props.variant === 'secondary'
         ? 'rgba(255, 255, 255, 0.15)'
-        : 'linear-gradient(135deg, #7c8aed 0%, #8a5aa8 100%)'
+        : 'rgba(102, 126, 234, 0.3)'
     };
-    box-shadow: ${props => 
-      props.variant === 'secondary' 
-        ? 'none' 
-        : props.variant === 'danger'
-        ? '0 4px 16px rgba(239, 68, 68, 0.35)'
-        : '0 4px 16px rgba(102, 126, 234, 0.35)'
+    border-color: ${props => 
+      props.variant === 'danger' 
+        ? 'rgba(239, 68, 68, 0.6)'
+        : props.variant === 'secondary'
+        ? 'rgba(255, 255, 255, 0.3)'
+        : 'rgba(102, 126, 234, 0.6)'
     };
   }
   
   &:disabled {
-    opacity: 0.5;
+    background: rgba(156, 163, 175, 0.2);
+    border-color: rgba(156, 163, 175, 0.4);
+    color: rgba(156, 163, 175, 0.6);
     cursor: not-allowed;
-    box-shadow: none;
   }
 `;
 
@@ -166,7 +154,7 @@ const ItemHeader = styled.div`
 const ParticipantName = styled.div`
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.9);
 `;
 
 const TaskName = styled.div`
@@ -181,14 +169,14 @@ const TaskName = styled.div`
 
 const TaskDescription = styled.div`
   font-size: 0.75rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.8);
   margin-top: 0.25rem;
   line-height: 1.4;
 `;
 
 const DateTime = styled.div`
   font-size: 0.7rem;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.7);
   text-align: right;
 `;
 
@@ -281,24 +269,24 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
 
   if (taskHistory.length === 0) {
     return (
-      <HistoryContainer>
+      <>
         <Header>
-          <Title>📊 Histórico de Tarefas</Title>
+          <Title>Histórico de Tarefas</Title>
           <HistoryCount>0</HistoryCount>
         </Header>
         
         <EmptyState>
-          <EmptyIcon>📝</EmptyIcon>
+          <EmptyIcon>·</EmptyIcon>
           <EmptyText>Nenhuma tarefa foi sorteada ainda</EmptyText>
         </EmptyState>
-      </HistoryContainer>
+      </>
     );
   }
 
   return (
-    <HistoryContainer>
+    <>
       <Header>
-        <Title>📊 Histórico de Tarefas</Title>
+        <Title>Histórico de Tarefas</Title>
         <HistoryCount>{totalAssignments}</HistoryCount>
       </Header>
 
@@ -323,7 +311,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          📊 Exportar CSV
+          Exportar CSV
         </ActionButton>
         <ActionButton
           variant="secondary"
@@ -331,7 +319,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          📄 Exportar JSON
+          Exportar JSON
         </ActionButton>
         <ActionButton
           variant="danger"
@@ -339,7 +327,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          🗑️ Limpar
+          Limpar
         </ActionButton>
       </ActionsContainer>
 
@@ -369,6 +357,6 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           </HistoryItem>
         ))}
       </HistoryList>
-    </HistoryContainer>
+    </>
   );
 };

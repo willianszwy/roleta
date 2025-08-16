@@ -215,19 +215,19 @@ interface WinnerModalProps {
 }
 
 const goodResults: Omit<SpecialResultType, 'isGood'>[] = [
-  { title: "Sortudo!", description: "A sorte está com você hoje! 🎉", emoji: "🍀" },
-  { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "✨" },
-  { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "🌟" },
-  { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "👑" },
-  { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "⭐" }
+  { title: "Sortudo!", description: "A sorte está com você hoje!", emoji: "+" },
+  { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "+" },
+  { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "+" },
+  { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "+" },
+  { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "+" }
 ];
 
 const badResults: Omit<SpecialResultType, 'isGood'>[] = [
-  { title: "Azarado!", description: "Não foi dessa vez... você deu azar!", emoji: "😅" },
-  { title: "Pessoa Azarada!", description: "O azar decidiu te visitar hoje!", emoji: "🎲" },
-  { title: "Que Azar!", description: "Venceu mas o azar estava presente!", emoji: "🌪️" },
-  { title: "Sem Sorte!", description: "Desta vez a sorte não estava do seu lado!", emoji: "⚖️" },
-  { title: "Vencedor Azarado!", description: "Ganhou o sorteio mas perdeu na sorte!", emoji: "🎭" }
+  { title: "Azarado!", description: "Não foi dessa vez... você deu azar!", emoji: "-" },
+  { title: "Pessoa Azarada!", description: "O azar decidiu te visitar hoje!", emoji: "-" },
+  { title: "Que Azar!", description: "Venceu mas o azar estava presente!", emoji: "-" },
+  { title: "Sem Sorte!", description: "Desta vez a sorte não estava do seu lado!", emoji: "-" },
+  { title: "Vencedor Azarado!", description: "Ganhou o sorteio mas perdeu na sorte!", emoji: "-" }
 ];
 
 export function WinnerModal({ 
@@ -311,8 +311,8 @@ export function WinnerModal({
               transition={{ delay: 0.2 }}
             >
               {mode === 'tasks'
-                ? "🎯 TAREFA SORTEADA! 🎯"
-                : specialResult?.isGood ? "🎉 VENCEDOR! 🎉" : "😈 QUE AZAR! 😈"
+                ? "TAREFA SORTEADA!"
+                : specialResult?.isGood ? "VENCEDOR!" : "QUE AZAR!"
               }
             </WinnerTitle>
 
@@ -332,7 +332,7 @@ export function WinnerModal({
                 transition={{ delay: 0.6 }}
               >
                 <TaskLabel>vai fazer</TaskLabel>
-                <TaskName>📋 {task.name}</TaskName>
+                <TaskName>{task.name}</TaskName>
                 {task.description && (
                   <TaskDescription>{task.description}</TaskDescription>
                 )}
@@ -364,8 +364,8 @@ export function WinnerModal({
               whileTap={{ scale: 0.95 }}
             >
               {mode === 'tasks'
-                ? (specialResult?.isGood ? "🎯✨ Sortudo! ✨🎯" : "🎯😏 Azarado! 😏🎯")
-                : specialResult?.isGood ? "✨ Fantástico! ✨" : "😏 Que Pena! 😏"
+                ? (specialResult?.isGood ? "Sortudo!" : "Azarado!")
+                : specialResult?.isGood ? "Fantástico!" : "Que Pena!"
               }
             </CloseButton>
 

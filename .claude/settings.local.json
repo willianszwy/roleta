@@ -10,7 +10,8 @@
       "WebFetch(domain:www.flaticon.com)",
       "Bash(git commit:*)",
       "Bash(mkdir:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

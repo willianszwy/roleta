@@ -106,35 +106,6 @@ const MenuLine = styled(motion.div)<{ isOpen: boolean }>`
 `;
 
 
-const Attribution = styled.div`
-  position: fixed;
-  bottom: 1rem;
-  left: 1rem;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.5rem;
-  border-radius: 4px;
-  backdrop-filter: blur(10px);
-  z-index: 999;
-  
-  a {
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    
-    &:hover {
-      color: rgba(255, 255, 255, 0.9);
-    }
-  }
-  
-  @media (max-width: 768px) {
-    position: relative;
-    margin: 1rem auto;
-    text-align: center;
-    background: transparent;
-    backdrop-filter: none;
-  }
-`;
 
 const MainContent = styled.div`
   display: flex;
@@ -212,18 +183,18 @@ function App() {
         const isGoodResult = settings.sorteioBomRuim;
         const results = isGoodResult ? 
           [
-            { title: "Sortudo!", description: "A sorte está com você hoje! 🎉", emoji: "🍀", isGood: true },
-            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "✨", isGood: true },
-            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "🌟", isGood: true },
-            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "👑", isGood: true },
-            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "⭐", isGood: true }
+            { title: "Sortudo!", description: "A sorte está com você hoje!", emoji: "+", isGood: true },
+            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "+", isGood: true },
+            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "+", isGood: true },
+            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "+", isGood: true },
+            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "+", isGood: true }
           ] :
           [
-            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar! 😏", emoji: "😅", isGood: false },
-            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "🎲", isGood: false },
-            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar! 🤭", emoji: "🌪️", isGood: false },
-            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "⚖️", isGood: false },
-            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda! 😈", emoji: "🎭", isGood: false }
+            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar!", emoji: "-", isGood: false },
+            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "-", isGood: false },
+            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar!", emoji: "-", isGood: false },
+            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "-", isGood: false },
+            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda!", emoji: "-", isGood: false }
           ];
         
         const randomResult = results[Math.floor(Math.random() * results.length)];
@@ -280,18 +251,18 @@ function App() {
         const isGoodResult = settings.sorteioBomRuim;
         const results = isGoodResult ? 
           [
-            { title: "Sortudo!", description: "A sorte está com você hoje! 🎉", emoji: "🍀", isGood: true },
-            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "✨", isGood: true },
-            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "🌟", isGood: true },
-            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "👑", isGood: true },
-            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "⭐", isGood: true }
+            { title: "Sortudo!", description: "A sorte está com você hoje!", emoji: "+", isGood: true },
+            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "+", isGood: true },
+            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "+", isGood: true },
+            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "+", isGood: true },
+            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "+", isGood: true }
           ] :
           [
-            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar! 😏", emoji: "😅", isGood: false },
-            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "🎲", isGood: false },
-            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar! 🤭", emoji: "🌪️", isGood: false },
-            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "⚖️", isGood: false },
-            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda! 😈", emoji: "🎭", isGood: false }
+            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar!", emoji: "-", isGood: false },
+            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "-", isGood: false },
+            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar!", emoji: "-", isGood: false },
+            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "-", isGood: false },
+            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda!", emoji: "-", isGood: false }
           ];
         
         const randomResult = results[Math.floor(Math.random() * results.length)];
@@ -354,7 +325,7 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <HeaderTitle>🎰 LuckyWheel</HeaderTitle>
+          <HeaderTitle>LuckyWheel</HeaderTitle>
           <HeaderMenuButton
             onClick={togglePanel}
             whileHover={{ scale: 1.05 }}
@@ -461,9 +432,6 @@ function App() {
             mode={settings.rouletteMode}
           />
           
-          <Attribution>
-            Uicons by <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener noreferrer">Flaticon</a>
-          </Attribution>
         </Container>
       </AppContainer>
     </>

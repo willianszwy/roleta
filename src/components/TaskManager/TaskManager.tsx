@@ -75,25 +75,27 @@ const DescriptionInput = styled(Input)`
 `;
 
 const AddButton = styled(motion.button)`
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-  border: none;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  border-radius: 6px;
+  color: #a5b4fc;
   padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(79, 172, 254, 0.25);
   white-space: nowrap;
+  transition: all 0.3s ease;
   
-  &:hover {
-    box-shadow: 0 4px 16px rgba(79, 172, 254, 0.35);
+  &:hover:not(:disabled) {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
   }
   
   &:disabled {
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+    background: rgba(156, 163, 175, 0.2);
+    border-color: rgba(156, 163, 175, 0.4);
+    color: rgba(156, 163, 175, 0.6);
     cursor: not-allowed;
-    box-shadow: none;
   }
 `;
 
@@ -370,39 +372,39 @@ const BulkActions = styled.div`
 const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
   background: ${props => props.variant === 'secondary' 
     ? 'rgba(255, 255, 255, 0.1)' 
-    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    : 'rgba(102, 126, 234, 0.2)'
   };
-  color: white;
   border: 1px solid ${props => props.variant === 'secondary' 
     ? 'rgba(255, 255, 255, 0.2)' 
-    : 'transparent'
+    : 'rgba(102, 126, 234, 0.4)'
+  };
+  border-radius: 6px;
+  color: ${props => props.variant === 'secondary' 
+    ? 'rgba(255, 255, 255, 0.9)' 
+    : '#a5b4fc'
   };
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: ${props => props.variant === 'secondary' 
-    ? 'none' 
-    : '0 3px 12px rgba(102, 126, 234, 0.25)'
-  };
-  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
   
-  &:hover {
+  &:hover:not(:disabled) {
     background: ${props => props.variant === 'secondary' 
       ? 'rgba(255, 255, 255, 0.15)' 
-      : 'linear-gradient(135deg, #7c8aed 0%, #8a5aa8 100%)'
+      : 'rgba(102, 126, 234, 0.3)'
     };
-    box-shadow: ${props => props.variant === 'secondary' 
-      ? 'none' 
-      : '0 4px 16px rgba(102, 126, 234, 0.35)'
+    border-color: ${props => props.variant === 'secondary' 
+      ? 'rgba(255, 255, 255, 0.3)' 
+      : 'rgba(102, 126, 234, 0.6)'
     };
   }
   
   &:disabled {
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+    background: rgba(156, 163, 175, 0.2);
+    border-color: rgba(156, 163, 175, 0.4);
+    color: rgba(156, 163, 175, 0.6);
     cursor: not-allowed;
-    box-shadow: none;
   }
 `;
 
@@ -524,7 +526,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   return (
     <>
       <Header>
-        <Title>📋 Tarefas</Title>
+        <Title>Tarefas</Title>
         {tasks.length > 0 && (
           <TaskCount>{tasks.length}</TaskCount>
         )}
@@ -545,7 +547,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            +
+            Adicionar
           </AddButton>
         </InputRow>
         <DescriptionInput
@@ -564,7 +566,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          📋 {showBulkImport ? 'Fechar' : 'Importar Lista'}
+          {showBulkImport ? 'Fechar' : 'Importar Lista'}
         </BulkButton>
       </BulkActions>
 
@@ -577,7 +579,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             transition={{ duration: 0.3 }}
           >
             <BulkImportSection>
-              <BulkTitle>📝 Importar Tarefas</BulkTitle>
+              <BulkTitle>Importar Tarefas</BulkTitle>
               <BulkTextarea
                 value={bulkValue}
                 onChange={(e) => setBulkValue(e.target.value)}
@@ -587,7 +589,7 @@ Fazer relatório | Entregar até sexta-feira
 Comprar mantimentos | Supermercado do bairro`}
               />
               <BulkHint>
-                💡 Use "Nome da tarefa | Descrição" para adicionar descrições (opcional)
+                Use "Nome da tarefa | Descrição" para adicionar descrições (opcional)
               </BulkHint>
               <BulkActions>
                 <BulkButton
@@ -596,7 +598,7 @@ Comprar mantimentos | Supermercado do bairro`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  ✅ Adicionar ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
+                  Adicionar ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
                 </BulkButton>
                 <BulkButton
                   variant="secondary"
@@ -605,7 +607,7 @@ Comprar mantimentos | Supermercado do bairro`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  🗑️ Limpar
+                  Limpar
                 </BulkButton>
               </BulkActions>
             </BulkImportSection>
@@ -617,7 +619,7 @@ Comprar mantimentos | Supermercado do bairro`}
         <AnimatePresence>
           {tasks.length === 0 ? (
             <EmptyState>
-              <EmptyIcon>📋</EmptyIcon>
+              <EmptyIcon>·</EmptyIcon>
               <EmptyText>
                 Adicione tarefas para começar o sorteio
               </EmptyText>

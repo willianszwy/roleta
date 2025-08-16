@@ -461,7 +461,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     return (
       <RouletteContainer>
         <EmptyStateContainer>
-          <EmptyStateIcon>🎯</EmptyStateIcon>
+          <EmptyStateIcon>●</EmptyStateIcon>
           <EmptyStateText>
             {participants.length === 0 && tasks.length === 0 
               ? "Adicione participantes e tarefas para começar o sorteio"
@@ -479,7 +479,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     <RouletteContainer>
       <MainContent>
         <RouletteSection>
-          <SectionTitle>👥 Quem vai fazer?</SectionTitle>
+          <SectionTitle>Quem vai fazer?</SectionTitle>
           <WheelContainer size={wheelSize}>
             {renderWheel()}
             <CenterCircle size={wheelSize} />
@@ -497,7 +497,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         </RouletteSection>
 
         <TasksSection>
-          <SectionTitle>📋 Lista de Tarefas</SectionTitle>
+          <SectionTitle>Lista de Tarefas</SectionTitle>
           <TasksList>
             {currentTask && (
               <CurrentTaskCard
@@ -544,7 +544,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                       )}
                     </TaskItemContent>
                     <TaskStatus completed={isCompleted}>
-                      {isCompleted ? '✅' : '⏳'}
+                      {isCompleted ? '✓' : '○'}
                     </TaskStatus>
                   </TaskItem>
                 );
@@ -563,7 +563,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 }}
               >
                 <div style={{ marginBottom: '1rem' }}>
-                  🎉 Todas as tarefas foram concluídas!
+                  Todas as tarefas foram concluídas!
                 </div>
                 <motion.button
                   onClick={resetTasks}
@@ -581,7 +581,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  🔄 Reiniciar Tarefas
+                  Reiniciar Tarefas
                 </motion.button>
               </motion.div>
             )}

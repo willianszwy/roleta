@@ -235,7 +235,7 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        🔄 Restaurar Padrões
+        Restaurar Padrões
       </ResetButton>
     </SettingsContainer>
   );

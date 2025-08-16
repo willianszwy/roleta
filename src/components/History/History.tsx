@@ -22,7 +22,7 @@ const Header = styled.div`
 const Title = styled.h3`
   font-size: 1.1rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -223,7 +223,7 @@ const EmptyState = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.9);
   text-align: center;
   padding: 1.5rem 1rem;
   min-height: 120px;
@@ -320,7 +320,7 @@ export const History: React.FC<HistoryProps> = ({
   return (
     <>
       <Header>
-        <Title>🏆 Histórico</Title>
+        <Title>Histórico</Title>
         {history.length > 0 && (
           <HistoryCount>{history.length}</HistoryCount>
         )}
@@ -345,7 +345,7 @@ export const History: React.FC<HistoryProps> = ({
                 >
                   <ItemContent>
                     <WinnerInfo>
-                      <Trophy>{item.removed ? '❌' : '🏆'}</Trophy>
+                      <Trophy>{item.removed ? '✗' : '✓'}</Trophy>
                       <WinnerDetails>
                         <WinnerName>{item.participantName}</WinnerName>
                         <DateTime>{formatDate(item.selectedAt)}</DateTime>
