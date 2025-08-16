@@ -265,18 +265,18 @@ export const GlobalStyles = createGlobalStyle`
 `;
 
 export const Container = styled.div`
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
   width: 100%;
   
   @media (min-width: 768px) {
-    padding: 0 2rem;
+    padding: 0 2.5rem;
   }
   
   @media (min-width: 1920px) {
-    max-width: 1600px;
-    padding: 0 3rem;
+    max-width: 1800px;
+    padding: 0 4rem;
   }
 `;
 

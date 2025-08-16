@@ -106,7 +106,7 @@ interface SettingsConfig {
   sorteioBomRuim: boolean;
   autoRemoveWinner: boolean;
   winnerDisplayDuration: number;
-  rouletteMode: 'participants' | 'prizes' | 'tasks';
+  rouletteMode: 'participants' | 'tasks';
 }
 
 interface SettingsProps {
@@ -135,18 +135,15 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
             Modalidade de Sorteio
             <Select 
               value={config.rouletteMode}
-              onChange={(e) => updateConfig('rouletteMode', e.target.value as 'participants' | 'prizes' | 'tasks')}
+              onChange={(e) => updateConfig('rouletteMode', e.target.value as 'participants' | 'tasks')}
             >
               <option value="participants">Sorteio de Pessoas</option>
-              <option value="prizes">Sorteio de Prêmios</option>
               <option value="tasks">Sorteio de Tarefas</option>
             </Select>
           </SettingLabel>
           <SettingDescription>
             {config.rouletteMode === 'participants' 
               ? "Modo tradicional: sorteia uma pessoa da lista de participantes"
-              : config.rouletteMode === 'prizes'
-              ? "Modo prêmios: sorteia uma pessoa para ganhar um prêmio específico da lista"
               : "Modo tarefas: sorteia uma pessoa para executar uma tarefa específica da lista"
             }
           </SettingDescription>

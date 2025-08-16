@@ -21,6 +21,11 @@ const RouletteContainer = styled.div`
   width: 100%;
   height: 100%;
   flex: 1;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const RouletteWrapper = styled.div`
@@ -41,6 +46,7 @@ const WheelContainer = styled.div<{ size: number }>`
     inset 0 0 30px rgba(255, 255, 255, 0.1),
     0 20px 40px rgba(0, 0, 0, 0.1);
   border: 8px solid rgba(255, 255, 255, 0.2);
+  margin: 1rem;
 `;
 
 const WheelSVG = styled(motion.svg)<{ size: number }>`

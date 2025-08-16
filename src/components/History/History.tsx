@@ -11,17 +11,6 @@ interface HistoryProps {
   onClearHistory: () => void;
 }
 
-const HistoryContainer = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.5rem;
-  padding: 1.25rem;
-  box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
-  max-height: 400px;
-  display: flex;
-  flex-direction: column;
-`;
 
 const Header = styled.div`
   display: flex;

@@ -4,11 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ParticipantManager } from '../ParticipantManager/ParticipantManager';
 import { History } from '../History/History';
 import { Settings, type SettingsConfig } from '../Settings/Settings';
-import { PrizeManager } from '../PrizeManager/PrizeManager';
-import { PrizeHistory } from '../PrizeHistory/PrizeHistory';
 import { TaskManager } from '../TaskManager/TaskManager';
 import { TaskHistory } from '../TaskHistory/TaskHistory';
-import type { Participant, RouletteHistory, Prize, PrizeHistory as PrizeHistoryType, Task, TaskHistory as TaskHistoryType } from '../../types';
+import type { Participant, RouletteHistory, Task, TaskHistory as TaskHistoryType } from '../../types';
 
 const PanelContainer = styled.div`
   position: fixed;
@@ -21,7 +19,7 @@ const PanelContainer = styled.div`
 `;
 
 const PanelContent = styled(motion.div)`
-  width: 420px;
+  width: 480px;
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(16px);
   border-left: 1px solid rgba(255, 255, 255, 0.2);
@@ -38,12 +36,12 @@ const PanelContent = styled(motion.div)`
 `;
 
 const PanelHeader = styled.div`
-  padding: 1.5rem;
+  padding: 2rem;
 `;
 
 const PanelTitle = styled.h2`
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: #fff;
   display: flex;
@@ -112,11 +110,6 @@ const NavButton = styled.button<{ active: boolean }>`
   }
 `;
 
-const PanelBody = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.5rem;
-`;
 
 const HamburgerButton = styled(motion.button)`
   width: 48px;
@@ -198,8 +191,6 @@ const CloseButton = styled.button`
 interface SidePanelProps {
   participants: Participant[];
   history: RouletteHistory[];
-  prizes?: Prize[];
-  prizeHistory?: PrizeHistoryType[];
   tasks?: Task[];
   taskHistory?: TaskHistoryType[];
   settings: SettingsConfig;
@@ -209,11 +200,6 @@ interface SidePanelProps {
   onClearParticipants: () => void;
   onRemoveFromRoulette: (participantId: string) => void;
   onClearHistory: () => void;
-  onAddPrize?: (name: string, description?: string) => void;
-  onAddPrizesBulk?: (names: string[]) => void;
-  onRemovePrize?: (id: string) => void;
-  onClearPrizes?: () => void;
-  onClearPrizeHistory?: () => void;
   onAddTask?: (name: string, description?: string) => void;
   onAddTasksBulk?: (taskLines: string[]) => void;
   onRemoveTask?: (id: string) => void;
@@ -226,8 +212,6 @@ interface SidePanelProps {
 export function SidePanel({
   participants,
   history,
-  prizes = [],
-  prizeHistory = [],
   tasks = [],
   taskHistory = [],
   settings,
@@ -237,11 +221,6 @@ export function SidePanel({
   onClearParticipants,
   onRemoveFromRoulette,
   onClearHistory,
-  onAddPrize,
-  onAddPrizesBulk,
-  onRemovePrize,
-  onClearPrizes,
-  onClearPrizeHistory,
   onAddTask,
   onAddTasksBulk,
   onRemoveTask,
@@ -251,7 +230,7 @@ export function SidePanel({
   onResetSettings,
 }: SidePanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'participants' | 'prizes' | 'tasks' | 'history' | 'prizeHistory' | 'taskHistory' | 'settings'>('participants');
+  const [activeSection, setActiveSection] = useState<'participants' | 'tasks' | 'history' | 'taskHistory' | 'settings'>('participants');
 
   const togglePanel = () => setIsOpen(!isOpen);
 
@@ -286,15 +265,6 @@ export function SidePanel({
                     <i className="fi fi-tr-users"></i>
                     <span>Participantes</span>
                   </NavButton>
-                  {settings.rouletteMode === 'prizes' && (
-                    <NavButton
-                      active={activeSection === 'prizes'}
-                      onClick={() => setActiveSection('prizes')}
-                    >
-                      <i className="fi fi-tr-gift"></i>
-                      <span>Prêmios</span>
-                    </NavButton>
-                  )}
                   {settings.rouletteMode === 'tasks' && (
                     <NavButton
                       active={activeSection === 'tasks'}
@@ -306,11 +276,9 @@ export function SidePanel({
                   )}
                   <NavButton
                     active={activeSection === (
-                      settings.rouletteMode === 'prizes' ? 'prizeHistory' : 
                       settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
                     )}
                     onClick={() => setActiveSection(
-                      settings.rouletteMode === 'prizes' ? 'prizeHistory' : 
                       settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
                     )}
                   >
@@ -345,14 +313,6 @@ export function SidePanel({
                     />
                   </div>
                 )}
-                {activeSection === 'prizeHistory' && settings.rouletteMode === 'prizes' && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <PrizeHistory
-                    prizeHistory={prizeHistory}
-                    onClearHistory={onClearPrizeHistory!}
-                  />
-                  </div>
-                )}
                 {activeSection === 'tasks' && settings.rouletteMode === 'tasks' && (
                   <div style={{ marginTop: '1.5rem' }}>
                     <TaskManager
@@ -383,17 +343,6 @@ export function SidePanel({
                 )}
               </PanelHeader>
               
-              {(activeSection === 'prizes' && settings.rouletteMode === 'prizes') && (
-                <PanelBody>
-                  <PrizeManager
-                    prizes={prizes}
-                    onAdd={onAddPrize!}
-                    onAddBulk={onAddPrizesBulk!}
-                    onRemove={onRemovePrize!}
-                    onClear={onClearPrizes!}
-                  />
-                </PanelBody>
-              )}
             </PanelContent>
           </>
         )}

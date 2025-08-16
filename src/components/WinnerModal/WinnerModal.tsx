@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import type { Participant, Prize, Task } from '../../types';
+import type { Participant, Task } from '../../types';
 
 
 const sparkleAnimation = keyframes`
@@ -65,14 +65,6 @@ const WinnerName = styled(motion.div)`
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 `;
 
-const PrizeDisplay = styled(motion.div)`
-  margin: 1.5rem 0;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%);
-  border: 2px solid rgba(240, 147, 251, 0.4);
-  border-radius: 1rem;
-  text-align: center;
-`;
 
 const TaskDisplay = styled(motion.div)`
   margin: 1.5rem 0;
@@ -83,12 +75,6 @@ const TaskDisplay = styled(motion.div)`
   text-align: center;
 `;
 
-const PrizeLabel = styled.div`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-`;
 
 const TaskLabel = styled.div`
   font-size: 1rem;
@@ -97,15 +83,6 @@ const TaskLabel = styled.div`
   font-weight: 500;
 `;
 
-const PrizeName = styled.div`
-  font-size: clamp(1.2rem, 5vw, 2rem);
-  font-weight: 700;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.5rem;
-`;
 
 const TaskName = styled.div`
   font-size: clamp(1.2rem, 5vw, 2rem);
@@ -230,12 +207,11 @@ interface SpecialResultType {
 interface WinnerModalProps {
   isOpen: boolean;
   winner: Participant | null;
-  prize?: Prize | null;
   task?: Task | null;
   specialResult: SpecialResultType | null;
   autoCloseDuration: number; // 0 = manual close
   onClose: () => void;
-  mode?: 'participants' | 'prizes' | 'tasks';
+  mode?: 'participants' | 'tasks';
 }
 
 const goodResults: Omit<SpecialResultType, 'isGood'>[] = [
@@ -257,7 +233,6 @@ const badResults: Omit<SpecialResultType, 'isGood'>[] = [
 export function WinnerModal({ 
   isOpen, 
   winner, 
-  prize,
   task,
   specialResult, 
   autoCloseDuration, 
@@ -335,9 +310,7 @@ export function WinnerModal({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {mode === 'prizes' 
-                ? "🎁 PARABÉNS! 🎁"
-                : mode === 'tasks'
+              {mode === 'tasks'
                 ? "🎯 TAREFA SORTEADA! 🎯"
                 : specialResult?.isGood ? "🎉 VENCEDOR! 🎉" : "😈 QUE AZAR! 😈"
               }
@@ -351,16 +324,6 @@ export function WinnerModal({
               {winner.name}
             </WinnerName>
 
-            {mode === 'prizes' && prize && (
-              <PrizeDisplay
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <PrizeLabel>ganhou</PrizeLabel>
-                <PrizeName>🎁 {prize.name}</PrizeName>
-              </PrizeDisplay>
-            )}
 
             {mode === 'tasks' && task && (
               <TaskDisplay
@@ -400,9 +363,7 @@ export function WinnerModal({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {mode === 'prizes' 
-                ? (specialResult?.isGood ? "🎁✨ Sortudo! ✨🎁" : "🎁😏 Azarado! 😏🎁")
-                : mode === 'tasks'
+              {mode === 'tasks'
                 ? (specialResult?.isGood ? "🎯✨ Sortudo! ✨🎯" : "🎯😏 Azarado! 😏🎯")
                 : specialResult?.isGood ? "✨ Fantástico! ✨" : "😏 Que Pena! 😏"
               }
