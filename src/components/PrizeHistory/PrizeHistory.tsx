@@ -31,7 +31,7 @@ const Header = styled.div`
 const Title = styled.h3`
   font-size: 1.1rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -42,7 +42,7 @@ const Title = styled.h3`
 `;
 
 const HistoryCount = styled.div`
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   padding: 0.2rem 0.5rem;
   border-radius: 0.5rem;
@@ -64,7 +64,7 @@ const ActionButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' |
       ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
       : props.variant === 'secondary'
       ? 'rgba(255, 255, 255, 0.1)'
-      : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   };
   color: white;
   border: 1px solid ${props => 
@@ -82,7 +82,7 @@ const ActionButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' |
       ? 'none' 
       : props.variant === 'danger'
       ? '0 3px 12px rgba(239, 68, 68, 0.25)'
-      : '0 3px 12px rgba(240, 147, 251, 0.25)'
+      : '0 3px 12px rgba(102, 126, 234, 0.25)'
   };
   backdrop-filter: blur(8px);
   white-space: nowrap;
@@ -93,14 +93,14 @@ const ActionButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' |
         ? 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
         : props.variant === 'secondary'
         ? 'rgba(255, 255, 255, 0.15)'
-        : 'linear-gradient(135deg, #f2a3fc 0%, #f6687c 100%)'
+        : 'linear-gradient(135deg, #7c8aed 0%, #8a5aa8 100%)'
     };
     box-shadow: ${props => 
       props.variant === 'secondary' 
         ? 'none' 
         : props.variant === 'danger'
         ? '0 4px 16px rgba(239, 68, 68, 0.35)'
-        : '0 4px 16px rgba(240, 147, 251, 0.35)'
+        : '0 4px 16px rgba(102, 126, 234, 0.35)'
     };
   }
   
@@ -130,7 +130,7 @@ const HistoryList = styled.div`
   }
   
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 2px;
   }
 `;
@@ -173,7 +173,7 @@ const ParticipantName = styled.div`
 const PrizeName = styled.div`
   font-size: 0.85rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -234,7 +234,7 @@ const StatItem = styled.div`
 const StatValue = styled.div`
   font-size: 1.25rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

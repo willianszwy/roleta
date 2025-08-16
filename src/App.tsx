@@ -15,12 +15,25 @@ import type { SettingsConfig } from './components/Settings/Settings';
 
 const AppContainer = styled.div`
   min-height: 100vh;
+  width: 100vw;
+  position: relative;
   background: 
-    radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(79, 172, 254, 0.1) 0%, transparent 50%);
+    radial-gradient(ellipse 150vw 80vh at 20% 30%, rgba(102, 126, 234, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 120vw 60vh at 80% 70%, rgba(139, 92, 246, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 130vw 50vh at 50% 100%, rgba(79, 172, 254, 0.08) 0%, transparent 60%),
+    linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, transparent 30%),
+    #0f0f23;
   background-attachment: fixed;
   padding: 2rem 0;
+  overflow-x: hidden;
+  
+  @media (max-width: 768px) {
+    background: 
+      radial-gradient(ellipse 200vw 50vh at 50% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 70%),
+      radial-gradient(ellipse 150vw 40vh at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+      #0f0f23;
+    background-attachment: scroll;
+  }
 `;
 
 const Header = styled(motion.header)`
@@ -32,7 +45,7 @@ const MainTitle = styled.h1`
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -48,13 +61,45 @@ const Subtitle = styled.p`
   line-height: 1.6;
 `;
 
+const Attribution = styled.div`
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+  z-index: 999;
+  
+  a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    
+    &:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    position: relative;
+    margin: 1rem auto;
+    text-align: center;
+    background: transparent;
+    backdrop-filter: none;
+  }
+`;
+
 const MainContent = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 120px);
   padding: 1rem;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
   
   @media (max-width: 768px) {
     padding: 0.5rem;
@@ -153,7 +198,7 @@ function App() {
       
       // Trigger confetti animation only if modal is disabled
       if (!settings.showWinnerModal) {
-        const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
+        const colors = ['#667eea', '#8b5cf6', '#a855f7', '#4facfe', '#00f2fe', '#3b82f6'];
         
         confetti({
           particleCount: 100,
@@ -188,7 +233,7 @@ function App() {
       
       // Trigger confetti animation only if modal is disabled
       if (!settings.showWinnerModal) {
-        const colors = ['#f093fb', '#f5576c', '#667eea', '#764ba2', '#4facfe', '#00f2fe'];
+        const colors = ['#8b5cf6', '#a855f7', '#667eea', '#4facfe', '#00f2fe', '#3b82f6'];
         
         confetti({
           particleCount: 100,
@@ -297,6 +342,10 @@ function App() {
             onClose={handleCloseWinnerModal}
             mode={settings.rouletteMode}
           />
+          
+          <Attribution>
+            Uicons by <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener noreferrer">Flaticon</a>
+          </Attribution>
         </Container>
       </AppContainer>
     </>

@@ -37,8 +37,6 @@ const PanelContent = styled(motion.div)`
 
 const PanelHeader = styled.div`
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
 `;
 
 const PanelTitle = styled.h2`
@@ -52,31 +50,63 @@ const PanelTitle = styled.h2`
 `;
 
 const MenuNav = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 0.5rem;
   margin-top: 1rem;
+  
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.25rem;
+  }
 `;
 
 const NavButton = styled.button<{ active: boolean }>`
-  flex: 1;
-  padding: 0.75rem 1rem;
-  background: ${props => props.active ? 'rgba(102, 126, 234, 0.3)' : 'rgba(255, 255, 255, 0.12)'};
-  border: 1px solid ${props => props.active ? 'rgba(102, 126, 234, 0.5)' : 'rgba(255, 255, 255, 0.25)'};
+  padding: 0.75rem 0.5rem;
+  background: ${props => props.active ? 'rgba(102, 126, 234, 0.25)' : 'rgba(255, 255, 255, 0.08)'};
+  border: 1px solid ${props => props.active ? 'rgba(102, 126, 234, 0.4)' : 'rgba(255, 255, 255, 0.15)'};
   border-radius: 8px;
-  color: ${props => props.active ? '#fff' : 'rgba(255, 255, 255, 0.85)'};
+  color: ${props => props.active ? '#a5b4fc' : 'rgba(255, 255, 255, 0.75)'};
   font-weight: ${props => props.active ? '600' : '500'};
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  text-align: center;
+  min-height: 60px;
+  white-space: nowrap;
+  
+  i {
+    font-size: 1.25rem;
+    line-height: 1;
+    color: inherit;
+  }
+  
+  span {
+    font-size: inherit;
+    line-height: 1.2;
+  }
   
   &:hover {
-    background: ${props => props.active ? 'rgba(102, 126, 234, 0.4)' : 'rgba(255, 255, 255, 0.18)'};
-    border-color: ${props => props.active ? 'rgba(102, 126, 234, 0.6)' : 'rgba(255, 255, 255, 0.35)'};
-    color: #fff;
+    background: ${props => props.active ? 'rgba(102, 126, 234, 0.35)' : 'rgba(255, 255, 255, 0.12)'};
+    border-color: ${props => props.active ? 'rgba(102, 126, 234, 0.5)' : 'rgba(255, 255, 255, 0.25)'};
+    color: ${props => props.active ? '#c7d2fe' : 'rgba(255, 255, 255, 0.9)'};
+    transform: translateY(-1px);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem;
+    min-height: 50px;
+    gap: 0.375rem;
+    
+    i {
+      font-size: 1rem;
+    }
   }
 `;
 
@@ -237,41 +267,74 @@ export function SidePanel({
                     active={activeSection === 'participants'}
                     onClick={() => setActiveSection('participants')}
                   >
-                    👥 Participantes
+                    <i className="fi fi-tr-users"></i>
+                    <span>Participantes</span>
                   </NavButton>
                   {settings.rouletteMode === 'prizes' && (
                     <NavButton
                       active={activeSection === 'prizes'}
                       onClick={() => setActiveSection('prizes')}
                     >
-                      🎁 Prêmios
+                      <i className="fi fi-tr-gift"></i>
+                      <span>Prêmios</span>
                     </NavButton>
                   )}
                   <NavButton
                     active={activeSection === (settings.rouletteMode === 'prizes' ? 'prizeHistory' : 'history')}
                     onClick={() => setActiveSection(settings.rouletteMode === 'prizes' ? 'prizeHistory' : 'history')}
                   >
-                    📊 Histórico
+                    <i className="fi fi-tr-chart-histogram"></i>
+                    <span>Histórico</span>
                   </NavButton>
                   <NavButton
                     active={activeSection === 'settings'}
                     onClick={() => setActiveSection('settings')}
                   >
-                    ⚙️ Configurações
+                    <i className="fi fi-tr-settings"></i>
+                    <span>Config</span>
                   </NavButton>
                 </MenuNav>
-              </PanelHeader>
-              
-              <PanelBody>
-                {activeSection === 'participants' ? (
-                  <ParticipantManager
+                {activeSection === 'participants' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <ParticipantManager
                     participants={participants}
                     onAdd={onAddParticipant}
                     onAddBulk={onAddParticipantsBulk}
                     onRemove={onRemoveParticipant}
                     onClear={onClearParticipants}
+                    />
+                  </div>
+                )}
+                {activeSection === 'history' && settings.rouletteMode === 'participants' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <History
+                    history={history}
+                    onRemoveFromRoulette={onRemoveFromRoulette}
+                    onClearHistory={onClearHistory}
+                    />
+                  </div>
+                )}
+                {activeSection === 'prizeHistory' && settings.rouletteMode === 'prizes' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <PrizeHistory
+                    prizeHistory={prizeHistory}
+                    onClearHistory={onClearPrizeHistory!}
                   />
-                ) : activeSection === 'prizes' && settings.rouletteMode === 'prizes' ? (
+                  </div>
+                )}
+                {activeSection === 'settings' && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <Settings
+                    config={settings}
+                    onConfigChange={onSettingsChange}
+                    onResetSettings={onResetSettings}
+                    />
+                  </div>
+                )}
+              </PanelHeader>
+              
+              {(activeSection === 'prizes' && settings.rouletteMode === 'prizes') && (
+                <PanelBody>
                   <PrizeManager
                     prizes={prizes}
                     onAdd={onAddPrize!}
@@ -279,25 +342,8 @@ export function SidePanel({
                     onRemove={onRemovePrize!}
                     onClear={onClearPrizes!}
                   />
-                ) : activeSection === 'history' && settings.rouletteMode === 'participants' ? (
-                  <History
-                    history={history}
-                    onRemoveFromRoulette={onRemoveFromRoulette}
-                    onClearHistory={onClearHistory}
-                  />
-                ) : activeSection === 'prizeHistory' && settings.rouletteMode === 'prizes' ? (
-                  <PrizeHistory
-                    prizeHistory={prizeHistory}
-                    onClearHistory={onClearPrizeHistory!}
-                  />
-                ) : (
-                  <Settings
-                    config={settings}
-                    onConfigChange={onSettingsChange}
-                    onResetSettings={onResetSettings}
-                  />
-                )}
-              </PanelBody>
+                </PanelBody>
+              )}
             </PanelContent>
           </>
         )}

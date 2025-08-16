@@ -513,7 +513,6 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
 
   return (
     <>
-      <ManagerContainer>
         <Header>
           <Title>👥 Participantes</Title>
           {participants.length > 0 && (
@@ -646,7 +645,6 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
             </MenuButton>
           </MenuContainer>
         )}
-      </ManagerContainer>
 
       {/* Portal Dropdowns */}
       {menuOpen && createPortal(

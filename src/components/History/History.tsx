@@ -330,7 +330,6 @@ export const History: React.FC<HistoryProps> = ({
 
   return (
     <>
-      <HistoryContainer>
         <Header>
           <Title>🏆 Histórico</Title>
           {history.length > 0 && (
@@ -394,7 +393,6 @@ export const History: React.FC<HistoryProps> = ({
             </MenuButton>
           </MenuContainer>
         )}
-      </HistoryContainer>
 
       {/* Portal Dropdowns */}
       {menuOpen && createPortal(

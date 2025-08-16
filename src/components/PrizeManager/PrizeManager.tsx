@@ -34,7 +34,7 @@ const Header = styled.div`
 const Title = styled.h3`
   font-size: 1.1rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -69,15 +69,15 @@ const Input = styled.input`
   
   &:focus {
     outline: none;
-    border-color: rgba(240, 147, 251, 0.4);
-    box-shadow: 0 0 0 2px rgba(240, 147, 251, 0.1);
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     background: rgba(255, 255, 255, 0.12);
     color: #111827;
   }
 `;
 
 const AddButton = styled(motion.button)`
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
   padding: 0.6rem 1rem;
@@ -85,11 +85,11 @@ const AddButton = styled(motion.button)`
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(240, 147, 251, 0.25);
+  box-shadow: 0 3px 12px rgba(79, 172, 254, 0.25);
   white-space: nowrap;
   
   &:hover {
-    box-shadow: 0 4px 16px rgba(240, 147, 251, 0.35);
+    box-shadow: 0 4px 16px rgba(79, 172, 254, 0.35);
   }
   
   &:disabled {
@@ -140,8 +140,8 @@ const BulkTextarea = styled.textarea`
   
   &:focus {
     outline: none;
-    border-color: rgba(240, 147, 251, 0.4);
-    box-shadow: 0 0 0 2px rgba(240, 147, 251, 0.1);
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     background: rgba(255, 255, 255, 0.12);
     color: #111827;
   }
@@ -156,7 +156,7 @@ const BulkActions = styled.div`
 const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
   background: ${props => props.variant === 'secondary' 
     ? 'rgba(255, 255, 255, 0.1)' 
-    : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   };
   color: white;
   border: 1px solid ${props => props.variant === 'secondary' 
@@ -170,18 +170,18 @@ const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
   cursor: pointer;
   box-shadow: ${props => props.variant === 'secondary' 
     ? 'none' 
-    : '0 3px 12px rgba(240, 147, 251, 0.25)'
+    : '0 3px 12px rgba(102, 126, 234, 0.25)'
   };
   backdrop-filter: blur(8px);
   
   &:hover {
     background: ${props => props.variant === 'secondary' 
       ? 'rgba(255, 255, 255, 0.15)' 
-      : 'linear-gradient(135deg, #f2a3fc 0%, #f6687c 100%)'
+      : 'linear-gradient(135deg, #7c8aed 0%, #8a5aa8 100%)'
     };
     box-shadow: ${props => props.variant === 'secondary' 
       ? 'none' 
-      : '0 4px 16px rgba(240, 147, 251, 0.35)'
+      : '0 4px 16px rgba(102, 126, 234, 0.35)'
     };
   }
   
@@ -218,7 +218,7 @@ const PrizesList = styled.div`
   }
   
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 2px;
   }
 `;
@@ -245,7 +245,7 @@ const PrizeCard = styled(motion.div)`
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     border-radius: 0 1px 1px 0;
   }
 `;
@@ -396,7 +396,7 @@ const EmptyText = styled.p`
 `;
 
 const PrizeCount = styled.div`
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   padding: 0.2rem 0.5rem;
   border-radius: 0.5rem;
