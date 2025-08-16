@@ -9,7 +9,8 @@
       "Bash(rm:*)",
       "WebFetch(domain:www.flaticon.com)",
       "Bash(git commit:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }

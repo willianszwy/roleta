@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Participant, Task, TaskHistory, TaskRouletteState } from '../types';
-import { generateId, getRandomColor, selectRandomParticipant } from '../utils/helpers';
+import { generateId, getRandomColor } from '../utils/helpers';
 
 const PARTICIPANTS_KEY = 'task-roulette-participants';
 const TASKS_KEY = 'task-roulette-tasks';

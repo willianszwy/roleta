@@ -12,18 +12,6 @@ interface TaskManagerProps {
   onClear: () => void;
 }
 
-const ManagerContainer = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.5rem;
-  padding: 1.25rem;
-  box-shadow: 0 6px 25px rgba(31, 38, 135, 0.25);
-  max-height: 400px;
-  display: flex;
-  flex-direction: column;
-`;
-
 const Header = styled.div`
   display: flex;
   align-items: center;
@@ -63,13 +51,13 @@ const Input = styled.input`
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.3s ease;
   
   &::placeholder {
-    color: #6b7280;
+    color: rgba(255, 255, 255, 0.6);
     font-size: 0.8rem;
   }
   
@@ -78,7 +66,7 @@ const Input = styled.input`
     border-color: rgba(102, 126, 234, 0.4);
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     background: rgba(255, 255, 255, 0.12);
-    color: #111827;
+    color: rgba(255, 255, 255, 1);
   }
 `;
 
@@ -109,49 +97,259 @@ const AddButton = styled(motion.button)`
   }
 `;
 
-const BulkToggle = styled(motion.button)`
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.8);
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+const TasksList = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+`;
+
+const TaskCard = styled(motion.div)`
+  position: relative;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.375rem;
   backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 0 1px 1px 0;
+  }
+`;
+
+const ItemContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+const TaskInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+`;
+
+const TaskColor = styled.div<{ color: string }>`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${props => props.color};
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+`;
+
+const TaskDetails = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const TaskName = styled.div`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+`;
+
+const TaskDescription = styled.div`
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.2;
+  margin-top: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const ItemMenuContainer = styled.div`
+  position: relative;
+`;
+
+const ItemMenuButton = styled(motion.button)`
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.2rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.9);
   }
 `;
 
-const BulkContainer = styled(motion.div)`
+const MenuContainer = styled.div`
+  position: relative;
+`;
+
+const MenuButton = styled(motion.button)`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 1);
+  }
+`;
+
+const PortalDropdown = styled(motion.div)<{ $top: number; $left: number }>`
+  position: fixed;
+  top: ${props => props.$top}px;
+  left: ${props => props.$left}px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  min-width: 140px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  z-index: 999999;
+`;
+
+const MenuItem = styled(motion.button)`
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  color: white;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const EmptyState = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 1.5rem 1rem;
+  min-height: 120px;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 2rem;
+  opacity: 0.6;
+`;
+
+const EmptyText = styled.p`
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.6);
+`;
+
+const TaskCount = styled.div`
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+`;
+
+const BulkImportSection = styled.div`
   margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(8px);
+`;
+
+const BulkTitle = styled.h4`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 0.75rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const BulkTextarea = styled.textarea`
   width: 100%;
-  min-height: 100px;
+  min-height: 80px;
   padding: 0.6rem 0.8rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
-  color: #1f2937;
-  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
   font-weight: 500;
-  resize: vertical;
   font-family: inherit;
-  line-height: 1.4;
+  resize: vertical;
+  transition: all 0.3s ease;
   
   &::placeholder {
-    color: #6b7280;
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
   }
   
   &:focus {
@@ -159,14 +357,14 @@ const BulkTextarea = styled.textarea`
     border-color: rgba(102, 126, 234, 0.4);
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     background: rgba(255, 255, 255, 0.12);
-    color: #111827;
+    color: rgba(255, 255, 255, 1);
   }
 `;
 
 const BulkActions = styled.div`
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 `;
 
 const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
@@ -177,11 +375,11 @@ const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
   color: white;
   border: 1px solid ${props => props.variant === 'secondary' 
     ? 'rgba(255, 255, 255, 0.2)' 
-    : 'rgba(102, 126, 234, 0.3)'
+    : 'transparent'
   };
-  padding: 0.4rem 0.8rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   box-shadow: ${props => props.variant === 'secondary' 
@@ -202,179 +400,17 @@ const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
   }
   
   &:disabled {
-    opacity: 0.5;
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
     cursor: not-allowed;
+    box-shadow: none;
   }
 `;
 
-const TasksList = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 2px;
-  }
-`;
-
-const TaskCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  backdrop-filter: blur(8px);
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    border-radius: 0 1px 1px 0;
-  }
-`;
-
-const TaskInfo = styled.div`
-  flex: 1;
-  margin-right: 0.75rem;
-`;
-
-const TaskName = styled.div`
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.25rem;
-  line-height: 1.3;
-`;
-
-const TaskDescription = styled.div`
+const BulkHint = styled.p`
   font-size: 0.75rem;
-  color: #6b7280;
-  line-height: 1.4;
-  opacity: 0.8;
-`;
-
-const TaskColor = styled.div<{ color: string }>`
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: ${props => props.color};
-  flex-shrink: 0;
-  margin-right: 0.5rem;
-  margin-top: 0.125rem;
-`;
-
-const RemoveButton = styled(motion.button)`
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
-  font-size: 0.7rem;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  
-  &:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.4);
-  }
-`;
-
-const EmptyText = styled.p`
-  text-align: center;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.85rem;
-  margin: 2rem 0;
-  font-style: italic;
-`;
-
-const TaskCount = styled.div`
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  min-width: 1.5rem;
-  text-align: center;
-`;
-
-const MenuContainer = styled.div`
-  position: relative;
-`;
-
-const MenuButton = styled(motion.button)`
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #1f2937;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(8px);
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #111827;
-  }
-`;
-
-const PortalDropdown = styled(motion.div)<{ $top: number; $left: number }>`
-  position: fixed;
-  top: ${props => props.$top}px;
-  left: ${props => props.$left}px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 40px rgba(31, 38, 135, 0.37);
-  z-index: 10000;
-  min-width: 150px;
-  overflow: hidden;
-`;
-
-const DropdownItem = styled(motion.button)`
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #1f2937;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  
-  &:hover {
-    background: rgba(102, 126, 234, 0.1);
-  }
-  
-  &:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  }
+  margin: 0.5rem 0 0 0;
+  line-height: 1.4;
 `;
 
 export const TaskManager: React.FC<TaskManagerProps> = ({
@@ -386,10 +422,12 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 }) => {
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
-  const [showBulkAdd, setShowBulkAdd] = useState(false);
-  const [bulkText, setBulkText] = useState('');
+  const [bulkValue, setBulkValue] = useState('');
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -400,35 +438,91 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     }
   };
 
-  const handleBulkSubmit = () => {
-    if (bulkText.trim()) {
-      const lines = bulkText.split('\n').filter(line => line.trim());
+  const handleBulkImport = () => {
+    if (!bulkValue.trim()) return;
+    
+    // Parse the text - split by lines
+    const lines = bulkValue
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+    
+    if (lines.length > 0) {
       onAddBulk(lines);
-      setBulkText('');
-      setShowBulkAdd(false);
+      setBulkValue('');
+      setShowBulkImport(false);
     }
   };
 
-  const handleMenuClick = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMenuPosition({
-      top: rect.bottom + window.scrollY + 5,
-      left: rect.left + window.scrollX,
-    });
-    setMenuOpen(true);
+  const handleClearBulk = () => {
+    setBulkValue('');
+  };
+
+  const handleRemove = (id: string, name: string) => {
+    if (window.confirm(`Remover tarefa "${name}"?`)) {
+      onRemove(id);
+    }
+    setOpenItemMenu(null);
+  };
+
+  const handleClear = () => {
+    if (window.confirm('Remover todas as tarefas?')) {
+      onClear();
+    }
+    setMenuOpen(false);
+  };
+
+  const toggleBulkImport = () => {
+    setShowBulkImport(!showBulkImport);
+    if (showBulkImport) {
+      setBulkValue('');
+    }
+  };
+
+  const toggleItemMenu = (itemId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (openItemMenu === itemId) {
+      setOpenItemMenu(null);
+    } else {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setItemMenuPosition({
+        top: rect.bottom + 4,
+        left: Math.max(10, rect.right - 140),
+      });
+      setOpenItemMenu(itemId);
+    }
+  };
+
+  const handleMainMenuClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (menuOpen) {
+      setMenuOpen(false);
+    } else {
+      const button = event.currentTarget as HTMLElement;
+      const rect = button.getBoundingClientRect();
+      setMenuPosition({
+        top: Math.max(10, rect.top - 70),
+        left: Math.max(10, rect.right - 140),
+      });
+      setMenuOpen(true);
+    }
   };
 
   useEffect(() => {
-    const handleClickOutside = () => setMenuOpen(false);
-    if (menuOpen) {
+    const handleClickOutside = () => {
+      setMenuOpen(false);
+      setOpenItemMenu(null);
+    };
+
+    if (menuOpen || openItemMenu) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [menuOpen]);
+  }, [menuOpen, openItemMenu]);
 
   return (
     <>
-      <ManagerContainer>
         <Header>
           <Title>📋 Tarefas</Title>
           {tasks.length > 0 && (
@@ -440,134 +534,185 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
           <InputRow>
             <Input
               type="text"
-              placeholder="Nome da tarefa..."
               value={taskName}
               onChange={(e) => setTaskName(e.target.value)}
+              placeholder="Nome da tarefa..."
+              maxLength={50}
             />
             <AddButton
               type="submit"
               disabled={!taskName.trim()}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              Adicionar
+              +
             </AddButton>
           </InputRow>
           <DescriptionInput
             type="text"
-            placeholder="Descrição (opcional)..."
             value={taskDescription}
             onChange={(e) => setTaskDescription(e.target.value)}
+            placeholder="Descrição (opcional)..."
+            maxLength={100}
           />
         </AddForm>
 
+        <BulkActions style={{ marginBottom: '1rem' }}>
+          <BulkButton
+            variant="secondary"
+            onClick={toggleBulkImport}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            📋 {showBulkImport ? 'Fechar' : 'Importar Lista'}
+          </BulkButton>
+        </BulkActions>
+
         <AnimatePresence>
-          {showBulkAdd && (
-            <BulkContainer
+          {showBulkImport && (
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <BulkTextarea
-                placeholder="Cole suas tarefas aqui, uma por linha:&#10;Tarefa 1&#10;Tarefa 2 | Descrição opcional&#10;Tarefa 3"
-                value={bulkText}
-                onChange={(e) => setBulkText(e.target.value)}
-              />
-              <BulkActions>
-                <BulkButton
-                  onClick={handleBulkSubmit}
-                  disabled={!bulkText.trim()}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Adicionar Todas
-                </BulkButton>
-                <BulkButton
-                  variant="secondary"
-                  onClick={() => setShowBulkAdd(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Cancelar
-                </BulkButton>
-              </BulkActions>
-            </BulkContainer>
+              <BulkImportSection>
+                <BulkTitle>📝 Importar Tarefas</BulkTitle>
+                <BulkTextarea
+                  value={bulkValue}
+                  onChange={(e) => setBulkValue(e.target.value)}
+                  placeholder={`Digite as tarefas, uma por linha:
+Limpar a casa
+Fazer relatório | Entregar até sexta-feira
+Comprar mantimentos | Supermercado do bairro`}
+                />
+                <BulkHint>
+                  💡 Use "Nome da tarefa | Descrição" para adicionar descrições (opcional)
+                </BulkHint>
+                <BulkActions>
+                  <BulkButton
+                    onClick={handleBulkImport}
+                    disabled={!bulkValue.trim()}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    ✅ Adicionar ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
+                  </BulkButton>
+                  <BulkButton
+                    variant="secondary"
+                    onClick={handleClearBulk}
+                    disabled={!bulkValue.trim()}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    🗑️ Limpar
+                  </BulkButton>
+                </BulkActions>
+              </BulkImportSection>
+            </motion.div>
           )}
         </AnimatePresence>
 
         <TasksList>
-          {tasks.length === 0 ? (
-            <EmptyText>Nenhuma tarefa adicionada ainda</EmptyText>
-          ) : (
-            <AnimatePresence>
-              {tasks.map((task) => (
+          <AnimatePresence>
+            {tasks.length === 0 ? (
+              <EmptyState>
+                <EmptyIcon>📋</EmptyIcon>
+                <EmptyText>
+                  Adicione tarefas para começar o sorteio
+                </EmptyText>
+              </EmptyState>
+            ) : (
+              tasks.map((task, index) => (
                 <TaskCard
                   key={task.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  layout
+                  initial={{ opacity: 0, x: -15, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 15, scale: 0.95 }}
+                  transition={{ duration: 0.25, delay: index * 0.03 }}
                 >
-                  <TaskColor color={task.color || '#667eea'} />
-                  <TaskInfo>
-                    <TaskName>{task.name}</TaskName>
-                    {task.description && (
-                      <TaskDescription>{task.description}</TaskDescription>
-                    )}
-                  </TaskInfo>
-                  <RemoveButton
-                    onClick={() => onRemove(task.id)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    ×
-                  </RemoveButton>
+                  <ItemContent>
+                    <TaskInfo>
+                      <TaskColor color={task.color || '#4facfe'} />
+                      <TaskDetails>
+                        <TaskName>{task.name}</TaskName>
+                        {task.description && (
+                          <TaskDescription>{task.description}</TaskDescription>
+                        )}
+                      </TaskDetails>
+                    </TaskInfo>
+                    
+                    <ItemMenuContainer>
+                      <ItemMenuButton
+                        onClick={(e) => toggleItemMenu(task.id, e)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        ⋮
+                      </ItemMenuButton>
+                    </ItemMenuContainer>
+                  </ItemContent>
                 </TaskCard>
-              ))}
-            </AnimatePresence>
-          )}
+              ))
+            )}
+          </AnimatePresence>
         </TasksList>
 
-        {tasks.length > 0 && (
+        {tasks.length > 1 && (
           <MenuContainer>
             <MenuButton
-              onClick={handleMenuClick}
+              onClick={handleMainMenuClick}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
             >
               Opções ⋮
             </MenuButton>
           </MenuContainer>
         )}
-      </ManagerContainer>
 
       {/* Portal Dropdowns */}
       {menuOpen && createPortal(
         <PortalDropdown
           $top={menuPosition.top}
           $left={menuPosition.left}
-          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
         >
-          <DropdownItem
-            onClick={() => {
-              setShowBulkAdd(true);
-              setMenuOpen(false);
-            }}
-            whileHover={{ x: 4 }}
+          <MenuItem
+            onClick={handleClear}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            📝 Adicionar em Lote
-          </DropdownItem>
-          <DropdownItem
+            Limpar todas
+          </MenuItem>
+        </PortalDropdown>,
+        document.body
+      )}
+
+      {openItemMenu && createPortal(
+        <PortalDropdown
+          $top={itemMenuPosition.top}
+          $left={itemMenuPosition.left}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.15 }}
+        >
+          <MenuItem
             onClick={() => {
-              onClear();
-              setMenuOpen(false);
+              const task = tasks.find(t => t.id === openItemMenu);
+              if (task) {
+                handleRemove(task.id, task.name);
+              }
             }}
-            whileHover={{ x: 4 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            🗑️ Limpar Todas
-          </DropdownItem>
+            Remover tarefa
+          </MenuItem>
         </PortalDropdown>,
         document.body
       )}

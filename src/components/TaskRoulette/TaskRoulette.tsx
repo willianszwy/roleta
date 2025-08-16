@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, Task } from '../../types';
-import { calculateRouletteRotation, getContrastColor, selectRandomParticipant } from '../../utils/helpers';
+import { getContrastColor, selectRandomParticipant } from '../../utils/helpers';
 
 interface TaskRouletteProps {
   participants: Participant[];
@@ -256,7 +256,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         if (participants.length > 0 && tasks.length > 0) {
           const selectedParticipant = selectRandomParticipant(participants);
           const selectedTask = tasks[Math.floor(Math.random() * tasks.length)];
-          onSpinComplete(selectedParticipant, selectedTask);
+          onSpinComplete(selectedParticipant || undefined, selectedTask);
         }
       }, duration);
     }

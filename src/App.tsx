@@ -7,7 +7,7 @@ import { Roulette } from './components/Roulette/Roulette';
 import { PrizeRoulette } from './components/PrizeRoulette/PrizeRoulette';
 import { TaskRoulette } from './components/TaskRoulette/TaskRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
-import { WinnerModal, generateSpecialResult, type SpecialResultType } from './components/WinnerModal/WinnerModal';
+import { WinnerModal, type SpecialResultType } from './components/WinnerModal/WinnerModal';
 import { useRoulette } from './hooks/useRoulette';
 import { usePrizeRoulette } from './hooks/usePrizeRoulette';
 import { useTaskRoulette } from './hooks/useTaskRoulette';
@@ -54,14 +54,6 @@ const MainTitle = styled.h1`
   text-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 `;
 
-const Subtitle = styled.p`
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  color: #6b7280;
-  font-weight: 500;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-`;
 
 const Attribution = styled.div`
   position: fixed;

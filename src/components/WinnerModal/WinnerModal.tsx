@@ -4,10 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import type { Participant, Prize, Task } from '../../types';
 
-const confettiAnimation = keyframes`
-  0% { transform: translateY(-100vh) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(720deg); }
-`;
 
 const sparkleAnimation = keyframes`
   0%, 100% { opacity: 0; transform: scale(0); }
