@@ -36,9 +36,14 @@ const PanelContent = styled(motion.div)`
 `;
 
 const PanelHeader = styled.div`
-  padding: 2rem 2rem 1rem 2rem;
+  padding: 5rem 2rem 1rem 2rem;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  
+  @media (max-width: 768px) {
+    padding: 5.5rem 2rem 1rem 2rem;
+  }
 `;
 
 const PanelBody = styled.div`
@@ -148,29 +153,42 @@ const Overlay = styled(motion.div)`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
+  font-weight: 400;
   transition: all 0.3s ease;
   z-index: 10;
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.2);
   
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(31, 38, 135, 0.3);
   }
   
-  @media (min-width: 769px) {
-    display: none;
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(31, 38, 135, 0.2);
+  }
+  
+  &::before {
+    content: '✕';
+    font-size: 0.9rem;
+    line-height: 1;
   }
 `;
 
@@ -238,7 +256,7 @@ export function SidePanel({
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             >
-              <CloseButton onClick={onToggle}>×</CloseButton>
+              <CloseButton onClick={onToggle}></CloseButton>
               
               <PanelHeader>
                 <MenuNav>
