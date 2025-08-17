@@ -16,8 +16,8 @@ const ModalOverlay = styled(motion.div)`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 15, 35, 0.85);
+  backdrop-filter: blur(16px);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -26,53 +26,75 @@ const ModalOverlay = styled(motion.div)`
 `;
 
 const ModalContent = styled(motion.div)`
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15) 0%, 
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 2rem;
-  padding: 3rem 2rem;
-  max-width: 500px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  max-width: 480px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   text-align: center;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+    max-width: 90vw;
+    margin: 0 auto;
+  }
 `;
 
 const WinnerTitle = styled(motion.h1)`
-  font-size: clamp(2rem, 8vw, 3.5rem);
-  font-weight: 800;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 30%, #4facfe 70%, #00f2fe 100%);
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 1rem;
-  text-shadow: 0 4px 20px rgba(240, 147, 251, 0.3);
+  line-height: 1.2;
+  word-break: break-word;
+  hyphens: auto;
 `;
 
 const WinnerName = styled(motion.div)`
-  font-size: clamp(1.5rem, 6vw, 2.5rem);
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 2rem;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  line-height: 1.3;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 
 const TaskDisplay = styled(motion.div)`
-  margin: 1.5rem 0;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%);
-  border: 2px solid rgba(79, 172, 254, 0.4);
-  border-radius: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(79, 172, 254, 0.1);
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
   text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+  }
 `;
 
 
@@ -85,13 +107,14 @@ const TaskLabel = styled.div`
 
 
 const TaskName = styled.div`
-  font-size: clamp(1.2rem, 5vw, 2rem);
-  font-weight: 700;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
+  line-height: 1.3;
+  word-break: break-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
 `;
 
 const TaskDescription = styled.div`
@@ -102,50 +125,72 @@ const TaskDescription = styled.div`
 `;
 
 const SpecialResult = styled(motion.div)<{ isGood: boolean }>`
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0.75rem;
   background: ${props => props.isGood 
-    ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%)'
-    : 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 127, 0.2) 100%)'
+    ? 'rgba(34, 197, 94, 0.1)'
+    : 'rgba(239, 68, 68, 0.1)'
   };
-  border: 2px solid ${props => props.isGood 
-    ? 'rgba(34, 197, 94, 0.4)'
-    : 'rgba(239, 68, 68, 0.4)'
+  border: 1px solid ${props => props.isGood 
+    ? 'rgba(34, 197, 94, 0.3)'
+    : 'rgba(239, 68, 68, 0.3)'
   };
+  backdrop-filter: blur(8px);
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+  }
 `;
 
 const SpecialTitle = styled.div<{ isGood: boolean }>`
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 3vw, 1.1rem);
   font-weight: 600;
-  color: ${props => props.isGood ? '#4ade80' : '#f87171'};
+  color: ${props => props.isGood 
+    ? 'rgba(34, 197, 94, 0.9)' 
+    : 'rgba(239, 68, 68, 0.9)'
+  };
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  line-height: 1.3;
+  word-break: break-word;
 `;
 
 const SpecialDescription = styled.div`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.4;
+  word-break: break-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
 `;
 
 const CloseButton = styled(motion.button)`
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  border-radius: 0.75rem;
+  color: #a5b4fc;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   margin-top: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
   
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
+    transform: translateY(-1px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -163,23 +208,41 @@ const Sparkle = styled.div<{ delay: number; x: number; y: number }>`
 
 const AutoCloseIndicator = styled(motion.div)`
   position: absolute;
-  bottom: 1rem;
+  bottom: 0.75rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    bottom: 0.5rem;
+    gap: 0.25rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.65rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 `;
 
 const CountdownBar = styled(motion.div)<{ duration: number }>`
-  width: 60px;
-  height: 4px;
+  width: 50px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   overflow: hidden;
   position: relative;
+  
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 2px;
+  }
   
   &::after {
     content: '';
@@ -310,10 +373,7 @@ export function WinnerModal({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {mode === 'tasks'
-                ? "TAREFA SORTEADA!"
-                : specialResult?.isGood ? "VENCEDOR!" : "QUE AZAR!"
-              }
+              {mode === 'tasks' ? "TAREFA SORTEADA!" : "VENCEDOR!"}
             </WinnerTitle>
 
             <WinnerName
@@ -339,21 +399,6 @@ export function WinnerModal({
               </TaskDisplay>
             )}
 
-            {specialResult && (
-              <SpecialResult
-                isGood={specialResult.isGood}
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                <SpecialTitle isGood={specialResult.isGood}>
-                  {specialResult.emoji} {specialResult.title}
-                </SpecialTitle>
-                <SpecialDescription>
-                  {specialResult.description}
-                </SpecialDescription>
-              </SpecialResult>
-            )}
 
             <CloseButton
               onClick={onClose}
@@ -363,10 +408,7 @@ export function WinnerModal({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {mode === 'tasks'
-                ? (specialResult?.isGood ? "Sortudo!" : "Azarado!")
-                : specialResult?.isGood ? "Fantástico!" : "Que Pena!"
-              }
+              Fechar
             </CloseButton>
 
             {autoCloseDuration > 0 && (
@@ -376,7 +418,7 @@ export function WinnerModal({
                 transition={{ delay: 1 }}
               >
                 <CountdownBar duration={autoCloseDuration} />
-                Fechando automaticamente
+                <span>Fechando...</span>
               </AutoCloseIndicator>
             )}
           </ModalContent>
