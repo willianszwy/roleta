@@ -50,29 +50,6 @@ const RouletteSection = styled.div`
 `;
 
 
-const CurrentTaskDisplay = styled(motion.div)`
-  text-align: center;
-  padding: 1rem 2rem;
-  background: rgba(79, 172, 254, 0.2);
-  border: 2px solid rgba(79, 172, 254, 0.4);
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const CurrentTaskLabel = styled.div`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const CurrentTaskName = styled.div`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 1);
-`;
 
 const RouletteWrapper = styled.div`
   position: relative;
@@ -245,29 +222,60 @@ const TaskList = styled.div`
   }
 `;
 
-const TaskItem = styled(motion.div)<{ isCompleted?: boolean }>`
+const TaskItem = styled(motion.div)<{ isCompleted?: boolean; isNext?: boolean }>`
   padding: 0.5rem 0.75rem;
-  background: ${props => props.isCompleted 
-    ? 'rgba(34, 197, 94, 0.1)' 
-    : 'rgba(255, 255, 255, 0.06)'
+  background: ${props => 
+    props.isCompleted 
+      ? 'rgba(34, 197, 94, 0.1)' 
+      : props.isNext 
+      ? 'rgba(102, 126, 234, 0.15)'
+      : 'rgba(255, 255, 255, 0.06)'
   };
-  border: 1px solid ${props => props.isCompleted 
-    ? 'rgba(34, 197, 94, 0.3)' 
-    : 'rgba(255, 255, 255, 0.1)'
+  border: 1px solid ${props => 
+    props.isCompleted 
+      ? 'rgba(34, 197, 94, 0.3)' 
+      : props.isNext
+      ? 'rgba(102, 126, 234, 0.4)'
+      : 'rgba(255, 255, 255, 0.1)'
   };
   border-radius: 0.5rem;
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   opacity: ${props => props.isCompleted ? 0.7 : 1};
+  position: relative;
+  
+  ${props => props.isNext && !props.isCompleted && `
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    
+    &::after {
+      content: 'PRÓXIMA';
+      position: absolute;
+      top: -2px;
+      right: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+  `}
   
   &::before {
-    content: '${props => props.isCompleted ? '✓' : '○'}';
+    content: '${props => 
+      props.isCompleted ? '✓' : 
+      props.isNext ? '▶' : '○'
+    }';
     margin-right: 0.5rem;
     font-size: 0.75rem;
-    color: ${props => props.isCompleted 
-      ? 'rgba(34, 197, 94, 0.8)' 
-      : 'rgba(255, 255, 255, 0.6)'
+    color: ${props => 
+      props.isCompleted 
+        ? 'rgba(34, 197, 94, 0.8)' 
+        : props.isNext
+        ? 'rgba(102, 126, 234, 0.9)'
+        : 'rgba(255, 255, 255, 0.6)'
     };
   }
 `;
@@ -277,6 +285,15 @@ const TaskName = styled.div<{ isCompleted?: boolean }>`
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   text-decoration: ${props => props.isCompleted ? 'line-through' : 'none'};
+  flex: 1;
+`;
+
+const TaskAssignee = styled.div`
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  margin-left: 0.5rem;
+  font-style: italic;
 `;
 
 const EmptyState = styled.div`
@@ -296,42 +313,6 @@ const EmptyStateText = styled.p`
 `;
 
 
-const ResultDisplay = styled(motion.div)`
-  text-align: center;
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: rgba(102, 126, 234, 0.1);
-  border: 2px solid rgba(102, 126, 234, 0.3);
-  border-radius: 1rem;
-  backdrop-filter: blur(10px);
-`;
-
-const WinnerText = styled.h2`
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-`;
-
-const WinnerName = styled.h1`
-  font-size: 2rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 4px 20px rgba(240, 147, 251, 0.3);
-  margin-bottom: 0.5rem;
-`;
-
-const AssignedTaskText = styled.div`
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-`;
 
 
 function createSegmentPath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): string {
@@ -458,16 +439,6 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   return (
     <RouletteContainer>
       <RouletteSection>
-        {currentTask && (
-          <CurrentTaskDisplay
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            key={currentTask.id}
-          >
-            <CurrentTaskLabel>Próxima Tarefa</CurrentTaskLabel>
-            <CurrentTaskName>{currentTask.name}</CurrentTaskName>
-          </CurrentTaskDisplay>
-        )}
 
         <RouletteWrapper>
           <RoulettePointer size={wheelSize} />
@@ -531,27 +502,13 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
           {isSpinning ? 'Sorteando...' : currentTask ? 'Sortear Responsável' : 'Sem tarefas'}
         </SpinButton>
 
-        <AnimatePresence>
-          {selectedParticipant && selectedTask && !isSpinning && (
-            <ResultDisplay
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.8 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <WinnerText>Responsável Sorteado</WinnerText>
-              <WinnerName>{selectedParticipant.name}</WinnerName>
-              <AssignedTaskText>irá fazer: {selectedTask.name}</AssignedTaskText>
-            </ResultDisplay>
-          )}
-        </AnimatePresence>
       </RouletteSection>
 
       <TaskSidebar>
         <TaskSidebarTitle>Lista de Tarefas</TaskSidebarTitle>
         
         <TaskCounter>
-          {pendingTasks.length} pendente{pendingTasks.length !== 1 ? 's' : ''} • {completedTasks.length} concluída{completedTasks.length !== 1 ? 's' : ''}
+          {pendingTasks.length} aguardando • {completedTasks.length} sorteada{completedTasks.length !== 1 ? 's' : ''}
         </TaskCounter>
 
         <TaskList>
@@ -560,6 +517,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
               <TaskItem
                 key={task.id}
                 isCompleted={false}
+                isNext={index === 0}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
@@ -568,18 +526,23 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 <TaskName isCompleted={false}>{task.name}</TaskName>
               </TaskItem>
             ))}
-            {completedTasks.map((task, index) => (
-              <TaskItem
-                key={`completed-${task.id}`}
-                isCompleted={true}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ delay: (pendingTasks.length + index) * 0.05 }}
-              >
-                <TaskName isCompleted={true}>{task.name}</TaskName>
-              </TaskItem>
-            ))}
+            {completedTasks.map((task, index) => {
+              const assignee = taskHistory.find(history => history.taskId === task.id);
+              return (
+                <TaskItem
+                  key={`completed-${task.id}`}
+                  isCompleted={true}
+                  isNext={false}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ delay: (pendingTasks.length + index) * 0.05 }}
+                >
+                  <TaskName isCompleted={true}>{task.name}</TaskName>
+                  {assignee && <TaskAssignee>→ {assignee.participantName}</TaskAssignee>}
+                </TaskItem>
+              );
+            })}
           </AnimatePresence>
         </TaskList>
       </TaskSidebar>
