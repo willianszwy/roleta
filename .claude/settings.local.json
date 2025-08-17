@@ -17,7 +17,8 @@
       "Bash(npx playwright:*)",
       "Bash(npm run test:e2e:*)",
       "Bash(npm uninstall:*)",
-      "Bash(del /s /q \"playwright-report\")"
+      "Bash(del /s /q \"playwright-report\")",
+      "Bash(npm run test:*)"
     ],
     "deny": []
   }
