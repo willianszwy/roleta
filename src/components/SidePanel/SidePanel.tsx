@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ParticipantManager } from '../ParticipantManager/ParticipantManager';
-import { History } from '../History/History';
-import { Settings, type SettingsConfig } from '../Settings/Settings';
-import { TaskManager } from '../TaskManager/TaskManager';
-import { TaskHistory } from '../TaskHistory/TaskHistory';
 import type { Participant, RouletteHistory, Task, TaskHistory as TaskHistoryType } from '../../types';
+import type { SettingsConfig } from '../Settings/Settings';
+import { Loading } from '../Loading/Loading';
+
+// Lazy load components that are not immediately visible
+const ParticipantManager = lazy(() => import('../ParticipantManager/ParticipantManager').then(module => ({ default: module.ParticipantManager })));
+const History = lazy(() => import('../History/History').then(module => ({ default: module.History })));
+const Settings = lazy(() => import('../Settings/Settings').then(module => ({ default: module.Settings })));
+const TaskManager = lazy(() => import('../TaskManager/TaskManager').then(module => ({ default: module.TaskManager })));
+const TaskHistory = lazy(() => import('../TaskHistory/TaskHistory').then(module => ({ default: module.TaskHistory })));
 
 const PanelContainer = styled.div`
   position: fixed;
@@ -296,54 +300,56 @@ export function SidePanel({
               </PanelHeader>
               
               <PanelBody>
-                {activeSection === 'participants' && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <ParticipantManager
-                    participants={participants}
-                    onAdd={onAddParticipant}
-                    onAddBulk={onAddParticipantsBulk}
-                    onRemove={onRemoveParticipant}
-                    onClear={onClearParticipants}
-                    />
-                  </div>
-                )}
-                {activeSection === 'history' && settings.rouletteMode === 'participants' && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <History
-                    history={history}
-                    onRemoveFromRoulette={onRemoveFromRoulette}
-                    onClearHistory={onClearHistory}
-                    />
-                  </div>
-                )}
-                {activeSection === 'tasks' && settings.rouletteMode === 'tasks' && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <TaskManager
-                    tasks={tasks}
-                    onAdd={onAddTask!}
-                    onAddBulk={onAddTasksBulk!}
-                    onRemove={onRemoveTask!}
-                    onClear={onClearTasks!}
-                    />
-                  </div>
-                )}
-                {activeSection === 'taskHistory' && settings.rouletteMode === 'tasks' && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <TaskHistory
-                    taskHistory={taskHistory}
-                    onClearHistory={onClearTaskHistory!}
-                    />
-                  </div>
-                )}
-                {activeSection === 'settings' && (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <Settings
-                    config={settings}
-                    onConfigChange={onSettingsChange}
-                    onResetSettings={onResetSettings}
-                    />
-                  </div>
-                )}
+                <Suspense fallback={<Loading text="Carregando seção..." />}>
+                  {activeSection === 'participants' && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <ParticipantManager
+                      participants={participants}
+                      onAdd={onAddParticipant}
+                      onAddBulk={onAddParticipantsBulk}
+                      onRemove={onRemoveParticipant}
+                      onClear={onClearParticipants}
+                      />
+                    </div>
+                  )}
+                  {activeSection === 'history' && settings.rouletteMode === 'participants' && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <History
+                      history={history}
+                      onRemoveFromRoulette={onRemoveFromRoulette}
+                      onClearHistory={onClearHistory}
+                      />
+                    </div>
+                  )}
+                  {activeSection === 'tasks' && settings.rouletteMode === 'tasks' && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <TaskManager
+                      tasks={tasks}
+                      onAdd={onAddTask!}
+                      onAddBulk={onAddTasksBulk!}
+                      onRemove={onRemoveTask!}
+                      onClear={onClearTasks!}
+                      />
+                    </div>
+                  )}
+                  {activeSection === 'taskHistory' && settings.rouletteMode === 'tasks' && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <TaskHistory
+                      taskHistory={taskHistory}
+                      onClearHistory={onClearTaskHistory!}
+                      />
+                    </div>
+                  )}
+                  {activeSection === 'settings' && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <Settings
+                      config={settings}
+                      onConfigChange={onSettingsChange}
+                      onResetSettings={onResetSettings}
+                      />
+                    </div>
+                  )}
+                </Suspense>
               </PanelBody>
               
             </PanelContent>

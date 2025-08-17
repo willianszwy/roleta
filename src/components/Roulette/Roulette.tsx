@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
@@ -203,7 +203,7 @@ function createSegmentPath(centerX: number, centerY: number, radius: number, sta
   return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 }
 
-export const Roulette: React.FC<RouletteProps> = ({
+export const Roulette: React.FC<RouletteProps> = React.memo(({
   participants,
   isSpinning,
   selectedParticipant,
@@ -404,4 +404,4 @@ export const Roulette: React.FC<RouletteProps> = ({
       </AnimatePresence>
     </RouletteContainer>
   );
-};
+});

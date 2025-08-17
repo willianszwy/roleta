@@ -397,7 +397,7 @@ const BulkHint = styled.p`
   line-height: 1.4;
 `;
 
-export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
+export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(({
   participants,
   onAdd,
   onAddBulk,
@@ -685,4 +685,4 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
       )}
     </>
   );
-};
+});
