@@ -628,6 +628,7 @@ Comprar mantimentos | Supermercado do bairro`}
             tasks.map((task, index) => (
               <TaskCard
                 key={task.id}
+                data-testid="task-item"
                 initial={{ opacity: 0, x: -15, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 15, scale: 0.95 }}

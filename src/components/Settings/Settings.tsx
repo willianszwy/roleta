@@ -116,7 +116,7 @@ interface SettingsProps {
 }
 
 export function Settings({ config, onConfigChange, onResetSettings }: SettingsProps) {
-  const updateConfig = (key: keyof SettingsConfig, value: any) => {
+  const updateConfig = (key: keyof SettingsConfig, value: SettingsConfig[keyof SettingsConfig]) => {
     onConfigChange({
       ...config,
       [key]: value

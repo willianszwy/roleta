@@ -1,9 +1,8 @@
-import { useReducer, useEffect, useCallback, useMemo } from 'react';
+import { useReducer, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { RouletteContext } from './RouletteContext';
 import type { RouletteState, RouletteActions } from './RouletteContext';
 import { rouletteReducer } from './RouletteReducer';
-import { selectRandomParticipant } from '../utils/helpers';
 import type { Participant, Task } from '../types';
 
 // Storage keys

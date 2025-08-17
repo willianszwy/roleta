@@ -79,7 +79,7 @@ function getOptimalColorSequence(count: number): string[] {
 function distributeColorsEvenly(count: number): string[] {
   const colors: string[] = [];
   const step = Math.floor(ROULETTE_COLORS.length / count);
-  let startIndex = 0;
+  const startIndex = 0;
   
   for (let i = 0; i < count; i++) {
     const colorIndex = (startIndex + i * step) % ROULETTE_COLORS.length;
@@ -185,7 +185,7 @@ export function formatTime(date: Date): string {
   }).format(date);
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

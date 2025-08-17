@@ -242,7 +242,7 @@ export function SidePanel({
   const [activeSection, setActiveSection] = useState<'participants' | 'tasks' | 'history' | 'taskHistory' | 'settings'>('participants');
 
   return (
-    <PanelContainer>
+    <PanelContainer data-testid="side-panel">
       <AnimatePresence>
         {isOpen && (
           <>

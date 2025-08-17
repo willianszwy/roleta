@@ -595,6 +595,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
             participants.map((participant, index) => (
               <ParticipantCard
                 key={participant.id}
+                data-testid="participant-item"
                 initial={{ opacity: 0, x: -15, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 15, scale: 0.95 }}

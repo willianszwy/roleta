@@ -26,7 +26,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
 export function useLocalStorageWithDate<T>(
   key: string, 
   initialValue: T,
-  reviver?: (key: string, value: any) => any
+  reviver?: (key: string, value: unknown) => unknown
 ): [T, (value: T) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
