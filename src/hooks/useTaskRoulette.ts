@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Participant, Task, TaskHistory, TaskRouletteState } from '../types';
-import { generateId, getRandomColor } from '../utils/helpers';
+import { generateId, getRandomColor, selectRandomParticipant } from '../utils/helpers';
 
 const PARTICIPANTS_KEY = 'task-roulette-participants';
 const TASKS_KEY = 'task-roulette-tasks';
@@ -142,13 +142,29 @@ export function useTaskRoulette() {
     setTaskHistory([]);
   }, []);
 
-  const spinTaskRoulette = useCallback(() => {
-    if (participants.length === 0 || tasks.length === 0 || isSpinning) return;
+  const getCurrentTask = useCallback(() => {
+    const pendingTasks = tasks.filter(task => 
+      !taskHistory.some(history => history.taskId === task.id)
+    );
+    return pendingTasks.length > 0 ? pendingTasks[0] : null;
+  }, [tasks, taskHistory]);
+
+  const spinTaskRoulette = useCallback(async (): Promise<{ participant: Participant; task: Task } | null> => {
+    if (participants.length === 0 || tasks.length === 0 || isSpinning) return null;
+
+    const currentTask = getCurrentTask();
+    if (!currentTask) return null;
 
     setIsSpinning(true);
     setSelectedParticipant(undefined);
     setSelectedTask(undefined);
-  }, [participants.length, tasks.length, isSpinning]);
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const selectedParticipant = selectRandomParticipant(participants);
+    
+    return { participant: selectedParticipant, task: currentTask };
+  }, [participants, tasks, isSpinning, getCurrentTask]);
 
   const finishTaskSpin = useCallback((selectedParticipant?: Participant, selectedTask?: Task) => {
     setIsSpinning(false);
@@ -194,6 +210,7 @@ export function useTaskRoulette() {
     clearTaskHistory,
     spinTaskRoulette,
     finishTaskSpin,
+    getCurrentTask,
   };
 
   return { state, actions };

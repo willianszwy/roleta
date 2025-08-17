@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
 import { formatDate } from '../../utils/helpers';
 
@@ -80,7 +80,7 @@ const HistoryList = styled.div`
   }
 `;
 
-const HistoryItem = styled(motion.div)<{ removed?: boolean }>`
+const HistoryItem = styled.div<{ removed?: boolean }>`
   position: relative;
   padding: 0.5rem;
   background: ${props => props.removed 
@@ -251,6 +251,8 @@ const HistoryCount = styled.div`
   text-align: center;
 `;
 
+const MAX_ITEMS = 10;
+
 export const History: React.FC<HistoryProps> = ({
   history,
   onRemoveFromRoulette,
@@ -260,6 +262,12 @@ export const History: React.FC<HistoryProps> = ({
   const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
+
+  // Limit items to improve performance
+  const displayedHistory = useMemo(() => 
+    history.slice(0, MAX_ITEMS), 
+    [history]
+  );
 
   const handleRemoveFromRoulette = (participantId: string, participantName: string) => {
     if (window.confirm(`Remover "${participantName}" da roleta?`)) {
@@ -327,47 +335,54 @@ export const History: React.FC<HistoryProps> = ({
       </Header>
 
       <HistoryList>
-          <AnimatePresence>
-            {history.length === 0 ? (
-              <EmptyState>
-                <EmptyIcon>📜</EmptyIcon>
-                <EmptyText>Nenhum sorteio realizado ainda</EmptyText>
-              </EmptyState>
-            ) : (
-              history.slice(0, 15).map((item, index) => (
-                <HistoryItem
-                  key={item.id}
-                  removed={item.removed}
-                  initial={{ opacity: 0, x: -15, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 15, scale: 0.95 }}
-                  transition={{ duration: 0.25, delay: index * 0.02 }}
-                >
-                  <ItemContent>
-                    <WinnerInfo>
-                      <Trophy>{item.removed ? '✗' : '✓'}</Trophy>
-                      <WinnerDetails>
-                        <WinnerName>{item.participantName}</WinnerName>
-                        <DateTime>{formatDate(item.selectedAt)}</DateTime>
-                      </WinnerDetails>
-                    </WinnerInfo>
-                    
-                    <ItemMenuContainer>
-                      <ItemMenuButton
-                        removed={item.removed}
-                        disabled={item.removed}
-                        onClick={(e) => toggleItemMenu(item.id, e)}
-                        whileHover={!item.removed ? { scale: 1.1 } : {}}
-                        whileTap={!item.removed ? { scale: 0.9 } : {}}
-                      >
-                        ⋮
-                      </ItemMenuButton>
-                    </ItemMenuContainer>
-                  </ItemContent>
-                </HistoryItem>
-              ))
-            )}
-        </AnimatePresence>
+        {history.length === 0 ? (
+          <EmptyState>
+            <EmptyIcon>📜</EmptyIcon>
+            <EmptyText>Nenhum sorteio realizado ainda</EmptyText>
+          </EmptyState>
+        ) : (
+          displayedHistory.map((item) => (
+            <HistoryItem
+              key={item.id}
+              removed={item.removed}
+            >
+              <ItemContent>
+                <WinnerInfo>
+                  <Trophy>{item.removed ? '✗' : '✓'}</Trophy>
+                  <WinnerDetails>
+                    <WinnerName>{item.participantName}</WinnerName>
+                    <DateTime>{formatDate(item.selectedAt)}</DateTime>
+                  </WinnerDetails>
+                </WinnerInfo>
+                
+                <ItemMenuContainer>
+                  <ItemMenuButton
+                    removed={item.removed}
+                    disabled={item.removed}
+                    onClick={(e) => toggleItemMenu(item.id, e)}
+                    whileHover={!item.removed ? { scale: 1.1 } : {}}
+                    whileTap={!item.removed ? { scale: 0.9 } : {}}
+                  >
+                    ⋮
+                  </ItemMenuButton>
+                </ItemMenuContainer>
+              </ItemContent>
+            </HistoryItem>
+          ))
+        )}
+        
+        {history.length > MAX_ITEMS && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '0.5rem', 
+            fontSize: '0.75rem', 
+            color: 'rgba(255, 255, 255, 0.6)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: '0.5rem'
+          }}>
+            Mostrando {MAX_ITEMS} de {history.length} itens
+          </div>
+        )}
       </HistoryList>
 
       {history.length > 0 && (

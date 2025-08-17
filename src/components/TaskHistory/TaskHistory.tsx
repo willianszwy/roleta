@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import type { TaskHistory as TaskHistoryType } from '../../types';
@@ -122,7 +122,7 @@ const HistoryList = styled.div`
   }
 `;
 
-const HistoryItem = styled(motion.div)`
+const HistoryItem = styled.div`
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
@@ -230,6 +230,50 @@ const StatLabel = styled.div`
   font-weight: 600;
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
+`;
+
+const PaginationButton = styled(motion.button)`
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  border-radius: 6px;
+  color: #a5b4fc;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover:not(:disabled) {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
+  }
+  
+  &:disabled {
+    background: rgba(156, 163, 175, 0.2);
+    border-color: rgba(156, 163, 175, 0.4);
+    color: rgba(156, 163, 175, 0.6);
+    cursor: not-allowed;
+  }
+`;
+
+const PaginationInfo = styled.div`
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.3;
+`;
+
 function formatDate(date: Date): string {
   return date.toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -245,11 +289,13 @@ function formatTime(date: Date): string {
   });
 }
 
+const ITEMS_PER_PAGE = 20;
+
 export const TaskHistory: React.FC<TaskHistoryProps> = ({
   taskHistory,
   onClearHistory,
 }) => {
-  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const handleClear = () => {
     if (window.confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
@@ -259,13 +305,25 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
 
   const handleExport = (format: 'csv' | 'json') => {
     exportTaskHistory(taskHistory, format);
-    setShowExportDropdown(false);
   };
 
-  // Calculate stats
-  const totalAssignments = taskHistory.length;
-  const uniqueParticipants = new Set(taskHistory.map(h => h.participantId)).size;
-  const uniqueTasks = new Set(taskHistory.map(h => h.taskId)).size;
+  // Memoize calculations to avoid recalculating on every render
+  const stats = useMemo(() => {
+    const totalAssignments = taskHistory.length;
+    const uniqueParticipants = new Set(taskHistory.map(h => h.participantId)).size;
+    const uniqueTasks = new Set(taskHistory.map(h => h.taskId)).size;
+    
+    return { totalAssignments, uniqueParticipants, uniqueTasks };
+  }, [taskHistory]);
+
+  // Paginated items
+  const paginatedItems = useMemo(() => {
+    const startIndex = currentPage * ITEMS_PER_PAGE;
+    return taskHistory.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [taskHistory, currentPage]);
+
+  const totalPages = Math.ceil(taskHistory.length / ITEMS_PER_PAGE);
+  const hasMorePages = totalPages > 1;
 
   if (taskHistory.length === 0) {
     return (
@@ -287,20 +345,20 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
     <>
       <Header>
         <Title>Histórico de Tarefas</Title>
-        <HistoryCount>{totalAssignments}</HistoryCount>
+        <HistoryCount>{stats.totalAssignments}</HistoryCount>
       </Header>
 
       <StatsContainer>
         <StatItem>
-          <StatValue>{totalAssignments}</StatValue>
+          <StatValue>{stats.totalAssignments}</StatValue>
           <StatLabel>Sorteios</StatLabel>
         </StatItem>
         <StatItem>
-          <StatValue>{uniqueParticipants}</StatValue>
+          <StatValue>{stats.uniqueParticipants}</StatValue>
           <StatLabel>Pessoas</StatLabel>
         </StatItem>
         <StatItem>
-          <StatValue>{uniqueTasks}</StatValue>
+          <StatValue>{stats.uniqueTasks}</StatValue>
           <StatLabel>Tarefas</StatLabel>
         </StatItem>
       </StatsContainer>
@@ -331,15 +389,34 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
         </ActionButton>
       </ActionsContainer>
 
-      <HistoryList>
-        {taskHistory.map((item) => (
-          <HistoryItem
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            layout
+      {hasMorePages && (
+        <PaginationContainer>
+          <PaginationButton
+            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+            disabled={currentPage === 0}
           >
+            ← Anterior
+          </PaginationButton>
+          
+          <PaginationInfo>
+            Página {currentPage + 1} de {totalPages} 
+            <span style={{ opacity: 0.7, fontSize: '0.7rem' }}>
+              ({paginatedItems.length} de {taskHistory.length} itens)
+            </span>
+          </PaginationInfo>
+          
+          <PaginationButton
+            onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+            disabled={currentPage >= totalPages - 1}
+          >
+            Próxima →
+          </PaginationButton>
+        </PaginationContainer>
+      )}
+
+      <HistoryList>
+        {paginatedItems.map((item) => (
+          <HistoryItem key={item.id}>
             <ItemHeader>
               <div>
                 <ParticipantName>{item.participantName}</ParticipantName>

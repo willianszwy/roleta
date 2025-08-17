@@ -1,39 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Participant, Task } from '../../types';
+import type { Participant, Task, TaskHistory } from '../../types';
 import { calculateRouletteRotation, getContrastColor } from '../../utils/helpers';
 
 interface TaskRouletteProps {
   participants: Participant[];
   tasks: Task[];
+  taskHistory: TaskHistory[];
   isSpinning: boolean;
-  onSpin: () => void;
+  selectedParticipant?: Participant;
+  selectedTask?: Task;
+  currentTask?: Task;
+  onSpin: () => Promise<{ participant: Participant; task: Task } | null>;
   onSpinComplete: (participant?: Participant, task?: Task) => void;
 }
 
 const RouletteContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 400px;
   gap: 2rem;
   width: 100%;
   height: 100%;
   flex: 1;
   padding: 2rem;
   
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+  }
+  
   @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
     padding: 1rem;
   }
 `;
 
-const WheelSection = styled.div`
+const RouletteSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    gap: 1.5rem;
+  }
 `;
+
 
 const CurrentTaskDisplay = styled(motion.div)`
   text-align: center;
@@ -172,19 +187,38 @@ const SpinButton = styled(motion.button)<{ disabled: boolean }>`
   }
 `;
 
-const TaskListSection = styled.div`
-  width: 100%;
-  max-width: 600px;
-  margin-top: 2rem;
+const TaskSidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  height: fit-content;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+`;
+
+const TaskSidebarTitle = styled.h3`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
 const TaskCounter = styled.div`
   text-align: center;
-  padding: 1rem;
+  padding: 0.75rem;
   background: rgba(79, 172, 254, 0.1);
   border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
 `;
@@ -192,12 +226,9 @@ const TaskCounter = styled.div`
 const TaskList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  max-height: 300px;
+  gap: 0.5rem;
+  max-height: 400px;
   overflow-y: auto;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.5rem;
   
   &::-webkit-scrollbar {
     width: 4px;
@@ -214,29 +245,38 @@ const TaskList = styled.div`
   }
 `;
 
-const TaskItem = styled(motion.div)`
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+const TaskItem = styled(motion.div)<{ isCompleted?: boolean }>`
+  padding: 0.5rem 0.75rem;
+  background: ${props => props.isCompleted 
+    ? 'rgba(34, 197, 94, 0.1)' 
+    : 'rgba(255, 255, 255, 0.06)'
+  };
+  border: 1px solid ${props => props.isCompleted 
+    ? 'rgba(34, 197, 94, 0.3)' 
+    : 'rgba(255, 255, 255, 0.1)'
+  };
   border-radius: 0.5rem;
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
+  opacity: ${props => props.isCompleted ? 0.7 : 1};
   
   &::before {
-    content: '';
-    width: 3px;
-    height: 100%;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    border-radius: 1.5px;
-    margin-right: 0.75rem;
+    content: '${props => props.isCompleted ? '✓' : '○'}';
+    margin-right: 0.5rem;
+    font-size: 0.75rem;
+    color: ${props => props.isCompleted 
+      ? 'rgba(34, 197, 94, 0.8)' 
+      : 'rgba(255, 255, 255, 0.6)'
+    };
   }
 `;
 
-const TaskName = styled.div`
-  font-size: 0.9rem;
+const TaskName = styled.div<{ isCompleted?: boolean }>`
+  font-size: 0.85rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
+  text-decoration: ${props => props.isCompleted ? 'line-through' : 'none'};
 `;
 
 const EmptyState = styled.div`
@@ -255,53 +295,42 @@ const EmptyStateText = styled.p`
   margin: 0;
 `;
 
-const EmptyWheel = styled.div<{ size: number }>`
-  width: ${props => props.size}px;
-  height: ${props => props.size}px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6b7280;
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-align: center;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-`;
 
-const CompletionMessage = styled(motion.div)`
+const ResultDisplay = styled(motion.div)`
   text-align: center;
-  padding: 2rem;
-  background: rgba(34, 197, 94, 0.1);
-  border: 2px solid rgba(34, 197, 94, 0.3);
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px solid rgba(102, 126, 234, 0.3);
   border-radius: 1rem;
-  margin-top: 2rem;
+  backdrop-filter: blur(10px);
 `;
 
-const CompletionTitle = styled.div`
-  font-size: 1.25rem;
+const WinnerText = styled.h2`
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #4ade80;
-  margin-bottom: 1rem;
 `;
 
-const ResetButton = styled(motion.button)`
-  background: rgba(102, 126, 234, 0.2);
-  border: 1px solid rgba(102, 126, 234, 0.4);
-  border-radius: 6px;
-  color: #a5b4fc;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: rgba(102, 126, 234, 0.3);
-    border-color: rgba(102, 126, 234, 0.6);
-  }
+const WinnerName = styled.h1`
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 20px rgba(240, 147, 251, 0.3);
+  margin-bottom: 0.5rem;
+`;
+
+const AssignedTaskText = styled.div`
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
 `;
 
 const colors = [
@@ -325,39 +354,41 @@ function createSegmentPath(centerX: number, centerY: number, radius: number, sta
 export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   participants,
   tasks,
+  taskHistory,
   isSpinning,
+  selectedParticipant,
+  selectedTask,
+  currentTask,
   onSpin,
   onSpinComplete,
 }) => {
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
-  const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
 
-  // Responsive wheel sizing
   useEffect(() => {
     const updateSize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
       
+      // Calculate size for grid layout - smaller than single column
       const availableHeight = height - 180;
-      const availableWidth = width - 60;
+      const availableWidth = (width * 0.6) - 60; // 60% of screen width minus padding
       
       const maxSize = Math.min(
         availableWidth * 0.9,
-        availableHeight * 0.75,
-        800
+        availableHeight * 0.8,
+        500 // Reduced max size for two-column layout
       );
       
       let minSize;
       if (width < 480) {
-        minSize = 300;
+        minSize = 280;
       } else if (width < 768) {
-        minSize = 350;
+        minSize = 320;
       } else if (width < 1024) {
-        minSize = 420;
+        minSize = 350;
       } else {
-        minSize = 480;
+        minSize = 400;
       }
       
       setWheelSize(Math.max(minSize, maxSize));
@@ -368,22 +399,13 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Set current task when tasks change
-  useEffect(() => {
-    if (!currentTask) {
-      const availableTasks = tasks.filter(task => !completedTasks.includes(task.id));
-      const nextTask = availableTasks.length > 0 ? availableTasks[0] : null;
-      setCurrentTask(nextTask);
-    }
-  }, [tasks, completedTasks, currentTask]);
+  const handleSpin = async () => {
+    if (participants.length === 0 || !currentTask || isSpinning) return;
 
-  // Handle spinning logic
-  useEffect(() => {
-    if (isSpinning && currentTask && participants.length > 0) {
-      // Select random participant
-      const selectedParticipant = participants[Math.floor(Math.random() * participants.length)];
-      const selectedIndex = participants.findIndex(p => p.id === selectedParticipant.id);
-      
+    const result = await onSpin();
+    
+    if (result) {
+      const selectedIndex = participants.findIndex(p => p.id === result.participant.id);
       const duration = 4.5;
       const extraRotations = 6;
       
@@ -392,59 +414,35 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
       setRotation(newRotation);
       
       setTimeout(() => {
-        // Complete the current task
-        setCompletedTasks(prev => [...prev, currentTask.id]);
-        
-        // Move to next task
-        const remainingTasks = tasks.filter(task => !completedTasks.includes(task.id) && task.id !== currentTask.id);
-        const nextTask = remainingTasks.length > 0 ? remainingTasks[0] : null;
-        setCurrentTask(nextTask);
-        
-        onSpinComplete(selectedParticipant, currentTask);
+        onSpinComplete(result.participant, result.task);
       }, duration * 1000);
     }
-  }, [isSpinning, participants, currentTask, onSpinComplete, tasks, completedTasks, rotation]);
-
-  const handleSpin = () => {
-    if (!isSpinning && participants.length > 0 && currentTask) {
-      onSpin();
-    }
   };
-
-  const resetTasks = () => {
-    setCompletedTasks([]);
-    setCurrentTask(tasks.length > 0 ? tasks[0] : null);
-  };
-
-  const availableTasks = tasks.filter(task => !completedTasks.includes(task.id));
-  const allTasksCompleted = availableTasks.length === 0 && tasks.length > 0;
 
   if (participants.length === 0 || tasks.length === 0) {
     return (
       <RouletteContainer>
-        <EmptyState>
-          <EmptyStateIcon>●</EmptyStateIcon>
-          <EmptyStateText>
-            {participants.length === 0 && tasks.length === 0 
-              ? "Adicione participantes e tarefas para começar o sorteio"
-              : participants.length === 0
-              ? "Adicione participantes para começar o sorteio"
-              : "Adicione tarefas para começar o sorteio"
-            }
-          </EmptyStateText>
-        </EmptyState>
-      </RouletteContainer>
-    );
-  }
-
-  if (participants.length === 0) {
-    return (
-      <RouletteContainer>
-        <RouletteWrapper>
-          <EmptyWheel size={wheelSize}>
-            Adicione participantes para começar
-          </EmptyWheel>
-        </RouletteWrapper>
+        <RouletteSection>
+          <EmptyState>
+            <EmptyStateIcon>●</EmptyStateIcon>
+            <EmptyStateText>
+              {participants.length === 0 && tasks.length === 0 
+                ? "Adicione participantes e tarefas para começar o sorteio"
+                : participants.length === 0
+                ? "Adicione participantes para começar o sorteio"
+                : "Adicione tarefas para começar o sorteio"
+              }
+            </EmptyStateText>
+          </EmptyState>
+        </RouletteSection>
+        
+        <TaskSidebar>
+          <TaskSidebarTitle>Tarefas</TaskSidebarTitle>
+          <TaskCounter>0 pendentes • 0 concluídas</TaskCounter>
+          <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>
+            Nenhuma tarefa adicionada ainda
+          </div>
+        </TaskSidebar>
       </RouletteContainer>
     );
   }
@@ -455,14 +453,19 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   const segmentAngle = (2 * Math.PI) / participants.length;
   const fontSize = Math.max(8, Math.min(16, (wheelSize * 0.8) / participants.length));
 
+  // Calculate completed tasks from the taskHistory
+  const completedTaskIds = new Set(taskHistory.map(history => history.taskId));
+  const pendingTasks = tasks.filter(task => !completedTaskIds.has(task.id));
+  const completedTasks = tasks.filter(task => completedTaskIds.has(task.id));
+
   return (
     <RouletteContainer>
-      <WheelSection>
+      <RouletteSection>
         {currentTask && (
           <CurrentTaskDisplay
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            key={currentTask.id}
           >
             <CurrentTaskLabel>Próxima Tarefa</CurrentTaskLabel>
             <CurrentTaskName>{currentTask.name}</CurrentTaskName>
@@ -484,6 +487,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
               {participants.map((participant, index) => {
                 const startAngle = index * segmentAngle - Math.PI / 2;
                 const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
+                const isSelected = selectedParticipant?.id === participant.id && !isSpinning;
                 
                 const textAngle = startAngle + segmentAngle / 2;
                 const textRadius = radius * 0.45;
@@ -500,7 +504,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                       stroke="rgba(255, 255, 255, 0.3)"
                       strokeWidth="2"
                       style={{
-                        filter: 'brightness(1.1)',
+                        filter: isSelected ? 'brightness(1.3) saturate(1.4)' : 'brightness(1.1)',
                         transition: 'filter 0.3s ease',
                       }}
                     />
@@ -529,47 +533,59 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         >
           {isSpinning ? 'Sorteando...' : currentTask ? 'Sortear Responsável' : 'Sem tarefas'}
         </SpinButton>
-      </WheelSection>
 
-      <TaskListSection>
+        <AnimatePresence>
+          {selectedParticipant && selectedTask && !isSpinning && (
+            <ResultDisplay
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.8 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <WinnerText>Responsável Sorteado</WinnerText>
+              <WinnerName>{selectedParticipant.name}</WinnerName>
+              <AssignedTaskText>irá fazer: {selectedTask.name}</AssignedTaskText>
+            </ResultDisplay>
+          )}
+        </AnimatePresence>
+      </RouletteSection>
+
+      <TaskSidebar>
+        <TaskSidebarTitle>Lista de Tarefas</TaskSidebarTitle>
+        
         <TaskCounter>
-          {availableTasks.length} pendente{availableTasks.length !== 1 ? 's' : ''} • {completedTasks.length} concluída{completedTasks.length !== 1 ? 's' : ''}
+          {pendingTasks.length} pendente{pendingTasks.length !== 1 ? 's' : ''} • {completedTasks.length} concluída{completedTasks.length !== 1 ? 's' : ''}
         </TaskCounter>
 
-        {availableTasks.length > 0 && (
-          <TaskList>
-            <AnimatePresence>
-              {availableTasks.map((task, index) => (
-                <TaskItem
-                  key={task.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <TaskName>{task.name}</TaskName>
-                </TaskItem>
-              ))}
-            </AnimatePresence>
-          </TaskList>
-        )}
-
-        {allTasksCompleted && (
-          <CompletionMessage
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <CompletionTitle>Todas as tarefas foram concluídas!</CompletionTitle>
-            <ResetButton
-              onClick={resetTasks}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Reiniciar Tarefas
-            </ResetButton>
-          </CompletionMessage>
-        )}
-      </TaskListSection>
+        <TaskList>
+          <AnimatePresence>
+            {pendingTasks.map((task, index) => (
+              <TaskItem
+                key={task.id}
+                isCompleted={false}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <TaskName isCompleted={false}>{task.name}</TaskName>
+              </TaskItem>
+            ))}
+            {completedTasks.map((task, index) => (
+              <TaskItem
+                key={`completed-${task.id}`}
+                isCompleted={true}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: (pendingTasks.length + index) * 0.05 }}
+              >
+                <TaskName isCompleted={true}>{task.name}</TaskName>
+              </TaskItem>
+            ))}
+          </AnimatePresence>
+        </TaskList>
+      </TaskSidebar>
     </RouletteContainer>
   );
 };

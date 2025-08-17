@@ -51,3 +51,114 @@ npm run preview      # Preview production build locally
 - Responsive grid layout (3-col → 2-col → 1-col)
 - CSS-in-JS with styled-components
 - Gradient backgrounds and modern UI elements
+
+## Design System Guide
+
+### Visual Identity
+- **Clean, minimalist interface** without external dependencies
+- **No emojis or decorative icons** - text-only approach for professional appearance
+- **Simple text symbols** for status indicators: ✓ (completed), ○ (pending), + (positive), - (negative)
+
+### Color Palette
+```css
+/* Primary Gradients */
+--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+--secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)
+
+/* Status Colors */
+--success: rgba(34, 197, 94, 0.3)  /* Green for completed */
+--error: rgba(239, 68, 68, 0.3)    /* Red for errors/negative */
+--warning: rgba(251, 191, 36, 0.3) /* Yellow for warnings */
+
+/* Glass Morphism Colors */
+--glass-primary: rgba(255, 255, 255, 0.08)
+--glass-border: rgba(255, 255, 255, 0.15)
+--glass-hover: rgba(255, 255, 255, 0.12)
+```
+
+### Typography
+```css
+/* Text Colors */
+--text-primary: rgba(255, 255, 255, 0.9)
+--text-secondary: rgba(255, 255, 255, 0.7)
+--text-muted: rgba(255, 255, 255, 0.6)
+
+/* Font Weights */
+--weight-normal: 500
+--weight-medium: 600
+--weight-bold: 700
+```
+
+### Component Standards
+
+#### Buttons
+```css
+/* Standard Button Style - based on Settings ResetButton */
+background: rgba(102, 126, 234, 0.2);
+border: 1px solid rgba(102, 126, 234, 0.4);
+border-radius: 6px;
+color: #a5b4fc;
+font-weight: 600;
+transition: all 0.3s ease;
+
+/* Hover State */
+&:hover {
+  background: rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.6);
+}
+
+/* Disabled State */
+&:disabled {
+  background: rgba(156, 163, 175, 0.2);
+  border-color: rgba(156, 163, 175, 0.4);
+  color: rgba(156, 163, 175, 0.6);
+}
+```
+
+#### Glass Containers
+```css
+background: rgba(255, 255, 255, 0.08);
+backdrop-filter: blur(15px);
+border: 1px solid rgba(255, 255, 255, 0.15);
+border-radius: 1rem;
+box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+```
+
+#### Navigation Elements
+- **No icons or emojis** in navigation buttons
+- Text-only labels: "Participantes", "Tarefas", "Histórico", "Config"
+- Consistent button styling across all navigation
+
+#### Status Indicators
+- **Completed**: ✓ (checkmark)
+- **Pending**: ○ (circle)
+- **Positive Result**: + (plus sign)
+- **Negative Result**: - (minus sign)
+- **Neutral/Empty**: · (center dot)
+
+### Layout Principles
+1. **Fixed header** with app title left, menu button right
+2. **Scrollable side panel** with proper overflow handling
+3. **Responsive breakpoints**: 768px (mobile), 1024px (tablet)
+4. **Consistent spacing**: 1rem, 1.5rem, 2rem scale
+5. **Glassmorphism effects** for all containers and panels
+
+### Animation Guidelines
+- **Framer Motion** for all component animations
+- **Smooth transitions**: 0.3s ease for interactive elements
+- **Spring animations** for modals and important state changes
+- **Stagger animations** for lists with 0.05s delay between items
+
+### Accessibility & UX
+- **High contrast text** on glass backgrounds
+- **Clear visual hierarchy** with proper font weights and sizes
+- **Consistent interactive states** (hover, active, disabled)
+- **Responsive design** that works on all screen sizes
+- **Clean information architecture** without visual clutter
+
+### Code Conventions
+- **No external icon libraries** (removed Flaticon dependency)
+- **Styled-components** for all styling
+- **TypeScript interfaces** for all props and data structures
+- **Consistent naming**: PascalCase for components, camelCase for props
+- **Modular component structure** with clear separation of concerns
