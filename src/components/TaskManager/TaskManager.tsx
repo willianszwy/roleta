@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Task } from '../../types';
+import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
 
 interface TaskManagerProps {
   tasks: Task[];
@@ -16,32 +17,32 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: ${tokens.spacing.lg};
 `;
 
 const Title = styled.h3`
-  font-size: 1.1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: ${tokens.typography.sizes.lg};
+  font-weight: ${tokens.typography.fontWeights.medium};
+  background: ${tokens.colors.primaryGradient};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: ${tokens.spacing.sm};
 `;
 
 const AddForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  gap: ${tokens.spacing.sm};
+  margin-bottom: ${tokens.spacing.xl};
 `;
 
 const InputRow = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: ${tokens.spacing.sm};
 `;
 
 const Input = styled.input`

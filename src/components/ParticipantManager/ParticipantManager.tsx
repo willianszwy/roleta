@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
+import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
 
 interface ParticipantManagerProps {
   participants: Participant[];
@@ -17,26 +18,26 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: ${tokens.spacing.lg};
 `;
 
 const Title = styled.h3`
-  font-size: 1.1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: ${tokens.typography.sizes.lg};
+  font-weight: ${tokens.typography.fontWeights.medium};
+  background: ${tokens.colors.primaryGradient};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: ${tokens.spacing.sm};
 `;
 
 const AddForm = styled.form`
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  gap: ${tokens.spacing.sm};
+  margin-bottom: ${tokens.spacing.xl};
 `;
 
 const Input = styled.input`
@@ -94,10 +95,10 @@ const ParticipantsList = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: ${tokens.spacing.sm};
   max-height: 320px;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding-right: ${tokens.spacing.xs};
   
   &::-webkit-scrollbar {
     width: 4px;
@@ -109,24 +110,24 @@ const ParticipantsList = styled.div`
   }
   
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: ${tokens.colors.primaryGradient};
     border-radius: 2px;
   }
 `;
 
 const ParticipantCard = styled(motion.div)`
   position: relative;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.375rem;
+  padding: ${tokens.spacing.sm};
+  background: ${tokens.colors.glass.primary};
+  border: 1px solid ${tokens.colors.glass.border};
+  border-radius: ${tokens.borderRadius.md};
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  box-shadow: ${tokens.shadows.sm};
+  transition: all ${tokens.transitions.normal};
   
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: ${tokens.shadows.md};
   }
   
   &::before {
@@ -136,7 +137,7 @@ const ParticipantCard = styled(motion.div)`
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: ${tokens.colors.secondaryGradient};
     border-radius: 0 1px 1px 0;
   }
 `;
@@ -346,8 +347,8 @@ const BulkTextarea = styled.textarea`
 
 const BulkActions = styled.div`
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: ${tokens.spacing.sm};
+  margin-top: ${tokens.spacing.md};
 `;
 
 const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
@@ -512,32 +513,32 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
       </Header>
       
       <AddForm onSubmit={handleSubmit}>
-        <Input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Nome..."
-          maxLength={30}
-        />
-        <AddButton
+        <div style={{ flex: 1 }}>
+          <DSInput
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Nome..."
+            maxLength={30}
+            fullWidth
+          />
+        </div>
+        <Button
           type="submit"
           disabled={!inputValue.trim()}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
+          variant="primary"
         >
           Adicionar
-        </AddButton>
+        </Button>
       </AddForm>
 
       <BulkActions style={{ marginBottom: '1rem' }}>
-        <BulkButton
+        <Button
           variant="secondary"
           onClick={toggleBulkImport}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           {showBulkImport ? 'Fechar' : 'Importar Lista'}
-        </BulkButton>
+        </Button>
       </BulkActions>
 
       <AnimatePresence>
@@ -550,32 +551,31 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = ({
           >
             <BulkImportSection>
               <BulkTitle>Importar Participantes</BulkTitle>
-              <BulkTextarea
+              <TextArea
                 value={bulkValue}
                 onChange={(e) => setBulkValue(e.target.value)}
                 placeholder="Digite os nomes separados por linha ou vírgula:&#10;João Silva&#10;Maria Santos&#10;Pedro, Ana, Carlos"
+                fullWidth
+                rows={4}
               />
               <BulkHint>
                 Nomes duplicados receberão números automaticamente (ex: João, João (2), João (3))
               </BulkHint>
               <BulkActions>
-                <BulkButton
+                <Button
                   onClick={handleBulkImport}
                   disabled={!bulkValue.trim()}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  variant="primary"
                 >
                   Adicionar ({bulkValue.split(/[\n,]/).filter(n => n.trim()).length} nomes)
-                </BulkButton>
-                <BulkButton
+                </Button>
+                <Button
                   variant="secondary"
                   onClick={handleClearBulk}
                   disabled={!bulkValue.trim()}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                 >
-                  🗑️ Limpar
-                </BulkButton>
+                  Limpar
+                </Button>
               </BulkActions>
             </BulkImportSection>
           </motion.div>
