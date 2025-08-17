@@ -276,6 +276,13 @@ function App() {
         setShowWinnerModal(true);
       }
       
+      // Auto remove winner if enabled
+      if (settings.autoRemoveWinner) {
+        setTimeout(() => {
+          taskActions.removeParticipant(selectedParticipant.id);
+        }, settings.showWinnerModal ? (settings.winnerDisplayDuration * 1000) + 500 : 2000);
+      }
+      
       // Trigger confetti animation only if modal is disabled
       if (!settings.showWinnerModal) {
         const colors = ['#667eea', '#4facfe', '#00f2fe', '#8b5cf6', '#a855f7', '#3b82f6'];
