@@ -6,7 +6,7 @@ import { GlobalStyles, Container } from './styles/GlobalStyles';
 import { Roulette } from './components/Roulette/Roulette';
 import { TaskRoulette } from './components/TaskRoulette/TaskRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
-import { WinnerModal, type SpecialResultType } from './components/WinnerModal/WinnerModal';
+import { WinnerModal } from './components/WinnerModal/WinnerModal';
 import { useRoulette } from './hooks/useRoulette';
 import { useTaskRoulette } from './hooks/useTaskRoulette';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -167,7 +167,6 @@ function App() {
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [specialResult, setSpecialResult] = useState<SpecialResultType | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [lastWinner, setLastWinner] = useState<{participant: Participant, mode: 'participants' | 'tasks'} | null>(null);
 
@@ -218,32 +217,6 @@ function App() {
     if (selected) {
       setCurrentWinner(selected);
       
-      // Generate special result based on toggle setting
-      if (settings.showWinnerModal) {
-        // settings.sorteioBomRuim = true means "sorteio de sortudo"
-        // settings.sorteioBomRuim = false means "sorteio de azarado"
-        const isGoodResult = settings.sorteioBomRuim;
-        const results = isGoodResult ? 
-          [
-            { title: "Sortudo!", description: "A sorte está com você hoje!", emoji: "+", isGood: true },
-            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "+", isGood: true },
-            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "+", isGood: true },
-            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "+", isGood: true },
-            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "+", isGood: true }
-          ] :
-          [
-            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar!", emoji: "-", isGood: false },
-            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "-", isGood: false },
-            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar!", emoji: "-", isGood: false },
-            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "-", isGood: false },
-            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda!", emoji: "-", isGood: false }
-          ];
-        
-        const randomResult = results[Math.floor(Math.random() * results.length)];
-        setSpecialResult(randomResult);
-      } else {
-        setSpecialResult(null);
-      }
       
       // Show winner modal if enabled
       if (settings.showWinnerModal) {
@@ -286,30 +259,6 @@ function App() {
       setCurrentWinner(selectedParticipant);
       setCurrentTask(selectedTask);
       
-      // Generate special result based on toggle setting
-      if (settings.showWinnerModal && settings.sorteioBomRuim !== undefined) {
-        const isGoodResult = settings.sorteioBomRuim;
-        const results = isGoodResult ? 
-          [
-            { title: "Sortudo!", description: "A sorte está com você hoje!", emoji: "+", isGood: true },
-            { title: "Pessoa Sortuda!", description: "O destino sorriu para você!", emoji: "+", isGood: true },
-            { title: "Dia de Sorte!", description: "Você está em um dia de muita sorte!", emoji: "+", isGood: true },
-            { title: "Vencedor Sortudo!", description: "Venceu e ainda por cima é sortudo!", emoji: "+", isGood: true },
-            { title: "Estrela da Sorte!", description: "As estrelas estão alinhadas para você!", emoji: "+", isGood: true }
-          ] :
-          [
-            { title: "Azarado!", description: "Parabéns... você foi o escolhido para dar azar!", emoji: "-", isGood: false },
-            { title: "Que Sorte... NÃO!", description: "Ops! Parece que hoje não é seu dia de sorte!", emoji: "-", isGood: false },
-            { title: "Escolhido pelo Azar!", description: "De todas as pessoas... foi você quem deu azar!", emoji: "-", isGood: false },
-            { title: "Sem Sorte Mesmo!", description: "Conseguiu ser sorteado E dar azar ao mesmo tempo!", emoji: "-", isGood: false },
-            { title: "O Azarado da Vez!", description: "Sua missão hoje: ser a pessoa menos sortuda!", emoji: "-", isGood: false }
-          ];
-        
-        const randomResult = results[Math.floor(Math.random() * results.length)];
-        setSpecialResult(randomResult);
-      } else {
-        setSpecialResult(null);
-      }
       
       // Show winner modal if enabled
       if (settings.showWinnerModal) {
@@ -348,7 +297,6 @@ function App() {
     setShowWinnerModal(false);
     setCurrentWinner(null);
     setCurrentTask(null);
-    setSpecialResult(null);
   };
 
   const handleSettingsChange = (newSettings: SettingsConfig) => {
@@ -474,7 +422,6 @@ function App() {
             isOpen={showWinnerModal}
             winner={currentWinner}
             task={currentTask}
-            specialResult={specialResult}
             autoCloseDuration={settings.winnerDisplayDuration}
             onClose={handleCloseWinnerModal}
             mode={settings.rouletteMode}

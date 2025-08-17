@@ -271,7 +271,6 @@ interface WinnerModalProps {
   isOpen: boolean;
   winner: Participant | null;
   task?: Task | null;
-  specialResult: SpecialResultType | null;
   autoCloseDuration: number; // 0 = manual close
   onClose: () => void;
   mode?: 'participants' | 'tasks';
@@ -297,7 +296,6 @@ export function WinnerModal({
   isOpen, 
   winner, 
   task,
-  specialResult, 
   autoCloseDuration, 
   onClose,
   mode = 'participants'
