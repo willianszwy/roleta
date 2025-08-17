@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, Task, TaskHistory } from '../../types';
@@ -279,7 +279,9 @@ const TaskItem = styled(motion.div)<{ isCompleted?: boolean; isNext?: boolean }>
   }
 `;
 
-const TaskName = styled.div<{ isCompleted?: boolean }>`
+const TaskName = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isCompleted',
+})<{ isCompleted?: boolean }>`
   font-size: 0.85rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
@@ -337,6 +339,8 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
 }) => {
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
+  const [spinState, setSpinState] = useState<'idle' | 'spinning' | 'completed'>('idle');
+  const selectedResultRef = useRef<{ participant: Participant; task: Task } | null>(null);
 
   useEffect(() => {
     const updateSize = () => {
@@ -372,23 +376,44 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  // State machine logic
+  useEffect(() => {
+    if (!isSpinning && spinState === 'spinning') {
+      // External spin stopped, reset state
+      setSpinState('idle');
+      selectedResultRef.current = null;
+    }
+  }, [isSpinning, spinState]);
+
+  // Handle completed state
+  useEffect(() => {
+    if (spinState === 'completed' && selectedResultRef.current) {
+      const result = selectedResultRef.current;
+      selectedResultRef.current = null;
+      setSpinState('idle');
+      onSpinComplete(result.participant, result.task);
+    }
+  }, [spinState, onSpinComplete]);
+
   const handleSpin = async () => {
-    if (participants.length === 0 || !currentTask || isSpinning) return;
+    if (participants.length === 0 || !currentTask || spinState !== 'idle') return;
+
+    // Transition to spinning state
+    setSpinState('spinning');
 
     const result = await onSpin();
     
     if (result) {
+      selectedResultRef.current = result;
+      
       const selectedIndex = participants.findIndex(p => p.id === result.participant.id);
-      const duration = 4.5;
       const extraRotations = 6;
       
       const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation, extraRotations);
       const newRotation = rotation + rotationToAdd;
       setRotation(newRotation);
       
-      setTimeout(() => {
-        onSpinComplete(result.participant, result.task);
-      }, duration * 1000);
+      // onSpinComplete will be called by onAnimationComplete
     }
   };
 
@@ -446,8 +471,13 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
               viewBox={`0 0 ${wheelSize} ${wheelSize}`}
               animate={{ rotate: rotation }}
               transition={{
-                duration: isSpinning ? 4.5 : 0,
+                duration: spinState === 'spinning' ? 4.5 : 0,
                 ease: [0.2, 0, 0.2, 1],
+              }}
+              onAnimationComplete={() => {
+                if (spinState === 'spinning') {
+                  setSpinState('completed');
+                }
               }}
             >
               {participants.map((participant, index) => {

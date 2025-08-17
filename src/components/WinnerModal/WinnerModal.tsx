@@ -16,18 +16,19 @@ const ModalOverlay = styled(motion.div)`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(15, 15, 35, 0.85);
-  backdrop-filter: blur(16px);
+  background: rgba(15, 15, 35, 0.9);
+  backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  will-change: opacity;
 `;
 
 const ModalContent = styled(motion.div)`
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 1rem;
   padding: 2rem 1.5rem;
@@ -38,6 +39,7 @@ const ModalContent = styled(motion.div)`
   text-align: center;
   position: relative;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  will-change: transform, opacity;
   
   @media (max-width: 768px) {
     padding: 1.5rem 1rem;
@@ -194,16 +196,19 @@ const CloseButton = styled(motion.button)`
   }
 `;
 
-const Sparkle = styled.div<{ delay: number; x: number; y: number }>`
+const Sparkle = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['delay', 'x', 'y'].includes(prop),
+})<{ delay: number; x: number; y: number }>`
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
   background: #fbbf24;
   border-radius: 50%;
   left: ${props => props.x}%;
   top: ${props => props.y}%;
-  animation: ${sparkleAnimation} 2s infinite;
+  animation: ${sparkleAnimation} 1.5s infinite;
   animation-delay: ${props => props.delay}s;
+  will-change: transform, opacity;
 `;
 
 const AutoCloseIndicator = styled(motion.div)`
@@ -303,60 +308,71 @@ export function WinnerModal({
   const [sparkles, setSparkles] = useState<Array<{x: number, y: number, delay: number}>>([]);
 
   useEffect(() => {
-    if (isOpen) {
-      // Trigger confetti
+    if (isOpen && winner) {
+      // Trigger confetti with optimized performance
       const colors = ['#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#fbbf24'];
       
       confetti({
-        particleCount: 150,
-        spread: 70,
+        particleCount: 100,
+        spread: 80,
         origin: { y: 0.6 },
         colors: colors,
+        gravity: 0.8,
+        scalar: 1.2,
+        drift: 0,
+        ticks: 300
       });
-      
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 60,
-          origin: { y: 0.7 },
-          colors: colors,
-        });
-      }, 300);
 
-      // Generate sparkles
-      const newSparkles = Array.from({ length: 12 }, () => ({
+      // Generate sparkles for visual effect
+      const newSparkles = Array.from({ length: 6 }, () => ({
         x: Math.random() * 100,
         y: Math.random() * 100,
-        delay: Math.random() * 2
+        delay: Math.random() * 1.5
       }));
       setSparkles(newSparkles);
 
-      // Auto close
+      // Auto close timer
       if (autoCloseDuration > 0) {
         const timer = setTimeout(onClose, autoCloseDuration * 1000);
         return () => clearTimeout(timer);
       }
     }
-  }, [isOpen, autoCloseDuration, onClose]);
+  }, [isOpen, winner, autoCloseDuration, onClose]);
 
-  if (!winner) return null;
+  if (!winner) {
+    return null;
+  }
 
+  // TEMP: Simplified modal without AnimatePresence for testing
+  if (!isOpen) return null;
+  
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <ModalOverlay
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-        >
-          <ModalContent
-            initial={{ scale: 0.5, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.5, opacity: 0, y: 50 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-          >
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'rgba(15, 15, 35, 0.9)',
+      backdropFilter: 'blur(8px)',
+      zIndex: 2000,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '1rem'
+    }} onClick={onClose}>
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.08)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '1rem',
+        padding: '2rem 1.5rem',
+        maxWidth: '480px',
+        width: '100%',
+        textAlign: 'center',
+        position: 'relative',
+        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.37)'
+      }} onClick={(e) => e.stopPropagation()}>
             {sparkles.map((sparkle, index) => (
               <Sparkle
                 key={index}
@@ -366,63 +382,90 @@ export function WinnerModal({
               />
             ))}
 
-            <WinnerTitle
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
+            <h1 style={{
+              fontSize: 'clamp(1.5rem, 5vw, 2.2rem)',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              marginBottom: '1rem',
+              lineHeight: '1.2'
+            }}>
               {mode === 'tasks' ? "TAREFA SORTEADA!" : "VENCEDOR!"}
-            </WinnerTitle>
+            </h1>
 
-            <WinnerName
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.4, type: "spring", damping: 20 }}
-            >
+            <div style={{
+              fontSize: 'clamp(1.2rem, 4vw, 1.8rem)',
+              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.9)',
+              marginBottom: '1.5rem',
+              padding: '0.75rem 1.5rem',
+              background: 'rgba(255, 255, 255, 0.06)',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
               {winner.name}
-            </WinnerName>
+            </div>
 
 
             {mode === 'tasks' && task && (
-              <TaskDisplay
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <TaskLabel>vai fazer</TaskLabel>
-                <TaskName>{task.name}</TaskName>
+              <div style={{
+                margin: '1rem 0',
+                padding: '1rem',
+                background: 'rgba(79, 172, 254, 0.1)',
+                border: '1px solid rgba(79, 172, 254, 0.3)',
+                borderRadius: '0.75rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '0.5rem' }}>vai fazer</div>
+                <div style={{ fontSize: 'clamp(1rem, 3vw, 1.3rem)', fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.5rem' }}>{task.name}</div>
                 {task.description && (
-                  <TaskDescription>{task.description}</TaskDescription>
+                  <div style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)', fontStyle: 'italic' }}>{task.description}</div>
                 )}
-              </TaskDisplay>
+              </div>
             )}
 
 
-            <CloseButton
+            <button
               onClick={onClose}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 1.0 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              style={{
+                background: 'rgba(102, 126, 234, 0.2)',
+                border: '1px solid rgba(102, 126, 234, 0.4)',
+                borderRadius: '0.75rem',
+                color: '#a5b4fc',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginTop: '1rem'
+              }}
             >
               Fechar
-            </CloseButton>
+            </button>
 
             {autoCloseDuration > 0 && (
-              <AutoCloseIndicator
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-              >
-                <CountdownBar duration={autoCloseDuration} />
+              <div style={{
+                position: 'absolute',
+                bottom: '0.75rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem'
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '3px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '2px'
+                }} />
                 <span>Fechando...</span>
-              </AutoCloseIndicator>
+              </div>
             )}
-          </ModalContent>
-        </ModalOverlay>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }
 

@@ -91,7 +91,9 @@ const MenuNav = styled.div`
   }
 `;
 
-const NavButton = styled.button<{ active: boolean }>`
+const NavButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+})<{ active: boolean }>`
   padding: 0.75rem 0.5rem;
   background: ${props => props.active ? 'rgba(102, 126, 234, 0.25)' : 'rgba(255, 255, 255, 0.08)'};
   border: 1px solid ${props => props.active ? 'rgba(102, 126, 234, 0.4)' : 'rgba(255, 255, 255, 0.15)'};

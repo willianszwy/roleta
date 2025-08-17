@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
+import confetti from 'canvas-confetti';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import confetti from 'canvas-confetti';
 import { GlobalStyles, Container } from './styles/GlobalStyles';
 import { Roulette } from './components/Roulette/Roulette';
 import { TaskRoulette } from './components/TaskRoulette/TaskRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
 import { WinnerModal } from './components/WinnerModal/WinnerModal';
-import { useRoulette } from './hooks/useRoulette';
-import { useTaskRoulette } from './hooks/useTaskRoulette';
+import { useRouletteContext } from './context/RouletteContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import type { Participant, Task } from './types';
 import type { SettingsConfig } from './components/Settings/Settings';
@@ -161,92 +160,25 @@ const defaultSettings: SettingsConfig = {
 };
 
 function App() {
-  const { state, actions } = useRoulette();
-  const { state: taskState, actions: taskActions } = useTaskRoulette();
+  const { state, actions } = useRouletteContext();
   const [settings, setSettings] = useLocalStorage<SettingsConfig>('luckywheel-settings', defaultSettings);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [lastWinner, setLastWinner] = useState<{participant: Participant, mode: 'participants' | 'tasks'} | null>(null);
 
-  // Custom spin functions that handle removal and provide feedback
+  // Set auto-remove setting in context when settings change
+  React.useEffect(() => {
+    actions.setAutoRemoveParticipants(settings.autoRemoveWinner);
+  }, [settings.autoRemoveWinner, actions]);
+
   const handleParticipantSpin = async (): Promise<Participant | null> => {
-    console.log('🎲 HandleParticipantSpin called');
-    console.log('🏆 LastWinner:', lastWinner);
-    console.log('⚙️ AutoRemoveWinner:', settings.autoRemoveWinner);
-    
-    // Remove previous winner if exists
-    if (lastWinner && settings.autoRemoveWinner && lastWinner.mode === 'participants') {
-      console.log('🗑️ Removing previous winner:', lastWinner.participant.name);
-      actions.removeParticipant(lastWinner.participant.id);
-      setLastWinner(null);
-      
-      // Give time for UI to update AND state to propagate
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('✅ Removal complete, proceeding with spin');
-    }
-    
-    // Get current participants after potential removal
-    const currentParticipants = lastWinner ? 
-      state.participants.filter(p => p.id !== lastWinner.participant.id) : 
-      state.participants;
-    
-    console.log('👥 Available participants:', currentParticipants.map(p => p.name));
-    
-    if (currentParticipants.length === 0) {
-      console.log('❌ No participants available');
-      return null;
-    }
-    
-    // Manual spin with filtered participants
-    console.log('🎰 Starting manual spin with filtered participants');
-    const randomIndex = Math.floor(Math.random() * currentParticipants.length);
-    const selectedParticipant = currentParticipants[randomIndex];
-    
-    console.log('🎯 Selected participant:', selectedParticipant.name);
-    
-    return selectedParticipant;
+    const result = await actions.spinRoulette();
+    return result;
   };
 
-  const handleTaskSpin = async (): Promise<{ participant: Participant; task: Task } | null> => {
-    console.log('🎯 HandleTaskSpin called');
-    console.log('🏆 LastWinner:', lastWinner);
-    console.log('⚙️ AutoRemoveWinner:', settings.autoRemoveWinner);
-    
-    // Remove previous winner if exists
-    if (lastWinner && settings.autoRemoveWinner && lastWinner.mode === 'tasks') {
-      console.log('🗑️ Removing previous winner:', lastWinner.participant.name);
-      taskActions.removeParticipant(lastWinner.participant.id);
-      setLastWinner(null);
-      
-      // Give time for UI to update AND state to propagate
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('✅ Removal complete, proceeding with spin');
-    }
-    
-    // Get current participants after potential removal
-    const currentParticipants = lastWinner ? 
-      taskState.participants.filter(p => p.id !== lastWinner.participant.id) : 
-      taskState.participants;
-    
-    const currentTask = taskActions.getCurrentTask();
-    
-    console.log('👥 Available participants:', currentParticipants.map(p => p.name));
-    
-    if (currentParticipants.length === 0 || !currentTask) {
-      console.log('❌ No participants or task available');
-      return null;
-    }
-    
-    // Manual spin with filtered participants
-    console.log('🎰 Starting manual task spin with filtered participants');
-    const randomIndex = Math.floor(Math.random() * currentParticipants.length);
-    const selectedParticipant = currentParticipants[randomIndex];
-    
-    console.log('🎯 Selected participant:', selectedParticipant.name);
-    
-    return { participant: selectedParticipant, task: currentTask };
+  const handleTaskSpin = (): Promise<{ participant: Participant; task: Task } | null> => {
+    return actions.spinTaskRoulette();
   };
 
   const handleSpinComplete = (selected?: Participant) => {
@@ -255,80 +187,48 @@ function App() {
     if (selected) {
       setCurrentWinner(selected);
       
-      
-      // Show winner modal if enabled
+      // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {
         setShowWinnerModal(true);
-      }
-      
-      // Store last winner for next spin removal
-      if (settings.autoRemoveWinner) {
-        console.log('💾 Storing winner for removal:', selected.name);
-        setLastWinner({ participant: selected, mode: 'participants' });
-      }
-      
-      // Trigger confetti animation only if modal is disabled
-      if (!settings.showWinnerModal) {
-        const colors = ['#667eea', '#8b5cf6', '#a855f7', '#4facfe', '#00f2fe', '#3b82f6'];
-        
+      } else {
+        // Trigger confetti when modal is disabled
         confetti({
           particleCount: 100,
-          spread: 70,
+          spread: 80,
           origin: { y: 0.6 },
-          colors: colors,
+          colors: ['#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#fbbf24'],
+          gravity: 0.8,
+          scalar: 1.2,
+          drift: 0,
+          ticks: 300
         });
-        
-        setTimeout(() => {
-          confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.7 },
-            colors: colors,
-          });
-        }, 300);
       }
     }
   };
 
 
   const handleTaskSpinComplete = (selectedParticipant?: Participant, selectedTask?: Task) => {
-    taskActions.finishTaskSpin(selectedParticipant, selectedTask);
+    actions.finishTaskSpin(selectedParticipant, selectedTask);
     
     if (selectedParticipant && selectedTask) {
       setCurrentWinner(selectedParticipant);
       setCurrentTask(selectedTask);
       
-      
-      // Show winner modal if enabled
+      // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {
         setShowWinnerModal(true);
-      }
-      
-      // Store last winner for next spin removal
-      if (settings.autoRemoveWinner) {
-        console.log('💾 Storing task winner for removal:', selectedParticipant.name);
-        setLastWinner({ participant: selectedParticipant, mode: 'tasks' });
-      }
-      
-      // Trigger confetti animation only if modal is disabled
-      if (!settings.showWinnerModal) {
-        const colors = ['#667eea', '#4facfe', '#00f2fe', '#8b5cf6', '#a855f7', '#3b82f6'];
-        
+      } else {
+        // Trigger confetti when modal is disabled
         confetti({
           particleCount: 100,
-          spread: 70,
+          spread: 80,
           origin: { y: 0.6 },
-          colors: colors,
+          colors: ['#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#fbbf24'],
+          gravity: 0.8,
+          scalar: 1.2,
+          drift: 0,
+          ticks: 300
         });
-        
-        setTimeout(() => {
-          confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.7 },
-            colors: colors,
-          });
-        }, 300);
       }
     }
   };
@@ -406,12 +306,12 @@ function App() {
                   />
                 ) : (
                   <TaskRoulette
-                    participants={taskState.participants}
-                    tasks={taskState.tasks}
-                    taskHistory={taskState.taskHistory}
-                    isSpinning={taskState.isSpinning}
-                    selectedParticipant={taskState.selectedParticipant}
-                    currentTask={taskActions.getCurrentTask()}
+                    participants={state.participants}
+                    tasks={state.tasks}
+                    taskHistory={state.taskHistory}
+                    isSpinning={state.isSpinning}
+                    selectedParticipant={state.selectedParticipant}
+                    currentTask={actions.getCurrentTask()}
                     onSpin={handleTaskSpin}
                     onSpinComplete={handleTaskSpinComplete}
                   />
@@ -423,43 +323,28 @@ function App() {
           <SidePanel
             isOpen={isPanelOpen}
             onToggle={togglePanel}
-            participants={
-              settings.rouletteMode === 'participants' ? state.participants :
-              taskState.participants
-            }
+            participants={state.participants}
             history={state.history}
-            tasks={taskState.tasks}
-            taskHistory={taskState.taskHistory}
+            tasks={state.tasks}
+            taskHistory={state.taskHistory}
             settings={settings}
-            onAddParticipant={
-              settings.rouletteMode === 'participants' ? actions.addParticipant :
-              taskActions.addParticipant
-            }
-            onAddParticipantsBulk={
-              settings.rouletteMode === 'participants' ? actions.addParticipantsBulk :
-              taskActions.addParticipantsBulk
-            }
-            onRemoveParticipant={
-              settings.rouletteMode === 'participants' ? actions.removeParticipant :
-              taskActions.removeParticipant
-            }
-            onClearParticipants={
-              settings.rouletteMode === 'participants' ? actions.clearParticipants :
-              taskActions.clearParticipants
-            }
+            onAddParticipant={actions.addParticipant}
+            onAddParticipantsBulk={actions.addParticipantsBulk}
+            onRemoveParticipant={actions.removeParticipant}
+            onClearParticipants={actions.clearParticipants}
             onRemoveFromRoulette={actions.removeFromRouletteAfterSpin}
             onClearHistory={actions.clearHistory}
-            onAddTask={taskActions.addTask}
-            onAddTasksBulk={taskActions.addTasksBulk}
-            onRemoveTask={taskActions.removeTask}
-            onClearTasks={taskActions.clearTasks}
-            onClearTaskHistory={taskActions.clearTaskHistory}
+            onAddTask={actions.addTask}
+            onAddTasksBulk={actions.addTasksBulk}
+            onRemoveTask={actions.removeTask}
+            onClearTasks={actions.clearTasks}
+            onClearTaskHistory={actions.clearTaskHistory}
             onSettingsChange={handleSettingsChange}
             onResetSettings={handleResetSettings}
           />
 
           <WinnerModal
-            isOpen={showWinnerModal}
+            isOpen={showWinnerModal && !state.isSpinning}
             winner={currentWinner}
             task={currentTask}
             autoCloseDuration={settings.winnerDisplayDuration}

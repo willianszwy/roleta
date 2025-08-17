@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
@@ -212,6 +212,8 @@ export const Roulette: React.FC<RouletteProps> = ({
 }) => {
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
+  const [spinState, setSpinState] = useState<'idle' | 'spinning' | 'completed'>('idle');
+  const selectedParticipantRef = useRef<Participant | null>(null);
 
   useEffect(() => {
     const updateSize = () => {
@@ -249,23 +251,43 @@ export const Roulette: React.FC<RouletteProps> = ({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  const handleSpin = async () => {
-    if (participants.length === 0 || isSpinning) return;
+  // State machine logic
+  useEffect(() => {
+    if (!isSpinning && spinState === 'spinning') {
+      // External spin stopped, reset state
+      setSpinState('idle');
+      selectedParticipantRef.current = null;
+    }
+  }, [isSpinning, spinState]);
 
+  // Handle completed state
+  useEffect(() => {
+    if (spinState === 'completed' && selectedParticipantRef.current) {
+      const winner = selectedParticipantRef.current;
+      selectedParticipantRef.current = null;
+      setSpinState('idle');
+      onSpinComplete(winner);
+    }
+  }, [spinState, onSpinComplete]);
+
+  const handleSpin = async () => {
+    if (participants.length === 0 || spinState !== 'idle') return;
+
+    // Transition to spinning state
+    setSpinState('spinning');
+
+    // Get the selected participant
     const selected = await onSpin();
     
     if (selected) {
+      selectedParticipantRef.current = selected;
+      
       const selectedIndex = participants.findIndex(p => p.id === selected.id);
-      const duration = 4.5; // Fixed duration
-      const extraRotations = 6; // Fixed number of extra rotations
+      const extraRotations = 6;
       
       const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation, extraRotations);
       const newRotation = rotation + rotationToAdd;
       setRotation(newRotation);
-      
-      setTimeout(() => {
-        onSpinComplete(selected);
-      }, duration * 1000);
     }
   };
 
@@ -303,8 +325,13 @@ export const Roulette: React.FC<RouletteProps> = ({
             viewBox={`0 0 ${wheelSize} ${wheelSize}`}
             animate={{ rotate: rotation }}
             transition={{
-              duration: isSpinning ? 4.5 : 0,
+              duration: spinState === 'spinning' ? 4.5 : 0,
               ease: [0.2, 0, 0.2, 1],
+            }}
+            onAnimationComplete={() => {
+              if (spinState === 'spinning') {
+                setSpinState('completed');
+              }
             }}
           >
             {/* Create segments */}
