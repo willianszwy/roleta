@@ -9,13 +9,26 @@ Uma aplicação moderna e interativa de roleta para sorteios justos e divertidos
 
 ## ✨ Funcionalidades
 
-- 🎯 **Sorteios Justos**: Algoritmo de seleção aleatória confiável
-- 🎨 **Interface Moderna**: Design glassmorphism com animações fluidas
-- 📱 **Responsivo**: Funciona perfeitamente em desktop, tablet e mobile
-- 💾 **Persistência Local**: Seus participantes e histórico são salvos automaticamente
-- 🎉 **Animações Celebrativas**: Efeitos de confete ao selecionar um vencedor
-- 📊 **Histórico Completo**: Acompanhe todos os sorteios realizados
-- ⚡ **Performance**: Construído com Vite para carregamento ultrarrápido
+### 🎯 **Dois Modos de Sorteio**
+- **Modo Participantes**: Sorteio clássico entre pessoas
+- **Modo Tarefas**: Sorteia responsáveis para tarefas específicas com sistema de fila
+
+### 🎨 **Interface & Design**
+- **Design Glassmorphism**: Interface moderna com efeitos de vidro e blur
+- **Layout Responsivo**: Adapta-se perfeitamente a desktop, tablet e mobile
+- **Animações Fluidas**: Transições suaves com Framer Motion
+- **Cores Inteligentes**: Sistema de 20 cores otimizadas para evitar repetições consecutivas
+
+### 🎛️ **Configurações Avançadas**
+- **Modal de Vencedor**: Modal customizável com auto-fechamento configurável
+- **Remoção Automática**: Remove vencedores automaticamente de forma transparente
+- **Persistência Total**: Participantes, tarefas e histórico salvos localmente
+
+### 🎉 **Experiência do Usuário**
+- **Efeitos Celebrativos**: Confete animado ao selecionar vencedores
+- **Feedback Visual**: Indicadores claros do próximo na fila
+- **Sistema Anti-Fraude**: Remoção transparente antes do giro (não durante)
+- **Histórico Paginado**: Performance otimizada para grandes volumes
 
 ## 🚀 Demo
 
@@ -65,26 +78,53 @@ npm run lint     # Análise de código com ESLint
 
 ## 🎮 Como Usar
 
-1. **Adicione Participantes**: Digite nomes na caixa de texto e clique em "Adicionar"
-2. **Gire a Roleta**: Clique no botão "Girar Roleta" para iniciar o sorteio
-3. **Veja o Resultado**: A roleta girará e selecionará um vencedor aleatório
-4. **Gerencie o Histórico**: Acompanhe todos os sorteios e remova participantes se necessário
+### 📋 **Modo Participantes**
+1. **Adicione Participantes**: Digite nomes individuais ou em lote (um por linha)
+2. **Configure Opções**: Acesse as configurações para personalizar comportamento
+3. **Gire a Roleta**: Clique no botão "🎰 Girar Roleta" para iniciar
+4. **Veja o Resultado**: Modal mostra o vencedor com efeitos celebrativos
+
+### 🎯 **Modo Tarefas**
+1. **Mude para Modo Tarefas**: Vá em Configurações → Modo → Tarefas
+2. **Adicione Participantes e Tarefas**: Use o painel lateral para gerenciar
+3. **Sorteie Responsáveis**: Sistema automaticamente sorteia para a primeira tarefa da fila
+4. **Acompanhe Progresso**: Veja quem foi sorteado para cada tarefa no histórico
+
+### ⚙️ **Configurações Disponíveis**
+- **Modal de Vencedor**: Ativar/desativar modal de resultado
+- **Auto-Fechamento**: Configurar tempo de fechamento automático (1-10s)
+- **Remoção Automática**: Remove vencedores automaticamente após sorteio
+- **Modo de Sorteio**: Alternar entre Participantes e Tarefas
 
 ## 🏗️ Arquitetura
 
 ```
 src/
-├── components/          # Componentes React reutilizáveis
-│   ├── Roulette/       # Componente principal da roleta
+├── components/              # Componentes React reutilizáveis
+│   ├── Roulette/           # Roleta modo participantes
+│   ├── TaskRoulette/       # Roleta modo tarefas (layout 2 colunas)
 │   ├── ParticipantManager/ # Gerenciamento de participantes
-│   └── History/        # Histórico de sorteios
-├── hooks/              # Hooks customizados
-│   ├── useRoulette.ts  # Lógica principal da aplicação
-│   └── useLocalStorage.ts # Persistência local
-├── types/              # Definições TypeScript
-├── utils/              # Funções utilitárias
-└── styles/             # Estilos globais
+│   ├── TaskManager/        # Gerenciamento de tarefas
+│   ├── History/            # Histórico com paginação
+│   ├── TaskHistory/        # Histórico de tarefas sorteadas
+│   ├── WinnerModal/        # Modal de resultado glassmorphism
+│   ├── Settings/           # Painel de configurações
+│   └── SidePanel/          # Painel lateral responsivo
+├── hooks/                  # Hooks customizados
+│   ├── useRoulette.ts      # Estado modo participantes
+│   ├── useTaskRoulette.ts  # Estado modo tarefas
+│   └── useLocalStorage.ts  # Persistência localStorage
+├── types/                  # Definições TypeScript
+├── utils/                  # Funções utilitárias
+│   └── helpers.ts          # Algoritmos de rotação e cores
+└── styles/                 # Estilos globais glassmorphism
 ```
+
+### 🎨 **Design System**
+- **Glassmorphism**: `rgba(255, 255, 255, 0.08)` com `backdrop-filter: blur(15px)`
+- **Gradientes**: Sistema de cores harmoniosas predefinidas
+- **Responsividade**: Mobile-first com breakpoints em 768px e 1024px
+- **Animações**: Framer Motion com spring physics naturais
 
 ## 🤝 Contribuição
 
