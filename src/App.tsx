@@ -182,14 +182,31 @@ function App() {
       actions.removeParticipant(lastWinner.participant.id);
       setLastWinner(null);
       
-      // Give time for UI to update
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Give time for UI to update AND state to propagate
+      await new Promise(resolve => setTimeout(resolve, 1000));
       console.log('✅ Removal complete, proceeding with spin');
     }
     
-    // Now perform the normal spin
-    console.log('🎰 Starting normal spin');
-    return actions.spinRoulette();
+    // Get current participants after potential removal
+    const currentParticipants = lastWinner ? 
+      state.participants.filter(p => p.id !== lastWinner.participant.id) : 
+      state.participants;
+    
+    console.log('👥 Available participants:', currentParticipants.map(p => p.name));
+    
+    if (currentParticipants.length === 0) {
+      console.log('❌ No participants available');
+      return null;
+    }
+    
+    // Manual spin with filtered participants
+    console.log('🎰 Starting manual spin with filtered participants');
+    const randomIndex = Math.floor(Math.random() * currentParticipants.length);
+    const selectedParticipant = currentParticipants[randomIndex];
+    
+    console.log('🎯 Selected participant:', selectedParticipant.name);
+    
+    return selectedParticipant;
   };
 
   const handleTaskSpin = async (): Promise<{ participant: Participant; task: Task } | null> => {
@@ -203,14 +220,33 @@ function App() {
       taskActions.removeParticipant(lastWinner.participant.id);
       setLastWinner(null);
       
-      // Give time for UI to update
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Give time for UI to update AND state to propagate
+      await new Promise(resolve => setTimeout(resolve, 1000));
       console.log('✅ Removal complete, proceeding with spin');
     }
     
-    // Now perform the normal spin
-    console.log('🎰 Starting normal task spin');
-    return taskActions.spinTaskRoulette();
+    // Get current participants after potential removal
+    const currentParticipants = lastWinner ? 
+      taskState.participants.filter(p => p.id !== lastWinner.participant.id) : 
+      taskState.participants;
+    
+    const currentTask = taskActions.getCurrentTask();
+    
+    console.log('👥 Available participants:', currentParticipants.map(p => p.name));
+    
+    if (currentParticipants.length === 0 || !currentTask) {
+      console.log('❌ No participants or task available');
+      return null;
+    }
+    
+    // Manual spin with filtered participants
+    console.log('🎰 Starting manual task spin with filtered participants');
+    const randomIndex = Math.floor(Math.random() * currentParticipants.length);
+    const selectedParticipant = currentParticipants[randomIndex];
+    
+    console.log('🎯 Selected participant:', selectedParticipant.name);
+    
+    return { participant: selectedParticipant, task: currentTask };
   };
 
   const handleSpinComplete = (selected?: Participant) => {
