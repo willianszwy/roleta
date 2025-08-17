@@ -146,7 +146,7 @@ export function useTaskRoulette() {
     const pendingTasks = tasks.filter(task => 
       !taskHistory.some(history => history.taskId === task.id)
     );
-    return pendingTasks.length > 0 ? pendingTasks[0] : null;
+    return pendingTasks.length > 0 ? pendingTasks[0] : undefined;
   }, [tasks, taskHistory]);
 
   const spinTaskRoulette = useCallback(async (): Promise<{ participant: Participant; task: Task } | null> => {
@@ -162,6 +162,7 @@ export function useTaskRoulette() {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const selectedParticipant = selectRandomParticipant(participants);
+    if (!selectedParticipant) return null;
     
     return { participant: selectedParticipant, task: currentTask };
   }, [participants, tasks, isSpinning, getCurrentTask]);
