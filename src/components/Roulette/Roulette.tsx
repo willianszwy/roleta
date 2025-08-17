@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
-import { calculateRouletteRotation, getContrastColor } from '../../utils/helpers';
+import { calculateRouletteRotation, getContrastColor, getRouletteColors } from '../../utils/helpers';
 
 interface RouletteProps {
   participants: Participant[];
@@ -191,12 +191,6 @@ const EmptyWheel = styled.div<{ size: number }>`
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 `;
 
-const colors = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-  '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE',
-  '#AED6F1', '#A3E4D7', '#F9E79F', '#FADBD8', '#D5DBDB'
-];
 
 function createSegmentPath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): string {
   const x1 = centerX + radius * Math.cos(startAngle);
@@ -295,6 +289,9 @@ export const Roulette: React.FC<RouletteProps> = ({
   
   // Calculate appropriate font size based on wheel size and number of participants
   const fontSize = Math.max(8, Math.min(16, (wheelSize * 0.8) / participants.length));
+  
+  // Get optimally distributed colors for all participants
+  const rouletteColors = getRouletteColors(participants.length);
 
   return (
     <RouletteContainer>
@@ -322,8 +319,8 @@ export const Roulette: React.FC<RouletteProps> = ({
               const textX = centerX + textRadius * Math.cos(textAngle);
               const textY = centerY + textRadius * Math.sin(textAngle);
               
-              // Get color for this participant
-              const participantColor = participant.color || colors[index % colors.length];
+              // Get color for this participant - use predefined color or optimally distributed color
+              const participantColor = participant.color || rouletteColors[index];
               
               return (
                 <g key={participant.id}>

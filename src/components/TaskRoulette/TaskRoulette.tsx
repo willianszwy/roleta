@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, Task, TaskHistory } from '../../types';
-import { calculateRouletteRotation, getContrastColor } from '../../utils/helpers';
+import { calculateRouletteRotation, getContrastColor, getRouletteColors } from '../../utils/helpers';
 
 interface TaskRouletteProps {
   participants: Participant[];
@@ -333,12 +333,6 @@ const AssignedTaskText = styled.div`
   font-weight: 500;
 `;
 
-const colors = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-  '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE',
-  '#AED6F1', '#A3E4D7', '#F9E79F', '#FADBD8', '#D5DBDB'
-];
 
 function createSegmentPath(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): string {
   const x1 = centerX + radius * Math.cos(startAngle);
@@ -452,6 +446,9 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   const centerY = wheelSize / 2;
   const segmentAngle = (2 * Math.PI) / participants.length;
   const fontSize = Math.max(8, Math.min(16, (wheelSize * 0.8) / participants.length));
+  
+  // Get optimally distributed colors for all participants
+  const rouletteColors = getRouletteColors(participants.length);
 
   // Calculate completed tasks from the taskHistory
   const completedTaskIds = new Set(taskHistory.map(history => history.taskId));
@@ -494,7 +491,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 const textX = centerX + textRadius * Math.cos(textAngle);
                 const textY = centerY + textRadius * Math.sin(textAngle);
                 
-                const participantColor = participant.color || colors[index % colors.length];
+                const participantColor = participant.color || rouletteColors[index];
                 
                 return (
                   <g key={participant.id}>

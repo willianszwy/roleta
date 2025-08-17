@@ -4,14 +4,89 @@ export function generateId(): string {
   return Math.random().toString(36).substr(2, 9);
 }
 
+// Enhanced color palette with better harmony and contrast
+const ROULETTE_COLORS = [
+  '#FF6B6B', // Vibrant Red
+  '#4ECDC4', // Teal
+  '#45B7D1', // Blue
+  '#96CEB4', // Mint Green
+  '#FFEAA7', // Sunny Yellow
+  '#DDA0DD', // Plum
+  '#FF8A80', // Light Red
+  '#80CBC4', // Cyan
+  '#81C784', // Light Green
+  '#FFB74D', // Orange
+  '#CE93D8', // Light Purple
+  '#F06292', // Pink
+  '#64B5F6', // Light Blue
+  '#A5D6A7', // Pale Green
+  '#FFCC02', // Golden Yellow
+  '#BA68C8', // Medium Purple
+  '#26C6DA', // Light Cyan
+  '#66BB6A', // Green
+  '#FF7043', // Deep Orange
+  '#AB47BC'  // Purple
+];
+
 export function getRandomColor(): string {
-  const colors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-    '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE',
-    '#AED6F1', '#A3E4D7', '#F9E79F', '#FADBD8', '#D5DBDB'
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
+  return ROULETTE_COLORS[Math.floor(Math.random() * ROULETTE_COLORS.length)];
+}
+
+// Enhanced function to get well-distributed colors for roulette segments
+export function getRouletteColors(participantCount: number): string[] {
+  if (participantCount <= 0) return [];
+  
+  // For small numbers, use predefined optimal sequences
+  if (participantCount <= ROULETTE_COLORS.length) {
+    return getOptimalColorSequence(participantCount);
+  }
+  
+  // For larger numbers, repeat the palette
+  const colors: string[] = [];
+  for (let i = 0; i < participantCount; i++) {
+    colors.push(ROULETTE_COLORS[i % ROULETTE_COLORS.length]);
+  }
+  
+  return colors;
+}
+
+// Get optimal color sequence to avoid similar adjacent colors
+function getOptimalColorSequence(count: number): string[] {
+  if (count === 1) return [ROULETTE_COLORS[0]];
+  
+  // Pre-calculated optimal sequences for common participant counts
+  const optimalSequences: { [key: number]: number[] } = {
+    2: [0, 10], // Red, Light Purple - maximum contrast
+    3: [0, 5, 12], // Red, Plum, Light Blue
+    4: [0, 5, 12, 8], // Red, Plum, Light Blue, Light Green
+    5: [0, 5, 12, 8, 14], // Add Golden Yellow
+    6: [0, 5, 12, 8, 14, 2], // Add Blue
+    7: [0, 5, 12, 8, 14, 2, 15], // Add Medium Purple
+    8: [0, 5, 12, 8, 14, 2, 15, 1], // Add Teal
+    9: [0, 5, 12, 8, 14, 2, 15, 1, 18], // Add Deep Orange
+    10: [0, 5, 12, 8, 14, 2, 15, 1, 18, 3], // Add Mint Green
+  };
+  
+  if (optimalSequences[count]) {
+    return optimalSequences[count].map(index => ROULETTE_COLORS[index]);
+  }
+  
+  // For other counts, use a distribution algorithm
+  return distributeColorsEvenly(count);
+}
+
+// Distribute colors evenly across the color wheel to maximize contrast
+function distributeColorsEvenly(count: number): string[] {
+  const colors: string[] = [];
+  const step = Math.floor(ROULETTE_COLORS.length / count);
+  let startIndex = 0;
+  
+  for (let i = 0; i < count; i++) {
+    const colorIndex = (startIndex + i * step) % ROULETTE_COLORS.length;
+    colors.push(ROULETTE_COLORS[colorIndex]);
+  }
+  
+  return colors;
 }
 
 export function selectRandomParticipant(participants: Participant[]): Participant | null {
