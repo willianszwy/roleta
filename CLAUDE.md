@@ -19,9 +19,12 @@ npm run preview      # Preview production build locally
 ## Architecture
 
 ### State Management
-- Uses custom `useRoulette` hook for centralized state management
+⚠️ **NEEDS REFACTORING**: Current implementation has race conditions with participant removal
+- Uses custom `useRoulette` and `useTaskRoulette` hooks 
+- **PROBLEM**: Timeouts used for state propagation causing unreliable participant removal
+- **SOLUTION NEEDED**: Implement Context API + useReducer for robust state management
 - Persistent storage via localStorage for participants and history
-- Main state includes participants, spin history, spinning status, and selected participant
+- Main state includes participants, tasks, spin history, spinning status, and selected participant
 
 ### Key Components Structure
 - **App.tsx**: Main component with 3-column responsive grid layout
@@ -162,3 +165,50 @@ box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 - **TypeScript interfaces** for all props and data structures
 - **Consistent naming**: PascalCase for components, camelCase for props
 - **Modular component structure** with clear separation of concerns
+
+## 🚨 URGENT REFACTORING NEEDED
+
+### Current State Management Issues
+The application currently suffers from **race conditions** in participant removal functionality:
+
+#### Problem Details
+- **File**: `src/App.tsx` (lines 173-233)
+- **Issue**: Uses `setTimeout` and manual filtering to prevent removed participants from being re-selected
+- **Symptoms**: Participants can win multiple tasks even when auto-removal is enabled
+- **Root Cause**: State propagation delays between hooks and manual filtering logic
+
+#### Proposed Solution: Context API + useReducer
+```typescript
+// Recommended structure:
+src/
+├── context/
+│   ├── RouletteContext.tsx     # Central state context
+│   ├── RouletteReducer.ts      # State reducer with actions
+│   └── RouletteProvider.tsx    # Provider component
+└── hooks/
+    ├── useRouletteContext.ts   # Hook to consume context
+    └── useLocalStorage.ts      # Keep for persistence
+```
+
+#### Implementation Priority
+1. **Create RouletteContext** with centralized state (participants, tasks, history, lastWinner)
+2. **Implement RouletteReducer** with actions: REMOVE_PARTICIPANT, SET_LAST_WINNER, SPIN_COMPLETE
+3. **Replace custom hooks** with context consumer hooks
+4. **Remove timeout-based logic** from App.tsx
+5. **Ensure atomic operations** for all state changes
+
+#### Benefits
+- ✅ **Eliminates race conditions** - all state changes are synchronous
+- ✅ **Predictable state updates** - reducer pattern ensures consistency
+- ✅ **Better debugging** - clear action history and state flow
+- ✅ **No external dependencies** - uses React's built-in Context API
+- ✅ **Maintainable code** - centralized logic instead of scattered hooks
+
+#### Debug Logs Currently Present
+The App.tsx contains extensive console.log statements for debugging the current issue. These should be removed after implementing the new state management.
+
+### Auto-Removal Feature Status
+- **Current Status**: ❌ Broken (participants can win multiple times)
+- **Expected Behavior**: Participant removed immediately after winning, cannot be selected again
+- **Test Case**: Import 10 participants, enable auto-removal, run multiple task assignments
+- **Failure Mode**: Same participant appears multiple times in task history
