@@ -10,7 +10,6 @@ interface TaskRouletteProps {
   taskHistory: TaskHistory[];
   isSpinning: boolean;
   selectedParticipant?: Participant;
-  selectedTask?: Task;
   currentTask?: Task;
   onSpin: () => Promise<{ participant: Participant; task: Task } | null>;
   onSpinComplete: (participant?: Participant, task?: Task) => void;
@@ -332,7 +331,6 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   taskHistory,
   isSpinning,
   selectedParticipant,
-  selectedTask,
   currentTask,
   onSpin,
   onSpinComplete,

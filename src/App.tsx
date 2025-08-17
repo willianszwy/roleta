@@ -378,7 +378,6 @@ function App() {
                     taskHistory={taskState.taskHistory}
                     isSpinning={taskState.isSpinning}
                     selectedParticipant={taskState.selectedParticipant}
-                    selectedTask={taskState.selectedTask}
                     currentTask={taskActions.getCurrentTask()}
                     onSpin={taskActions.spinTaskRoulette}
                     onSpinComplete={handleTaskSpinComplete}
