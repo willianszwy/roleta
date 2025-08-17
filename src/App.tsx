@@ -168,6 +168,50 @@ function App() {
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [lastWinner, setLastWinner] = useState<{participant: Participant, mode: 'participants' | 'tasks'} | null>(null);
+
+  // Custom spin functions that handle removal and provide feedback
+  const handleParticipantSpin = async (): Promise<Participant | null> => {
+    console.log('🎲 HandleParticipantSpin called');
+    console.log('🏆 LastWinner:', lastWinner);
+    console.log('⚙️ AutoRemoveWinner:', settings.autoRemoveWinner);
+    
+    // Remove previous winner if exists
+    if (lastWinner && settings.autoRemoveWinner && lastWinner.mode === 'participants') {
+      console.log('🗑️ Removing previous winner:', lastWinner.participant.name);
+      actions.removeParticipant(lastWinner.participant.id);
+      setLastWinner(null);
+      
+      // Give time for UI to update
+      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('✅ Removal complete, proceeding with spin');
+    }
+    
+    // Now perform the normal spin
+    console.log('🎰 Starting normal spin');
+    return actions.spinRoulette();
+  };
+
+  const handleTaskSpin = async (): Promise<{ participant: Participant; task: Task } | null> => {
+    console.log('🎯 HandleTaskSpin called');
+    console.log('🏆 LastWinner:', lastWinner);
+    console.log('⚙️ AutoRemoveWinner:', settings.autoRemoveWinner);
+    
+    // Remove previous winner if exists
+    if (lastWinner && settings.autoRemoveWinner && lastWinner.mode === 'tasks') {
+      console.log('🗑️ Removing previous winner:', lastWinner.participant.name);
+      taskActions.removeParticipant(lastWinner.participant.id);
+      setLastWinner(null);
+      
+      // Give time for UI to update
+      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('✅ Removal complete, proceeding with spin');
+    }
+    
+    // Now perform the normal spin
+    console.log('🎰 Starting normal task spin');
+    return taskActions.spinTaskRoulette();
+  };
 
   const handleSpinComplete = (selected?: Participant) => {
     actions.finishSpin(selected);
@@ -181,12 +225,10 @@ function App() {
         setShowWinnerModal(true);
       }
       
-      // Remove winner immediately if enabled
+      // Store last winner for next spin removal
       if (settings.autoRemoveWinner) {
-        // Remove after modal closes or after 2 seconds if no modal
-        setTimeout(() => {
-          actions.removeParticipant(selected.id);
-        }, settings.showWinnerModal ? (settings.winnerDisplayDuration * 1000) + 500 : 2000);
+        console.log('💾 Storing winner for removal:', selected.name);
+        setLastWinner({ participant: selected, mode: 'participants' });
       }
       
       // Trigger confetti animation only if modal is disabled
@@ -226,12 +268,10 @@ function App() {
         setShowWinnerModal(true);
       }
       
-      // Remove winner immediately if enabled
+      // Store last winner for next spin removal
       if (settings.autoRemoveWinner) {
-        // Remove after modal closes or after 2 seconds if no modal
-        setTimeout(() => {
-          taskActions.removeParticipant(selectedParticipant.id);
-        }, settings.showWinnerModal ? (settings.winnerDisplayDuration * 1000) + 500 : 2000);
+        console.log('💾 Storing task winner for removal:', selectedParticipant.name);
+        setLastWinner({ participant: selectedParticipant, mode: 'tasks' });
       }
       
       // Trigger confetti animation only if modal is disabled
@@ -325,7 +365,7 @@ function App() {
                     participants={state.participants}
                     isSpinning={state.isSpinning}
                     selectedParticipant={state.selectedParticipant}
-                    onSpin={actions.spinRoulette}
+                    onSpin={handleParticipantSpin}
                     onSpinComplete={handleSpinComplete}
                   />
                 ) : (
@@ -336,7 +376,7 @@ function App() {
                     isSpinning={taskState.isSpinning}
                     selectedParticipant={taskState.selectedParticipant}
                     currentTask={taskActions.getCurrentTask()}
-                    onSpin={taskActions.spinTaskRoulette}
+                    onSpin={handleTaskSpin}
                     onSpinComplete={handleTaskSpinComplete}
                   />
                 )}
