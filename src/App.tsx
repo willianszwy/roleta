@@ -168,48 +168,6 @@ function App() {
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [lastWinner, setLastWinner] = useState<{participant: Participant, mode: 'participants' | 'tasks'} | null>(null);
-
-  const removePreviousWinner = () => {
-    if (lastWinner && settings.autoRemoveWinner) {
-      if (lastWinner.mode === 'participants') {
-        actions.removeParticipant(lastWinner.participant.id);
-      } else {
-        taskActions.removeParticipant(lastWinner.participant.id);
-      }
-      setLastWinner(null);
-    }
-  };
-
-  const handleParticipantSpin = async () => {
-    // Check if we need to remove previous winner
-    const hadPreviousWinner = lastWinner && settings.autoRemoveWinner;
-    
-    // Remove previous winner first if enabled
-    removePreviousWinner();
-    
-    // Small delay to show the removal
-    if (hadPreviousWinner) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-    
-    return actions.spinRoulette();
-  };
-
-  const handleTaskSpin = async () => {
-    // Check if we need to remove previous winner
-    const hadPreviousWinner = lastWinner && settings.autoRemoveWinner;
-    
-    // Remove previous winner first if enabled
-    removePreviousWinner();
-    
-    // Small delay to show the removal
-    if (hadPreviousWinner) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-    
-    return taskActions.spinTaskRoulette();
-  };
 
   const handleSpinComplete = (selected?: Participant) => {
     actions.finishSpin(selected);
@@ -223,9 +181,12 @@ function App() {
         setShowWinnerModal(true);
       }
       
-      // Store last winner for future removal
+      // Remove winner immediately if enabled
       if (settings.autoRemoveWinner) {
-        setLastWinner({ participant: selected, mode: 'participants' });
+        // Remove after modal closes or after 2 seconds if no modal
+        setTimeout(() => {
+          actions.removeParticipant(selected.id);
+        }, settings.showWinnerModal ? (settings.winnerDisplayDuration * 1000) + 500 : 2000);
       }
       
       // Trigger confetti animation only if modal is disabled
@@ -265,9 +226,12 @@ function App() {
         setShowWinnerModal(true);
       }
       
-      // Store last winner for future removal
+      // Remove winner immediately if enabled
       if (settings.autoRemoveWinner) {
-        setLastWinner({ participant: selectedParticipant, mode: 'tasks' });
+        // Remove after modal closes or after 2 seconds if no modal
+        setTimeout(() => {
+          taskActions.removeParticipant(selectedParticipant.id);
+        }, settings.showWinnerModal ? (settings.winnerDisplayDuration * 1000) + 500 : 2000);
       }
       
       // Trigger confetti animation only if modal is disabled
@@ -361,7 +325,7 @@ function App() {
                     participants={state.participants}
                     isSpinning={state.isSpinning}
                     selectedParticipant={state.selectedParticipant}
-                    onSpin={handleParticipantSpin}
+                    onSpin={actions.spinRoulette}
                     onSpinComplete={handleSpinComplete}
                   />
                 ) : (
@@ -372,7 +336,7 @@ function App() {
                     isSpinning={taskState.isSpinning}
                     selectedParticipant={taskState.selectedParticipant}
                     currentTask={taskActions.getCurrentTask()}
-                    onSpin={handleTaskSpin}
+                    onSpin={taskActions.spinTaskRoulette}
                     onSpinComplete={handleTaskSpinComplete}
                   />
                 )}
