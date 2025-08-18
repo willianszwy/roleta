@@ -1,6 +1,6 @@
-# 🎰 LuckyWheel
+# 🎯 TaskRoulette
 
-Uma aplicação moderna e interativa de roleta para sorteios justos e divertidos!
+Uma aplicação moderna e interativa para distribuição justa de tarefas via roleta!
 
 [![Demo](https://img.shields.io/badge/🌐_Demo-Live-success)](https://willianszwy.github.io/roleta/)
 [![React](https://img.shields.io/badge/React-19.1.1-61dafb)](https://reactjs.org/)
@@ -9,9 +9,10 @@ Uma aplicação moderna e interativa de roleta para sorteios justos e divertidos
 
 ## ✨ Funcionalidades
 
-### 🎯 **Dois Modos de Sorteio**
-- **Modo Participantes**: Sorteio clássico entre pessoas
-- **Modo Tarefas**: Sorteia responsáveis para tarefas específicas com sistema de fila
+### 🎯 **Foco em Distribuição de Tarefas**
+- **Sistema Principal**: Distribuição justa de tarefas entre participantes
+- **Sistema de Fila**: Tarefas são atribuídas automaticamente em ordem
+- **Modo Participantes**: Sorteio clássico entre pessoas (secundário)
 
 ### 🎨 **Interface & Design**
 - **Design Glassmorphism**: Interface moderna com efeitos de vidro e blur
@@ -32,7 +33,7 @@ Uma aplicação moderna e interativa de roleta para sorteios justos e divertidos
 
 ## 🚀 Demo
 
-Experimente agora: [**LuckyWheel Live Demo**](https://willianszwy.github.io/roleta/)
+Experimente agora: [**TaskRoulette Live Demo**](https://willianszwy.github.io/roleta/)
 
 ## 🛠️ Tecnologias
 

@@ -1,6 +1,6 @@
-# Performance Optimization - LuckyWheel
+# Performance Optimization - TaskRoulette
 
-Documentação completa das otimizações de performance implementadas na aplicação LuckyWheel.
+Documentação completa das otimizações de performance implementadas na aplicação TaskRoulette.
 
 ## 🎯 Objetivos Alcançados
 
@@ -252,4 +252,4 @@ npm run preview        # Production preview
 
 **Status**: ✅ **Performance Optimizations Complete**
 
-A aplicação LuckyWheel agora está significativamente mais rápida e eficiente, com uma arquitetura otimizada para crescimento e manutenibilidade!
+A aplicação TaskRoulette agora está significativamente mais rápida e eficiente, com uma arquitetura otimizada para crescimento e manutenibilidade!

@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('LuckyWheel Roulette Application', () => {
+test.describe('TaskRoulette Application', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
   test('should load the application', async ({ page }) => {
     // Verify page title
-    await expect(page).toHaveTitle(/LuckyWheel/);
+    await expect(page).toHaveTitle(/TaskRoulette/);
     
     // Verify main heading
-    await expect(page.locator('h1')).toContainText('LuckyWheel');
+    await expect(page.locator('h1')).toContainText('TaskRoulette');
   });
 
   test('should add participants and show in roulette', async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe('LuckyWheel Roulette Application', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     
     // Verify app still works on mobile
-    await expect(page.locator('h1')).toContainText('LuckyWheel');
+    await expect(page.locator('h1')).toContainText('TaskRoulette');
     
     // Open side panel (should be full width on mobile)
     await page.getByRole('button', { name: /menu/i }).click();

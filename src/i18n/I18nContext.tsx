@@ -38,7 +38,7 @@ export function I18nProvider({ children, config: userConfig }: I18nProviderProps
   
   // Load saved locale from localStorage or detect from browser
   const [storedLocale, setStoredLocale] = useLocalStorage<SupportedLocale>(
-    'luckywheel-locale',
+    'taskroulette-locale',
     detectUserLocale(config.supportedLocales, config.defaultLocale)
   );
   

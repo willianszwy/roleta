@@ -1,6 +1,6 @@
-# Accessibility Implementation - LuckyWheel
+# Accessibility Implementation - TaskRoulette
 
-Documentação completa das melhorias de acessibilidade implementadas na aplicação LuckyWheel.
+Documentação completa das melhorias de acessibilidade implementadas na aplicação TaskRoulette.
 
 ## 🎯 Objetivos Alcançados
 
@@ -592,9 +592,9 @@ export const SkipLinks: React.FC = () => {
 return (
   <>
     <SkipLinks />
-    <AppContainer role="application" aria-label="LuckyWheel - Aplicação de Sorteios">
+    <AppContainer role="application" aria-label="TaskRoulette - Distribuição de Tarefas">
       <AppHeader role="banner">
-        <HeaderTitle>LuckyWheel</HeaderTitle>
+        <HeaderTitle>TaskRoulette</HeaderTitle>
         <HeaderMenuButton
           aria-label={isPanelOpen ? 'Fechar painel de navegação' : 'Abrir painel de navegação'}
           aria-expanded={isPanelOpen}
@@ -884,4 +884,4 @@ useKeyboardNavigation({
 
 **Status**: ✅ **Accessibility Implementation Complete**
 
-A aplicação LuckyWheel agora atende aos mais altos padrões de acessibilidade, garantindo uma experiência inclusiva para todos os usuários!
+A aplicação TaskRoulette agora atende aos mais altos padrões de acessibilidade, garantindo uma experiência inclusiva para todos os usuários!

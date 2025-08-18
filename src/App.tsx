@@ -174,7 +174,7 @@ const defaultSettings: SettingsConfig = {
 
 function App() {
   const { state, actions } = useRouletteContext();
-  const [settings, setSettings] = useLocalStorage<SettingsConfig>('luckywheel-settings', defaultSettings);
+  const [settings, setSettings] = useLocalStorage<SettingsConfig>('taskroulette-settings', defaultSettings);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
@@ -274,7 +274,7 @@ function App() {
     <>
       <GlobalStyles />
       <SkipLinks />
-      <AppContainer role="application" aria-label="LuckyWheel - Aplicação de Sorteios">
+      <AppContainer role="application" aria-label="TaskRoulette - Distribuição de Tarefas">
         <AppHeader
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

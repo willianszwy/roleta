@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React + TypeScript + Vite roulette application called "LuckyWheel". It's a modern lottery/spin wheel app that allows users to add participants, spin a roulette wheel, and track winners.
+This is a React + TypeScript + Vite roulette application called "TaskRoulette". It's a modern task assignment app that allows users to add participants, add tasks, and fairly distribute tasks to participants via a spinning roulette wheel.
 
 ## Common Commands
 

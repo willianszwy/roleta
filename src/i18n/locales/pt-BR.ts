@@ -2,8 +2,8 @@ import type { Translation } from '../types';
 
 export const ptBR: Translation = {
   // App general
-  'app.title': 'LuckyWheel',
-  'app.description': 'Aplicação de sorteios e atribuição de tarefas',
+  'app.title': 'TaskRoulette',
+  'app.description': 'Aplicação para distribuição justa de tarefas',
   
   // Navigation
   'nav.participants': 'Participantes',

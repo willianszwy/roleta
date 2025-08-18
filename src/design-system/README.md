@@ -1,6 +1,6 @@
-# LuckyWheel Design System
+# TaskRoulette Design System
 
-Um sistema de design robusto e reutilizável para a aplicação LuckyWheel, baseado nos princípios de glassmorphism e design moderno.
+Um sistema de design robusto e reutilizável para a aplicação TaskRoulette, baseado nos princípios de glassmorphism e design moderno.
 
 ## 🎯 Objetivos
 

@@ -1,4 +1,4 @@
-// Design tokens for LuckyWheel application
+// Design tokens for TaskRoulette application
 export const tokens = {
   // Color palette
   colors: {

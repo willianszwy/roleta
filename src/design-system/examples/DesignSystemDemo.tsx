@@ -60,7 +60,7 @@ export const DesignSystemDemo: React.FC = () => {
 
   return (
     <DemoContainer>
-      <SectionTitle>LuckyWheel Design System</SectionTitle>
+      <SectionTitle>TaskRoulette Design System</SectionTitle>
       
       {/* Responsive Info */}
       <Card padding="sm" variant="outlined">

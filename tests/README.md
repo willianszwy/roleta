@@ -1,6 +1,6 @@
-# Testing Strategy - LuckyWheel
+# Testing Strategy - TaskRoulette
 
-Uma estratégia abrangente de testes para garantir qualidade, estabilidade e confiabilidade da aplicação LuckyWheel.
+Uma estratégia abrangente de testes para garantir qualidade, estabilidade e confiabilidade da aplicação TaskRoulette.
 
 ## 🎯 Objetivos
 
@@ -227,4 +227,4 @@ Exemplo de workflow:
 
 **Status**: ✅ **Estratégia Implementada e Funcional**
 
-A base sólida de testes está estabelecida, permitindo desenvolvimento seguro e confiável da aplicação LuckyWheel!
+A base sólida de testes está estabelecida, permitindo desenvolvimento seguro e confiável da aplicação TaskRoulette!

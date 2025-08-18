@@ -2,8 +2,8 @@ import type { Translation } from '../types';
 
 export const enUS: Translation = {
   // App general
-  'app.title': 'LuckyWheel',
-  'app.description': 'Lottery and task assignment application',
+  'app.title': 'TaskRoulette',
+  'app.description': 'Fair task distribution application',
   
   // Navigation
   'nav.participants': 'Participants',
