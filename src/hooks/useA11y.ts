@@ -138,7 +138,7 @@ export function useKeyboardNavigation(handlers: {
 export function useScreenReaderAnnouncements() {
   const [announcements, setAnnouncements] = useState<string[]>([]);
 
-  const announce = (message: string, _priority: 'polite' | 'assertive' = 'polite') => {
+  const announce = (message: string) => {
     setAnnouncements(prev => [...prev, message]);
     
     // Limpar anúncio após um tempo

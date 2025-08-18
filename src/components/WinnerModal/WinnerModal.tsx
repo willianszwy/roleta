@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import confetti from 'canvas-confetti';
 import type { Participant, Task } from '../../types';
+import { useI18n } from '../../i18n';
 
 const sparkleAnimation = keyframes`
   0%, 100% { opacity: 0; transform: scale(0); }
@@ -36,6 +37,7 @@ export function WinnerModal({
   onClose,
   mode = 'participants'
 }: WinnerModalProps) {
+  const { t } = useI18n();
   const [sparkles, setSparkles] = useState<Array<{x: number, y: number, delay: number}>>([]);
 
   useEffect(() => {
@@ -188,7 +190,7 @@ export function WinnerModal({
             <button
               onClick={onClose}
               autoFocus
-              aria-label="Fechar modal do vencedor"
+              aria-label={t('a11y.closeModal')}
               style={{
                 background: 'rgba(102, 126, 234, 0.2)',
                 border: '1px solid rgba(102, 126, 234, 0.4)',
@@ -201,7 +203,7 @@ export function WinnerModal({
                 marginTop: '1rem'
               }}
             >
-              Fechar
+              {t('action.close')}
             </button>
 
             {autoCloseDuration > 0 && (

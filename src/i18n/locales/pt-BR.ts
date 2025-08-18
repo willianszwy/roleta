@@ -80,6 +80,9 @@ export const ptBR: Translation = {
   'history.participant': 'Participante',
   'history.removeEntry': 'Remover entrada',
   'history.export': 'Exportar histórico',
+  'history.clearConfirm': 'Limpar todo o histórico?',
+  'history.clearTaskConfirm': 'Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.',
+  'history.noDraws': 'Nenhum sorteio realizado ainda',
   
   // Settings
   'settings.title': 'Configurações',
@@ -140,6 +143,10 @@ export const ptBR: Translation = {
   'action.import': 'Importar',
   'action.reset': 'Resetar',
   'action.spin': 'Girar',
+  'action.close': 'Fechar',
+  'action.options': 'Opções ⋮',
+  'action.clearAll': 'Limpar todos',
+  'action.importList': 'Importar Lista',
   
   // Status
   'status.loading': 'Carregando...',

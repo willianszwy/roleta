@@ -80,6 +80,9 @@ export const frFR: Translation = {
   'history.participant': 'Participant',
   'history.removeEntry': 'Supprimer l\'entrée',
   'history.export': 'Exporter l\'historique',
+  'history.clearConfirm': 'Effacer tout l\'historique?',
+  'history.clearTaskConfirm': 'Êtes-vous sûr de vouloir effacer tout l\'historique? Cette action ne peut pas être annulée.',
+  'history.noDraws': 'Aucun tirage effectué encore',
   
   // Settings
   'settings.title': 'Paramètres',
@@ -140,6 +143,10 @@ export const frFR: Translation = {
   'action.import': 'Importer',
   'action.reset': 'Réinitialiser',
   'action.spin': 'Tourner',
+  'action.close': 'Fermer',
+  'action.options': 'Options ⋮',
+  'action.clearAll': 'Tout effacer',
+  'action.importList': 'Importer Liste',
   
   // Status
   'status.loading': 'Chargement...',

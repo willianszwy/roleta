@@ -59,21 +59,21 @@ const baseInputStyles = css`
   border-radius: ${tokens.borderRadius.lg};
   background: ${tokens.colors.glass.primary};
   backdrop-filter: blur(8px);
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.9);
   transition: all ${tokens.transitions.normal};
   width: 100%;
   
   &::placeholder {
-    color: #6b7280;
-    font-size: ${tokens.typography.sizes.xs};
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
   }
   
   &:focus {
     outline: none;
     border-color: rgba(102, 126, 234, 0.4);
     box-shadow: ${tokens.shadows.glow};
-    background: ${tokens.colors.glass.secondary};
-    color: #111827;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 1);
   }
   
   &:disabled {

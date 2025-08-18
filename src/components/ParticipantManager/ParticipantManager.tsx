@@ -41,56 +41,7 @@ const AddForm = styled.form`
   margin-bottom: ${tokens.spacing.xl};
 `;
 
-const Input = styled.input`
-  flex: 1;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  color: #1f2937;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  
-  &::placeholder {
-    color: #6b7280;
-    font-size: 0.8rem;
-  }
-  
-  &:focus {
-    outline: none;
-    border-color: rgba(102, 126, 234, 0.4);
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-    background: rgba(255, 255, 255, 0.12);
-    color: #111827;
-  }
-`;
 
-const AddButton = styled(motion.button)`
-  background: rgba(102, 126, 234, 0.2);
-  border: 1px solid rgba(102, 126, 234, 0.4);
-  border-radius: 6px;
-  color: #a5b4fc;
-  padding: 0.6rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.3s ease;
-  
-  &:hover:not(:disabled) {
-    background: rgba(102, 126, 234, 0.3);
-    border-color: rgba(102, 126, 234, 0.6);
-  }
-  
-  &:disabled {
-    background: rgba(156, 163, 175, 0.2);
-    border-color: rgba(156, 163, 175, 0.4);
-    color: rgba(156, 163, 175, 0.6);
-    cursor: not-allowed;
-  }
-`;
 
 const ParticipantsList = styled.div`
   flex: 1;
@@ -317,34 +268,6 @@ const BulkTitle = styled.h4`
   gap: 0.5rem;
 `;
 
-const BulkTextarea = styled.textarea`
-  width: 100%;
-  min-height: 80px;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  color: #1f2937;
-  font-size: 0.875rem;
-  font-weight: 500;
-  font-family: inherit;
-  resize: vertical;
-  transition: all 0.3s ease;
-  
-  &::placeholder {
-    color: #6b7280;
-    font-size: 0.8rem;
-  }
-  
-  &:focus {
-    outline: none;
-    border-color: rgba(102, 126, 234, 0.4);
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-    background: rgba(255, 255, 255, 0.12);
-    color: #111827;
-  }
-`;
 
 const BulkActions = styled.div`
   display: flex;
@@ -352,44 +275,6 @@ const BulkActions = styled.div`
   margin-top: ${tokens.spacing.md};
 `;
 
-const BulkButton = styled(motion.button)<{ variant?: 'primary' | 'secondary' }>`
-  background: ${props => props.variant === 'secondary' 
-    ? 'rgba(255, 255, 255, 0.1)' 
-    : 'rgba(102, 126, 234, 0.2)'
-  };
-  border: 1px solid ${props => props.variant === 'secondary' 
-    ? 'rgba(255, 255, 255, 0.2)' 
-    : 'rgba(102, 126, 234, 0.4)'
-  };
-  border-radius: 6px;
-  color: ${props => props.variant === 'secondary' 
-    ? 'rgba(255, 255, 255, 0.9)' 
-    : '#a5b4fc'
-  };
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover:not(:disabled) {
-    background: ${props => props.variant === 'secondary' 
-      ? 'rgba(255, 255, 255, 0.15)' 
-      : 'rgba(102, 126, 234, 0.3)'
-    };
-    border-color: ${props => props.variant === 'secondary' 
-      ? 'rgba(255, 255, 255, 0.3)' 
-      : 'rgba(102, 126, 234, 0.6)'
-    };
-  }
-  
-  &:disabled {
-    background: rgba(156, 163, 175, 0.2);
-    border-color: rgba(156, 163, 175, 0.4);
-    color: rgba(156, 163, 175, 0.6);
-    cursor: not-allowed;
-  }
-`;
 
 const BulkHint = styled.p`
   font-size: 0.75rem;
@@ -539,7 +424,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
           variant="secondary"
           onClick={toggleBulkImport}
         >
-          {showBulkImport ? 'Fechar' : 'Importar Lista'}
+          {showBulkImport ? t('action.close') : t('action.importList')}
         </Button>
       </BulkActions>
 
@@ -576,7 +461,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
                   onClick={handleClearBulk}
                   disabled={!bulkValue.trim()}
                 >
-                  Limpar
+                  {t('action.clear')}
                 </Button>
               </BulkActions>
             </BulkImportSection>
@@ -635,7 +520,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
             whileTap={{ scale: 0.98 }}
             style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
           >
-            Opções ⋮
+            {t('action.options')}
           </MenuButton>
         </MenuContainer>
       )}
@@ -655,7 +540,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Limpar todos
+            {t('action.clearAll')}
           </MenuItem>
         </PortalDropdown>,
         document.body

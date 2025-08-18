@@ -80,6 +80,9 @@ export const enUS: Translation = {
   'history.participant': 'Participant',
   'history.removeEntry': 'Remove entry',
   'history.export': 'Export history',
+  'history.clearConfirm': 'Clear entire history?',
+  'history.clearTaskConfirm': 'Are you sure you want to clear all history? This action cannot be undone.',
+  'history.noDraws': 'No draws performed yet',
   
   // Settings
   'settings.title': 'Settings',
@@ -140,6 +143,10 @@ export const enUS: Translation = {
   'action.import': 'Import',
   'action.reset': 'Reset',
   'action.spin': 'Spin',
+  'action.close': 'Close',
+  'action.options': 'Options ⋮',
+  'action.clearAll': 'Clear all',
+  'action.importList': 'Import List',
   
   // Status
   'status.loading': 'Loading...',

@@ -81,6 +81,9 @@ export type TranslationKey =
   | 'history.participant'
   | 'history.removeEntry'
   | 'history.export'
+  | 'history.clearConfirm'
+  | 'history.clearTaskConfirm'
+  | 'history.noDraws'
   
   // Settings
   | 'settings.title'
@@ -141,6 +144,10 @@ export type TranslationKey =
   | 'action.import'
   | 'action.reset'
   | 'action.spin'
+  | 'action.close'
+  | 'action.options'
+  | 'action.clearAll'
+  | 'action.importList'
   
   // Status
   | 'status.loading'

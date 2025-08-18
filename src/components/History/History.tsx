@@ -279,7 +279,7 @@ export const History: React.FC<HistoryProps> = ({
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('Limpar todo o histórico?')) {
+    if (window.confirm(t('history.clearConfirm'))) {
       onClearHistory();
     }
     setMenuOpen(false);
@@ -330,7 +330,7 @@ export const History: React.FC<HistoryProps> = ({
   return (
     <>
       <Header>
-        <Title>Histórico</Title>
+        <Title>{t('history.title')}</Title>
         {history.length > 0 && (
           <HistoryCount>{history.length}</HistoryCount>
         )}
@@ -340,7 +340,7 @@ export const History: React.FC<HistoryProps> = ({
         {history.length === 0 ? (
           <EmptyState>
             <EmptyIcon>📜</EmptyIcon>
-            <EmptyText>Nenhum sorteio realizado ainda</EmptyText>
+            <EmptyText>{t('history.noDraws')}</EmptyText>
           </EmptyState>
         ) : (
           displayedHistory.map((item) => (
@@ -395,7 +395,7 @@ export const History: React.FC<HistoryProps> = ({
             whileTap={{ scale: 0.98 }}
             style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
           >
-            Opções ⋮
+            {t('action.options')}
           </MenuButton>
         </MenuContainer>
       )}
@@ -415,7 +415,7 @@ export const History: React.FC<HistoryProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Limpar histórico
+            {t('history.clear')}
           </MenuItem>
         </PortalDropdown>,
         document.body

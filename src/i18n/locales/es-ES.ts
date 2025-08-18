@@ -80,6 +80,9 @@ export const esES: Translation = {
   'history.participant': 'Participante',
   'history.removeEntry': 'Eliminar entrada',
   'history.export': 'Exportar historial',
+  'history.clearConfirm': '¿Limpiar todo el historial?',
+  'history.clearTaskConfirm': '¿Está seguro de que desea limpiar todo el historial? Esta acción no se puede deshacer.',
+  'history.noDraws': 'Ningún sorteo realizado aún',
   
   // Settings
   'settings.title': 'Configuración',
@@ -140,6 +143,10 @@ export const esES: Translation = {
   'action.import': 'Importar',
   'action.reset': 'Restablecer',
   'action.spin': 'Girar',
+  'action.close': 'Cerrar',
+  'action.options': 'Opciones ⋮',
+  'action.clearAll': 'Limpiar todo',
+  'action.importList': 'Importar Lista',
   
   // Status
   'status.loading': 'Cargando...',

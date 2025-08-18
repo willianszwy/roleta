@@ -203,7 +203,7 @@ function App() {
       setCurrentWinner(selected);
       
       // Announce winner to screen readers
-      announce(t('a11y.spinCompleted', { winner: selected.name }), 'assertive');
+      announce(t('a11y.spinCompleted', { winner: selected.name }));
       
       // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {
@@ -233,7 +233,7 @@ function App() {
       setCurrentTask(selectedTask);
       
       // Announce task assignment to screen readers
-      announce(t('a11y.taskAssigned', { participant: selectedParticipant.name, task: selectedTask.name }), 'assertive');
+      announce(t('a11y.taskAssigned', { participant: selectedParticipant.name, task: selectedTask.name }));
       
       // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {

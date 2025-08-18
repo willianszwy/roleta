@@ -300,7 +300,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   const [currentPage, setCurrentPage] = useState(0);
 
   const handleClear = () => {
-    if (window.confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
+    if (window.confirm(t('history.clearTaskConfirm'))) {
       onClearHistory();
     }
   };
@@ -387,7 +387,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Limpar
+          {t('history.clear')}
         </ActionButton>
       </ActionsContainer>
 
