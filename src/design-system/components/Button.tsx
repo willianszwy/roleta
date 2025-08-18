@@ -18,6 +18,13 @@ interface ButtonProps {
   onClick?: () => void;
   className?: string;
   style?: React.CSSProperties;
+  // Accessibility props
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-expanded'?: boolean;
+  'aria-pressed'?: boolean;
+  'aria-controls'?: string;
+  role?: string;
 }
 
 const getVariantStyles = (variant: ButtonVariant) => {
@@ -148,6 +155,12 @@ const StyledButton = styled(motion.button).withConfig({
   &:focus {
     outline: none;
     box-shadow: ${tokens.shadows.glow};
+    position: relative;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
   }
   
   ${props => props.loading && css`
@@ -182,7 +195,19 @@ export const Button: React.FC<ButtonProps> = ({
   onClick,
   className,
   style,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-expanded': ariaExpanded,
+  'aria-pressed': ariaPressed,
+  'aria-controls': ariaControls,
+  role,
 }) => {
+  const handleClick = () => {
+    if (!disabled && !loading && onClick) {
+      onClick();
+    }
+  };
+
   return (
     <StyledButton
       variant={variant}
@@ -191,9 +216,16 @@ export const Button: React.FC<ButtonProps> = ({
       loading={loading}
       disabled={disabled || loading}
       type={type}
-      onClick={onClick}
+      onClick={handleClick}
       className={className}
       style={style}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-expanded={ariaExpanded}
+      aria-pressed={ariaPressed}
+      aria-controls={ariaControls}
+      aria-busy={loading}
+      role={role}
       whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
       whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
     >

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
 import { formatDate } from '../../utils/helpers';
+import { useI18n } from '../../i18n';
 
 interface HistoryProps {
   history: RouletteHistory[];
@@ -258,6 +259,7 @@ export const History: React.FC<HistoryProps> = ({
   onRemoveFromRoulette,
   onClearHistory,
 }) => {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -270,7 +272,7 @@ export const History: React.FC<HistoryProps> = ({
   );
 
   const handleRemoveFromRoulette = (participantId: string, participantName: string) => {
-    if (window.confirm(`Remover "${participantName}" da roleta?`)) {
+    if (window.confirm(t('participants.remove') + ` "${participantName}"?`)) {
       onRemoveFromRoulette(participantId);
     }
     setOpenItemMenu(null);
@@ -438,7 +440,7 @@ export const History: React.FC<HistoryProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Remover da roleta
+            {t('participants.remove')}
           </MenuItem>
         </PortalDropdown>,
         document.body

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, RouletteHistory, Task, TaskHistory as TaskHistoryType } from '../../types';
 import type { SettingsConfig } from '../Settings/Settings';
 import { Loading } from '../Loading/Loading';
+import { useI18n } from '../../i18n';
 
 // Lazy load components that are not immediately visible
 const ParticipantManager = lazy(() => import('../ParticipantManager/ParticipantManager').then(module => ({ default: module.ParticipantManager })));
@@ -243,6 +244,7 @@ export function SidePanel({
   onSettingsChange,
   onResetSettings,
 }: SidePanelProps) {
+  const { t } = useI18n();
   const [activeSection, setActiveSection] = useState<'participants' | 'tasks' | 'history' | 'taskHistory' | 'settings'>('participants');
 
   return (
@@ -270,14 +272,14 @@ export function SidePanel({
                     active={activeSection === 'participants'}
                     onClick={() => setActiveSection('participants')}
                   >
-                    <span>Participantes</span>
+                    <span>{t('nav.participants')}</span>
                   </NavButton>
                   {settings.rouletteMode === 'tasks' && (
                     <NavButton
                       active={activeSection === 'tasks'}
                       onClick={() => setActiveSection('tasks')}
                     >
-                      <span>Tarefas</span>
+                      <span>{t('nav.tasks')}</span>
                     </NavButton>
                   )}
                   <NavButton

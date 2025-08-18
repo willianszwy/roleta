@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
 import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
+import { useI18n } from '../../i18n';
 
 interface ParticipantManagerProps {
   participants: Participant[];
@@ -404,6 +405,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
   onRemove,
   onClear,
 }) => {
+  const { t } = useI18n();
   const [inputValue, setInputValue] = useState('');
   const [bulkValue, setBulkValue] = useState('');
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -441,14 +443,14 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
   };
 
   const handleRemove = (id: string, name: string) => {
-    if (window.confirm(`Remover "${name}" dos participantes?`)) {
+    if (window.confirm(t('participants.remove') + ` "${name}"?`)) {
       onRemove(id);
     }
     setOpenItemMenu(null);
   };
 
   const handleClear = () => {
-    if (window.confirm('Remover todos os participantes?')) {
+    if (window.confirm(t('participants.clear') + '?')) {
       onClear();
     }
     setMenuOpen(false);
@@ -506,7 +508,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
   return (
     <>
       <Header>
-        <Title>👥 Participantes</Title>
+        <Title>{t('participants.title')}</Title>
         {participants.length > 0 && (
           <ParticipantCount>{participants.length}</ParticipantCount>
         )}
@@ -518,7 +520,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Nome..."
+            placeholder={t('participants.namePlaceholder')}
             maxLength={30}
             fullWidth
           />
@@ -528,7 +530,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
           disabled={!inputValue.trim()}
           variant="primary"
         >
-          Adicionar
+          {t('participants.add')}
         </Button>
       </AddForm>
 
@@ -550,16 +552,16 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
             transition={{ duration: 0.3 }}
           >
             <BulkImportSection>
-              <BulkTitle>Importar Participantes</BulkTitle>
+              <BulkTitle>{t('participants.import')}</BulkTitle>
               <TextArea
                 value={bulkValue}
                 onChange={(e) => setBulkValue(e.target.value)}
-                placeholder="Digite os nomes separados por linha ou vírgula:&#10;João Silva&#10;Maria Santos&#10;Pedro, Ana, Carlos"
+                placeholder={t('participants.bulkAddPlaceholder')}
                 fullWidth
                 rows={4}
               />
               <BulkHint>
-                Nomes duplicados receberão números automaticamente (ex: João, João (2), João (3))
+                {t('participants.bulkAddDescription')}
               </BulkHint>
               <BulkActions>
                 <Button
@@ -567,7 +569,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
                   disabled={!bulkValue.trim()}
                   variant="primary"
                 >
-                  Adicionar ({bulkValue.split(/[\n,]/).filter(n => n.trim()).length} nomes)
+                  {t('participants.bulkAdd')} ({bulkValue.split(/[\n,]/).filter(n => n.trim()).length} nomes)
                 </Button>
                 <Button
                   variant="secondary"
@@ -678,7 +680,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Remover participante
+            {t('participants.remove')}
           </MenuItem>
         </PortalDropdown>,
         document.body

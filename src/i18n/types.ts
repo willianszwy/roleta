@@ -1,0 +1,192 @@
+// Types for internationalization system
+export type SupportedLocale = 'pt-BR' | 'en-US' | 'es-ES' | 'fr-FR';
+
+export type TranslationKey = 
+  // App general
+  | 'app.title'
+  | 'app.description'
+  
+  // Navigation
+  | 'nav.participants'
+  | 'nav.tasks'
+  | 'nav.history'
+  | 'nav.settings'
+  | 'nav.openMenu'
+  | 'nav.closeMenu'
+  | 'nav.skipToContent'
+  | 'nav.skipToNavigation'
+  
+  // Participants
+  | 'participants.title'
+  | 'participants.add'
+  | 'participants.name'
+  | 'participants.namePlaceholder'
+  | 'participants.remove'
+  | 'participants.clear'
+  | 'participants.empty'
+  | 'participants.count'
+  | 'participants.import'
+  | 'participants.export'
+  | 'participants.bulkAdd'
+  | 'participants.bulkAddPlaceholder'
+  | 'participants.bulkAddDescription'
+  
+  // Tasks
+  | 'tasks.title'
+  | 'tasks.add'
+  | 'tasks.name'
+  | 'tasks.namePlaceholder'
+  | 'tasks.description'
+  | 'tasks.descriptionPlaceholder'
+  | 'tasks.remove'
+  | 'tasks.clear'
+  | 'tasks.empty'
+  | 'tasks.count'
+  | 'tasks.import'
+  | 'tasks.export'
+  | 'tasks.bulkAdd'
+  | 'tasks.bulkAddPlaceholder'
+  | 'tasks.bulkAddDescription'
+  | 'tasks.pending'
+  | 'tasks.completed'
+  | 'tasks.pendingCount'
+  | 'tasks.completedCount'
+  | 'tasks.noneDrawn'
+  | 'tasks.noTasks'
+  | 'tasks.drawResponsible'
+  | 'tasks.drawing'
+  | 'tasks.nextTask'
+  | 'tasks.nextLabel'
+  
+  // Roulette
+  | 'roulette.spin'
+  | 'roulette.spinning'
+  | 'roulette.noParticipants'
+  | 'roulette.noTasks'
+  | 'roulette.selectWinner'
+  | 'roulette.winner'
+  | 'roulette.taskAssigned'
+  | 'roulette.participantMode'
+  | 'roulette.taskMode'
+  
+  // History
+  | 'history.title'
+  | 'history.taskHistory'
+  | 'history.clear'
+  | 'history.empty'
+  | 'history.winner'
+  | 'history.task'
+  | 'history.date'
+  | 'history.time'
+  | 'history.participant'
+  | 'history.removeEntry'
+  | 'history.export'
+  
+  // Settings
+  | 'settings.title'
+  | 'settings.language'
+  | 'settings.showWinnerModal'
+  | 'settings.autoRemoveWinner'
+  | 'settings.winnerDisplayDuration'
+  | 'settings.rouletteMode'
+  | 'settings.reset'
+  | 'settings.resetConfirm'
+  | 'settings.theme'
+  | 'settings.accessibility'
+  | 'settings.performance'
+  | 'settings.displayDuration'
+  | 'settings.displayDurationDescription'
+  | 'settings.lotteryType'
+  | 'settings.lotteryTypeDescription'
+  | 'settings.luckyPerson'
+  | 'settings.unluckyPerson'
+  | 'settings.duration3s'
+  | 'settings.duration5s'
+  | 'settings.duration8s'
+  | 'settings.durationManual'
+  
+  // Modal/Dialog
+  | 'modal.close'
+  | 'modal.confirm'
+  | 'modal.cancel'
+  | 'modal.save'
+  | 'modal.delete'
+  
+  // Winner Modal
+  | 'winner.title'
+  | 'winner.taskTitle'
+  | 'winner.close'
+  | 'winner.closing'
+  | 'winner.willDo'
+  
+  // Validation/Errors
+  | 'validation.required'
+  | 'validation.minLength'
+  | 'validation.maxLength'
+  | 'validation.duplicate'
+  | 'error.generic'
+  | 'error.loadData'
+  | 'error.saveData'
+  | 'error.network'
+  
+  // Actions/Buttons
+  | 'action.add'
+  | 'action.remove'
+  | 'action.clear'
+  | 'action.save'
+  | 'action.cancel'
+  | 'action.edit'
+  | 'action.delete'
+  | 'action.export'
+  | 'action.import'
+  | 'action.reset'
+  | 'action.spin'
+  
+  // Status
+  | 'status.loading'
+  | 'status.saving'
+  | 'status.saved'
+  | 'status.error'
+  | 'status.success'
+  | 'status.completed'
+  | 'status.pending'
+  
+  // Accessibility
+  | 'a11y.closeModal'
+  | 'a11y.openMenu'
+  | 'a11y.closeMenu'
+  | 'a11y.loading'
+  | 'a11y.required'
+  | 'a11y.spinCompleted'
+  | 'a11y.taskAssigned'
+  | 'a11y.participantSelected';
+
+export interface TranslationValues {
+  [key: string]: string | number | boolean;
+}
+
+export type Translation = {
+  [K in TranslationKey]: string;
+}
+
+export interface Translations {
+  [locale: string]: Translation;
+}
+
+export interface I18nConfig {
+  defaultLocale: SupportedLocale;
+  fallbackLocale: SupportedLocale;
+  supportedLocales: SupportedLocale[];
+  debug?: boolean;
+}
+
+export interface I18nContextValue {
+  locale: SupportedLocale;
+  setLocale: (locale: SupportedLocale) => void;
+  t: (key: TranslationKey, values?: TranslationValues) => string;
+  isRTL: boolean;
+  formatDate: (date: Date) => string;
+  formatTime: (date: Date) => string;
+  formatDateTime: (date: Date) => string;
+  formatNumber: (num: number) => string;
+}

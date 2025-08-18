@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, Task, TaskHistory } from '../../types';
 import { calculateRouletteRotation, getContrastColor, getRouletteColors } from '../../utils/helpers';
+import { useI18n } from '../../i18n';
 
 interface TaskRouletteProps {
   participants: Participant[];
@@ -221,6 +222,19 @@ const TaskList = styled.div`
   }
 `;
 
+const NextTaskBadge = styled.div`
+  position: absolute;
+  top: -2px;
+  right: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+`;
+
 const TaskItem = styled(motion.div)<{ isCompleted?: boolean; isNext?: boolean }>`
   padding: 0.5rem 0.75rem;
   background: ${props => 
@@ -246,20 +260,6 @@ const TaskItem = styled(motion.div)<{ isCompleted?: boolean; isNext?: boolean }>
   
   ${props => props.isNext && !props.isCompleted && `
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-    
-    &::after {
-      content: 'PRÓXIMA';
-      position: absolute;
-      top: -2px;
-      right: 8px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 0.6rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
-    }
   `}
   
   &::before {
@@ -337,6 +337,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   onSpin,
   onSpinComplete,
 }) => {
+  const { t } = useI18n();
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
   const [spinState, setSpinState] = useState<'idle' | 'spinning' | 'completed'>('idle');
@@ -435,10 +436,10 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         </RouletteSection>
         
         <TaskSidebar>
-          <TaskSidebarTitle>Tarefas</TaskSidebarTitle>
-          <TaskCounter>0 pendentes • 0 concluídas</TaskCounter>
+          <TaskSidebarTitle>{t('tasks.title')}</TaskSidebarTitle>
+          <TaskCounter>{t('tasks.pendingCount', { count: 0 })} • {t('tasks.completedCount', { count: 0, plural: 's' })}</TaskCounter>
           <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>
-            Nenhuma tarefa adicionada ainda
+            {t('tasks.empty')}
           </div>
         </TaskSidebar>
       </RouletteContainer>
@@ -527,16 +528,16 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
           whileHover={!(isSpinning || !currentTask) ? { scale: 1.02 } : {}}
           whileTap={!(isSpinning || !currentTask) ? { scale: 0.98 } : {}}
         >
-          {isSpinning ? 'Sorteando...' : currentTask ? 'Sortear Responsável' : 'Sem tarefas'}
+          {isSpinning ? t('tasks.drawing') : currentTask ? t('tasks.drawResponsible') : t('tasks.noTasks')}
         </SpinButton>
 
       </RouletteSection>
 
       <TaskSidebar>
-        <TaskSidebarTitle>Lista de Tarefas</TaskSidebarTitle>
+        <TaskSidebarTitle>{t('tasks.title')}</TaskSidebarTitle>
         
         <TaskCounter>
-          {pendingTasks.length} aguardando • {completedTasks.length} sorteada{completedTasks.length !== 1 ? 's' : ''}
+          {t('tasks.pendingCount', { count: pendingTasks.length })} • {t('tasks.completedCount', { count: completedTasks.length, plural: completedTasks.length !== 1 ? 's' : '' })}
         </TaskCounter>
 
         <TaskList>
@@ -552,6 +553,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 transition={{ delay: index * 0.05 }}
               >
                 <TaskName isCompleted={false}>{task.name}</TaskName>
+                {index === 0 && <NextTaskBadge>{t('tasks.nextLabel')}</NextTaskBadge>}
               </TaskItem>
             ))}
             {completedTasks.map((task, index) => {

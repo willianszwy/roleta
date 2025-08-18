@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import type { TaskHistory as TaskHistoryType } from '../../types';
 import { exportTaskHistory } from '../../utils/taskExportHelpers';
+import { useI18n } from '../../i18n';
 
 interface TaskHistoryProps {
   taskHistory: TaskHistoryType[];
@@ -295,6 +296,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   taskHistory,
   onClearHistory,
 }) => {
+  const { t } = useI18n();
   const [currentPage, setCurrentPage] = useState(0);
 
   const handleClear = () => {
@@ -329,13 +331,13 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
     return (
       <>
         <Header>
-          <Title>Histórico de Tarefas</Title>
+          <Title>{t('history.taskHistory')}</Title>
           <HistoryCount>0</HistoryCount>
         </Header>
         
         <EmptyState>
           <EmptyIcon>·</EmptyIcon>
-          <EmptyText>Nenhuma tarefa foi sorteada ainda</EmptyText>
+          <EmptyText>{t('tasks.noneDrawn')}</EmptyText>
         </EmptyState>
       </>
     );
@@ -359,7 +361,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
         </StatItem>
         <StatItem>
           <StatValue>{stats.uniqueTasks}</StatValue>
-          <StatLabel>Tarefas</StatLabel>
+          <StatLabel>{t('tasks.title')}</StatLabel>
         </StatItem>
       </StatsContainer>
 
@@ -409,7 +411,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
             onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
             disabled={currentPage >= totalPages - 1}
           >
-            Próxima →
+            {t('tasks.nextTask')}
           </PaginationButton>
         </PaginationContainer>
       )}

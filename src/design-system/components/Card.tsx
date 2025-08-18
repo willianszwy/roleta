@@ -10,6 +10,13 @@ interface CardProps {
   hoverable?: boolean;
   className?: string;
   onClick?: () => void;
+  // Accessibility props
+  role?: string;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-expanded'?: boolean;
+  'aria-selected'?: boolean;
+  tabIndex?: number;
 }
 
 const getVariantStyles = (variant: 'glass' | 'solid' | 'outlined') => {
@@ -101,6 +108,18 @@ const StyledCard = styled(motion.div)<{
       `}
     }
   `}
+  
+  ${props => props.clickable && css`
+    &:focus {
+      outline: none;
+      box-shadow: ${tokens.shadows.glow};
+    }
+    
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
+    }
+  `}
 `;
 
 export const Card: React.FC<CardProps> = ({
@@ -110,16 +129,46 @@ export const Card: React.FC<CardProps> = ({
   hoverable = false,
   className,
   onClick,
+  role,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-expanded': ariaExpanded,
+  'aria-selected': ariaSelected,
+  tabIndex,
   ...props
 }) => {
+  const isClickable = !!onClick;
+  const cardRole = role || (isClickable ? 'button' : undefined);
+  const cardTabIndex = tabIndex !== undefined ? tabIndex : (isClickable ? 0 : undefined);
+  
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isClickable && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <StyledCard
       variant={variant}
       padding={padding}
       hoverable={hoverable}
-      clickable={!!onClick}
-      onClick={onClick}
+      clickable={isClickable}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       className={className}
+      role={cardRole}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-expanded={ariaExpanded}
+      aria-selected={ariaSelected}
+      tabIndex={cardTabIndex}
       whileHover={hoverable ? { scale: 1.02 } : undefined}
       whileTap={onClick ? { scale: 0.98 } : undefined}
       {...props}

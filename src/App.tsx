@@ -7,8 +7,11 @@ import { Roulette } from './components/Roulette/Roulette';
 import { TaskRoulette } from './components/TaskRoulette/TaskRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
 import { WinnerModal } from './components/WinnerModal/WinnerModal';
+import { SkipLinks } from './components/SkipLinks/SkipLinks';
 import { useRouletteContext } from './context/RouletteContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useScreenReaderAnnouncements } from './hooks/useA11y';
+import { useI18n } from './i18n';
 import type { Participant, Task } from './types';
 import type { SettingsConfig } from './components/Settings/Settings';
 
@@ -94,6 +97,16 @@ const HeaderMenuButton = styled(motion.button)`
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
   }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
 `;
 
 const MenuLine = styled(motion.div)<{ isOpen: boolean }>`
@@ -106,7 +119,7 @@ const MenuLine = styled(motion.div)<{ isOpen: boolean }>`
 
 
 
-const MainContent = styled.div`
+const MainContent = styled.main`
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -166,6 +179,8 @@ function App() {
   const [currentWinner, setCurrentWinner] = useState<Participant | null>(null);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const { announce, LiveRegion } = useScreenReaderAnnouncements();
+  const { t } = useI18n();
 
   // Set auto-remove setting in context when settings change
   React.useEffect(() => {
@@ -186,6 +201,9 @@ function App() {
     
     if (selected) {
       setCurrentWinner(selected);
+      
+      // Announce winner to screen readers
+      announce(t('a11y.spinCompleted', { winner: selected.name }), 'assertive');
       
       // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {
@@ -213,6 +231,9 @@ function App() {
     if (selectedParticipant && selectedTask) {
       setCurrentWinner(selectedParticipant);
       setCurrentTask(selectedTask);
+      
+      // Announce task assignment to screen readers
+      announce(t('a11y.taskAssigned', { participant: selectedParticipant.name, task: selectedTask.name }), 'assertive');
       
       // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {
@@ -252,17 +273,22 @@ function App() {
   return (
     <>
       <GlobalStyles />
-      <AppContainer>
+      <SkipLinks />
+      <AppContainer role="application" aria-label="LuckyWheel - Aplicação de Sorteios">
         <AppHeader
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          role="banner"
         >
-          <HeaderTitle>LuckyWheel</HeaderTitle>
+          <HeaderTitle>{t('app.title')}</HeaderTitle>
           <HeaderMenuButton
             onClick={togglePanel}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            aria-label={isPanelOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+            aria-expanded={isPanelOpen}
+            aria-controls="side-panel"
           >
             <MenuLine
               isOpen={isPanelOpen}
@@ -289,13 +315,16 @@ function App() {
         
         <Container>
 
-          <MainContent>
+          <MainContent id="main-content" tabIndex={-1}>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <RouletteSection>
+              <RouletteSection 
+                role="main" 
+                aria-label={settings.rouletteMode === 'participants' ? t('roulette.participantMode') : t('roulette.taskMode')}
+              >
                 {settings.rouletteMode === 'participants' ? (
                   <Roulette
                     participants={state.participants}
@@ -353,6 +382,9 @@ function App() {
           />
           
         </Container>
+        
+        {/* Live region for screen reader announcements */}
+        <LiveRegion />
       </AppContainer>
     </>
   );

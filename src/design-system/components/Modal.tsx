@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useId } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { tokens } from '../tokens';
+import { useFocusTrap } from '../../hooks/useA11y';
 
 interface ModalProps {
   isOpen: boolean;
@@ -12,6 +13,12 @@ interface ModalProps {
   maxWidth?: string;
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
+  // Accessibility props
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-labelledby'?: string;
+  role?: string;
+  initialFocus?: React.RefObject<HTMLElement>;
 }
 
 const Overlay = styled(motion.div)`
@@ -97,6 +104,16 @@ const CloseButton = styled.button`
     transform: translateY(0);
   }
   
+  &:focus {
+    outline: none;
+    box-shadow: ${tokens.shadows.glow};
+  }
+  
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+  
   &::before {
     content: '✕';
     font-size: 0.9rem;
@@ -140,7 +157,16 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = '480px',
   closeOnOverlayClick = true,
   closeOnEscape = true,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-labelledby': ariaLabelledBy,
+  role = 'dialog',
+  initialFocus,
 }) => {
+  const modalRef = useFocusTrap(isOpen);
+  const titleId = useId();
+  const descriptionId = useId();
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (!closeOnEscape) return;
     
@@ -158,15 +184,34 @@ export const Modal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      // Save current focus and manage body scroll
+      previousActiveElementRef.current = document.activeElement as HTMLElement;
       document.body.style.overflow = 'hidden';
+      
+      // Focus management
+      setTimeout(() => {
+        if (initialFocus?.current) {
+          initialFocus.current.focus();
+        } else if (modalRef.current) {
+          const firstFocusable = modalRef.current.querySelector(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          ) as HTMLElement;
+          firstFocusable?.focus();
+        }
+      }, 100);
     } else {
       document.body.style.overflow = 'unset';
+      
+      // Restore previous focus
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+      }
     }
 
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, initialFocus, modalRef]);
 
   return createPortal(
     <AnimatePresence>
@@ -177,8 +222,10 @@ export const Modal: React.FC<ModalProps> = ({
           animate="visible"
           exit="exit"
           onClick={closeOnOverlayClick ? onClose : undefined}
+          role="presentation"
         >
           <ModalContent
+            ref={modalRef as any}
             maxWidth={maxWidth}
             variants={modalVariants}
             initial="hidden"
@@ -190,21 +237,33 @@ export const Modal: React.FC<ModalProps> = ({
               stiffness: 300
             }}
             onClick={(e) => e.stopPropagation()}
+            role={role}
+            aria-modal="true"
+            aria-label={ariaLabel}
+            aria-labelledby={title ? (ariaLabelledBy || titleId) : ariaLabelledBy}
+            aria-describedby={ariaDescribedBy || descriptionId}
+            tabIndex={-1}
           >
             {title && (
               <ModalHeader>
-                <ModalTitle>{title}</ModalTitle>
-                <CloseButton onClick={onClose} />
+                <ModalTitle id={titleId}>{title}</ModalTitle>
+                <CloseButton 
+                  onClick={onClose}
+                  aria-label="Fechar modal"
+                  type="button"
+                />
               </ModalHeader>
             )}
             
-            <ModalBody>
+            <ModalBody id={descriptionId}>
               {children}
             </ModalBody>
             
             {!title && (
               <CloseButton 
                 onClick={onClose}
+                aria-label="Fechar modal"
+                type="button"
                 style={{
                   position: 'absolute',
                   top: tokens.spacing.lg,

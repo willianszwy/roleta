@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import styled, { css } from 'styled-components';
 import { tokens } from '../tokens';
 
@@ -8,12 +8,24 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+  // Accessibility props
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
+  'aria-required'?: boolean;
+  helpText?: string;
 }
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   fullWidth?: boolean;
+  // Accessibility props
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
+  'aria-required'?: boolean;
+  helpText?: string;
 }
 
 const InputContainer = styled.div<{ fullWidth: boolean }>`
@@ -128,6 +140,12 @@ const ErrorMessage = styled.span`
   font-weight: ${tokens.typography.fontWeights.medium};
 `;
 
+const HelpText = styled.span`
+  font-size: ${tokens.typography.sizes.xs};
+  color: ${tokens.colors.text.muted};
+  font-weight: ${tokens.typography.fontWeights.normal};
+`;
+
 export const Input: React.FC<InputProps> = ({
   label,
   error,
@@ -135,22 +153,65 @@ export const Input: React.FC<InputProps> = ({
   startIcon,
   endIcon,
   className,
+  helpText,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
   ...props
 }) => {
+  const inputId = useId();
+  const errorId = useId();
+  const helpId = useId();
+  
+  // Build describedby string
+  const describedBy = [
+    error ? errorId : null,
+    helpText ? helpId : null,
+    ariaDescribedBy
+  ].filter(Boolean).join(' ') || undefined;
+
   return (
     <InputContainer fullWidth={fullWidth} className={className}>
-      {label && <Label>{label}</Label>}
+      {label && (
+        <Label htmlFor={inputId}>
+          {label}
+          {ariaRequired && <span aria-label="campo obrigatório"> *</span>}
+        </Label>
+      )}
       <InputWrapper>
-        {startIcon && <IconContainer position="start">{startIcon}</IconContainer>}
+        {startIcon && (
+          <IconContainer position="start" aria-hidden="true">
+            {startIcon}
+          </IconContainer>
+        )}
         <StyledInput
+          id={inputId}
           hasStartIcon={!!startIcon}
           hasEndIcon={!!endIcon}
           hasError={!!error}
+          aria-label={ariaLabel}
+          aria-describedby={describedBy}
+          aria-invalid={ariaInvalid ?? !!error}
+          aria-required={ariaRequired}
           {...props}
         />
-        {endIcon && <IconContainer position="end">{endIcon}</IconContainer>}
+        {endIcon && (
+          <IconContainer position="end" aria-hidden="true">
+            {endIcon}
+          </IconContainer>
+        )}
       </InputWrapper>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {helpText && (
+        <HelpText id={helpId}>
+          {helpText}
+        </HelpText>
+      )}
+      {error && (
+        <ErrorMessage id={errorId} role="alert" aria-live="polite">
+          {error}
+        </ErrorMessage>
+      )}
     </InputContainer>
   );
 };
@@ -160,16 +221,51 @@ export const TextArea: React.FC<TextAreaProps> = ({
   error,
   fullWidth = false,
   className,
+  helpText,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
   ...props
 }) => {
+  const textareaId = useId();
+  const errorId = useId();
+  const helpId = useId();
+  
+  // Build describedby string
+  const describedBy = [
+    error ? errorId : null,
+    helpText ? helpId : null,
+    ariaDescribedBy
+  ].filter(Boolean).join(' ') || undefined;
+
   return (
     <InputContainer fullWidth={fullWidth} className={className}>
-      {label && <Label>{label}</Label>}
+      {label && (
+        <Label htmlFor={textareaId}>
+          {label}
+          {ariaRequired && <span aria-label="campo obrigatório"> *</span>}
+        </Label>
+      )}
       <StyledTextArea
+        id={textareaId}
         hasError={!!error}
+        aria-label={ariaLabel}
+        aria-describedby={describedBy}
+        aria-invalid={ariaInvalid ?? !!error}
+        aria-required={ariaRequired}
         {...props}
       />
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {helpText && (
+        <HelpText id={helpId}>
+          {helpText}
+        </HelpText>
+      )}
+      {error && (
+        <ErrorMessage id={errorId} role="alert" aria-live="polite">
+          {error}
+        </ErrorMessage>
+      )}
     </InputContainer>
   );
 };

@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { useI18n } from '../../i18n';
+import { LanguageSelector } from '../LanguageSelector';
 
 const SettingsContainer = styled.div`
   padding: 0.5rem 0;
@@ -116,6 +118,8 @@ interface SettingsProps {
 }
 
 export function Settings({ config, onConfigChange, onResetSettings }: SettingsProps) {
+  const { t } = useI18n();
+  
   const updateConfig = (key: keyof SettingsConfig, value: SettingsConfig[keyof SettingsConfig]) => {
     onConfigChange({
       ...config,
@@ -127,24 +131,34 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
     <SettingsContainer>
       <SettingSection>
         <SectionTitle>
-          🎯 Modalidade de Sorteio
+          {t('settings.language')}
+        </SectionTitle>
+        
+        <SettingItem>
+          <LanguageSelector variant="dropdown" showFlags={true} />
+        </SettingItem>
+      </SettingSection>
+
+      <SettingSection>
+        <SectionTitle>
+          {t('settings.rouletteMode')}
         </SectionTitle>
         
         <SettingItem>
           <SettingLabel>
-            Modalidade de Sorteio
+            {t('settings.rouletteMode')}
             <Select 
               value={config.rouletteMode}
               onChange={(e) => updateConfig('rouletteMode', e.target.value as 'participants' | 'tasks')}
             >
-              <option value="participants">Sorteio de Pessoas</option>
-              <option value="tasks">Sorteio de Tarefas</option>
+              <option value="participants">{t('roulette.participantMode')}</option>
+              <option value="tasks">{t('roulette.taskMode')}</option>
             </Select>
           </SettingLabel>
           <SettingDescription>
             {config.rouletteMode === 'participants' 
-              ? "Modo tradicional: sorteia uma pessoa da lista de participantes"
-              : "Modo tarefas: sorteia uma pessoa para executar uma tarefa específica da lista"
+              ? t('roulette.participantMode')
+              : t('roulette.taskMode')
             }
           </SettingDescription>
         </SettingItem>
@@ -152,12 +166,12 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
 
       <SettingSection>
         <SectionTitle>
-          🎉 Exibição do Vencedor
+          {t('winner.title')}
         </SectionTitle>
         
         <SettingItem>
           <SettingLabel>
-            Mostrar modal do vencedor
+            {t('settings.showWinnerModal')}
             <ToggleSwitch
               enabled={config.showWinnerModal}
               onClick={() => updateConfig('showWinnerModal', !config.showWinnerModal)}
@@ -165,25 +179,25 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
             />
           </SettingLabel>
           <SettingDescription>
-            Exibe um modal especial com animações quando alguém vence
+            {t('settings.showWinnerModal')}
           </SettingDescription>
         </SettingItem>
 
         <SettingItem>
           <SettingLabel>
-            Tempo de exibição
+            {t('settings.displayDuration')}
             <Select 
               value={config.winnerDisplayDuration}
               onChange={(e) => updateConfig('winnerDisplayDuration', Number(e.target.value))}
             >
-              <option value={3}>3 segundos</option>
-              <option value={5}>5 segundos</option>
-              <option value={8}>8 segundos</option>
-              <option value={0}>Manual</option>
+              <option value={3}>{t('settings.duration3s')}</option>
+              <option value={5}>{t('settings.duration5s')}</option>
+              <option value={8}>{t('settings.duration8s')}</option>
+              <option value={0}>{t('settings.durationManual')}</option>
             </Select>
           </SettingLabel>
           <SettingDescription>
-            Tempo que o modal permanece aberto (0 = fechar manualmente)
+            {t('settings.displayDurationDescription')}
           </SettingDescription>
         </SettingItem>
       </SettingSection>
@@ -191,12 +205,12 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
       {config.rouletteMode === 'participants' && (
         <SettingSection>
           <SectionTitle>
-            🎲 Sorteio de Sorte
+            {t('settings.lotteryType')}
           </SectionTitle>
           
           <SettingItem>
             <SettingLabel>
-              {config.sorteioBomRuim ? "Sorteio de Sortudo" : "Sorteio de Azarado"}
+              {config.sorteioBomRuim ? t('settings.luckyPerson') : t('settings.unluckyPerson')}
               <ToggleSwitch
                 enabled={config.sorteioBomRuim}
                 onClick={() => updateConfig('sorteioBomRuim', !config.sorteioBomRuim)}
@@ -204,7 +218,10 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
               />
             </SettingLabel>
             <SettingDescription>
-              Define o tipo do sorteio: {config.sorteioBomRuim ? "encontrar uma pessoa sortuda 🍀" : "encontrar uma pessoa azarada 😅"}. O vencedor sempre será mostrado como {config.sorteioBomRuim ? "sortudo" : "azarado"}.
+              {t('settings.lotteryTypeDescription', { 
+                type: config.sorteioBomRuim ? t('settings.luckyPerson').toLowerCase() : t('settings.unluckyPerson').toLowerCase(),
+                winner: config.sorteioBomRuim ? t('settings.luckyPerson').toLowerCase() : t('settings.unluckyPerson').toLowerCase()
+              })}
             </SettingDescription>
           </SettingItem>
         </SettingSection>
@@ -212,12 +229,12 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
 
       <SettingSection>
         <SectionTitle>
-          ⚡ Automação
+          {t('settings.performance')}
         </SectionTitle>
         
         <SettingItem>
           <SettingLabel>
-            Remover vencedor automaticamente
+            {t('settings.autoRemoveWinner')}
             <ToggleSwitch
               enabled={config.autoRemoveWinner}
               onClick={() => updateConfig('autoRemoveWinner', !config.autoRemoveWinner)}
@@ -225,7 +242,7 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
             />
           </SettingLabel>
           <SettingDescription>
-            Remove automaticamente o vencedor da roleta após o sorteio
+            {t('settings.autoRemoveWinner')}
           </SettingDescription>
         </SettingItem>
       </SettingSection>
@@ -235,7 +252,7 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        Restaurar Padrões
+        {t('settings.reset')}
       </ResetButton>
     </SettingsContainer>
   );

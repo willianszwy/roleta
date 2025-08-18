@@ -27,6 +27,7 @@
     "styled-components": "^6.1.19"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.10.2",
     "@eslint/js": "^9.33.0",
     "@playwright/test": "^1.54.2",
     "@rollup/plugin-replace": "^6.0.2",
@@ -40,11 +41,13 @@
     "@vitejs/plugin-react": "^5.0.0",
     "babel-jest": "^30.0.5",
     "eslint": "^9.33.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.0.5",
+    "jest-axe": "^10.0.0",
     "jest-environment-jsdom": "^30.0.5",
     "rollup-plugin-analyzer": "^4.0.0",
     "ts-jest": "^29.4.1",

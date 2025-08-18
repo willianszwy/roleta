@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Task } from '../../types';
 import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
+import { useI18n } from '../../i18n';
 
 interface TaskManagerProps {
   tasks: Task[];
@@ -423,6 +424,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   onRemove,
   onClear,
 }) => {
+  const { t } = useI18n();
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [bulkValue, setBulkValue] = useState('');
@@ -462,14 +464,14 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   };
 
   const handleRemove = (id: string, name: string) => {
-    if (window.confirm(`Remover tarefa "${name}"?`)) {
+    if (window.confirm(t('tasks.remove') + ` "${name}"?`)) {
       onRemove(id);
     }
     setOpenItemMenu(null);
   };
 
   const handleClear = () => {
-    if (window.confirm('Remover todas as tarefas?')) {
+    if (window.confirm(t('tasks.clear') + '?')) {
       onClear();
     }
     setMenuOpen(false);
@@ -527,7 +529,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   return (
     <>
       <Header>
-        <Title>Tarefas</Title>
+        <Title>{t('tasks.title')}</Title>
         {tasks.length > 0 && (
           <TaskCount>{tasks.length}</TaskCount>
         )}
@@ -539,7 +541,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             type="text"
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
-            placeholder="Nome da tarefa..."
+            placeholder={t('tasks.namePlaceholder')}
             maxLength={50}
           />
           <AddButton
@@ -548,14 +550,14 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            Adicionar
+            {t('tasks.add')}
           </AddButton>
         </InputRow>
         <DescriptionInput
           type="text"
           value={taskDescription}
           onChange={(e) => setTaskDescription(e.target.value)}
-          placeholder="Descrição (opcional)..."
+          placeholder={t('tasks.descriptionPlaceholder')}
           maxLength={100}
         />
       </AddForm>
@@ -567,7 +569,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          {showBulkImport ? 'Fechar' : 'Importar Lista'}
+          {showBulkImport ? t('action.cancel') : t('tasks.import')}
         </BulkButton>
       </BulkActions>
 
@@ -580,7 +582,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             transition={{ duration: 0.3 }}
           >
             <BulkImportSection>
-              <BulkTitle>Importar Tarefas</BulkTitle>
+              <BulkTitle>{t('tasks.import')}</BulkTitle>
               <BulkTextarea
                 value={bulkValue}
                 onChange={(e) => setBulkValue(e.target.value)}
@@ -599,7 +601,7 @@ Comprar mantimentos | Supermercado do bairro`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Adicionar ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
+                  {t('tasks.bulkAdd')} ({bulkValue.split('\n').filter(n => n.trim()).length} tarefas)
                 </BulkButton>
                 <BulkButton
                   variant="secondary"
@@ -715,7 +717,7 @@ Comprar mantimentos | Supermercado do bairro`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Remover tarefa
+            {t('tasks.remove')}
           </MenuItem>
         </PortalDropdown>,
         document.body

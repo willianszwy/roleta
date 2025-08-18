@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
 import { calculateRouletteRotation, getContrastColor, getRouletteColors } from '../../utils/helpers';
+import { useI18n } from '../../i18n';
 
 interface RouletteProps {
   participants: Participant[];
@@ -210,6 +211,7 @@ export const Roulette: React.FC<RouletteProps> = React.memo(({
   onSpin,
   onSpinComplete,
 }) => {
+  const { t } = useI18n();
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
   const [spinState, setSpinState] = useState<'idle' | 'spinning' | 'completed'>('idle');
@@ -385,7 +387,7 @@ export const Roulette: React.FC<RouletteProps> = React.memo(({
           whileHover={!(isSpinning || participants.length === 0) ? { scale: 1.02 } : {}}
           whileTap={!(isSpinning || participants.length === 0) ? { scale: 0.98 } : {}}
         >
-          {isSpinning ? 'Girando...' : '🎰 Girar Roleta'}
+          {isSpinning ? t('roulette.spinning') : t('roulette.spin')}
         </SpinButton>
       </SpinButtonContainer>
 

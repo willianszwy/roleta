@@ -77,33 +77,57 @@ export function WinnerModal({
   // TEMP: Simplified modal without AnimatePresence for testing
   if (!isOpen) return null;
   
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div data-testid="winner-modal" style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      background: 'rgba(15, 15, 35, 0.9)',
-      backdropFilter: 'blur(8px)',
-      zIndex: 2000,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem'
-    }} onClick={onClose}>
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.15)',
-        borderRadius: '1rem',
-        padding: '2rem 1.5rem',
-        maxWidth: '480px',
-        width: '100%',
-        textAlign: 'center',
-        position: 'relative',
-        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.37)'
-      }} onClick={(e) => e.stopPropagation()}>
+    <div 
+      data-testid="winner-modal" 
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="winner-title"
+      aria-describedby="winner-description"
+      onKeyDown={handleKeyDown}
+      onClick={handleOverlayClick}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: 'rgba(15, 15, 35, 0.9)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 2000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem'
+      }}>
+      <div 
+        role="document"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
+        style={{
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          borderRadius: '1rem',
+          padding: '2rem 1.5rem',
+          maxWidth: '480px',
+          width: '100%',
+          textAlign: 'center',
+          position: 'relative',
+          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.37)'
+        }}>
             {sparkles.map((sparkle, index) => (
               <Sparkle
                 key={index}
@@ -113,28 +137,32 @@ export function WinnerModal({
               />
             ))}
 
-            <h1 style={{
-              fontSize: 'clamp(1.5rem, 5vw, 2.2rem)',
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '1rem',
-              lineHeight: '1.2'
-            }}>
+            <h1 
+              id="winner-title"
+              style={{
+                fontSize: 'clamp(1.5rem, 5vw, 2.2rem)',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                marginBottom: '1rem',
+                lineHeight: '1.2'
+              }}>
               {mode === 'tasks' ? "TAREFA SORTEADA!" : "VENCEDOR!"}
             </h1>
 
-            <div style={{
-              fontSize: 'clamp(1.2rem, 4vw, 1.8rem)',
-              fontWeight: 600,
-              color: 'rgba(255, 255, 255, 0.9)',
-              marginBottom: '1.5rem',
-              padding: '0.75rem 1.5rem',
-              background: 'rgba(255, 255, 255, 0.06)',
-              borderRadius: '0.75rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
+            <div 
+              id="winner-description"
+              style={{
+                fontSize: 'clamp(1.2rem, 4vw, 1.8rem)',
+                fontWeight: 600,
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '1.5rem',
+                padding: '0.75rem 1.5rem',
+                background: 'rgba(255, 255, 255, 0.06)',
+                borderRadius: '0.75rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
               <span data-testid="winner-name">{winner.name}</span>
             </div>
 
@@ -159,6 +187,8 @@ export function WinnerModal({
 
             <button
               onClick={onClose}
+              autoFocus
+              aria-label="Fechar modal do vencedor"
               style={{
                 background: 'rgba(102, 126, 234, 0.2)',
                 border: '1px solid rgba(102, 126, 234, 0.4)',
