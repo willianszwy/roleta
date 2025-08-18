@@ -9,6 +9,11 @@ const sparkleAnimation = keyframes`
   50% { opacity: 1; transform: scale(1); }
 `;
 
+const shrinkAnimation = keyframes`
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+`;
+
 const Sparkle = styled.div<{ x: number; y: number; delay: number }>`
   position: absolute;
   left: ${props => props.x}%;
@@ -18,6 +23,15 @@ const Sparkle = styled.div<{ x: number; y: number; delay: number }>`
   animation-delay: ${props => props.delay}s;
   pointer-events: none;
   z-index: 1;
+`;
+
+const ProgressBar = styled.div<{ duration: number }>`
+  width: 100%;
+  height: 100%;
+  background: rgba(102, 126, 234, 0.8);
+  border-radius: 2px;
+  animation: ${shrinkAnimation} ${props => props.duration}s linear forwards;
+  transform-origin: left;
 `;
 
 interface WinnerModalProps {
@@ -150,7 +164,7 @@ export function WinnerModal({
                 marginBottom: '1rem',
                 lineHeight: '1.2'
               }}>
-              {mode === 'tasks' ? "TAREFA SORTEADA!" : "VENCEDOR!"}
+              {mode === 'tasks' ? t('winner.taskTitle') : t('winner.title')}
             </h1>
 
             <div 
@@ -178,7 +192,7 @@ export function WinnerModal({
                 borderRadius: '0.75rem',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '0.5rem' }}>vai fazer</div>
+                <div style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '0.5rem' }}>{t('winner.willDo')}</div>
                 <div data-testid="task-name" style={{ fontSize: 'clamp(1rem, 3vw, 1.3rem)', fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.5rem' }}>{task.name}</div>
                 {task.description && (
                   <div style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)', fontStyle: 'italic' }}>{task.description}</div>
@@ -222,9 +236,12 @@ export function WinnerModal({
                   width: '50px',
                   height: '3px',
                   background: 'rgba(255, 255, 255, 0.2)',
-                  borderRadius: '2px'
-                }} />
-                <span>Fechando...</span>
+                  borderRadius: '2px',
+                  overflow: 'hidden'
+                }}>
+                  <ProgressBar duration={autoCloseDuration} />
+                </div>
+                <span>{t('winner.closing')}</span>
               </div>
             )}
       </div>
