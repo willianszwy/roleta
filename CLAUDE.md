@@ -206,3 +206,49 @@ src/
 - **Expected Behavior**: Participant removed immediately after winning, cannot be selected again
 - **Test Case**: Import 10 participants, enable auto-removal, run multiple task assignments
 - **Success**: State machine garante remoção atômica pós-sorteio
+
+# FEATURE DEVELOPMENT MANDATORY STANDARDS
+
+## 🚨 ALWAYS REQUIRED for new features:
+
+### 1. PLANNING PHASE (ALWAYS create TODO item first)
+- Detailed analysis and architecture planning
+- Break down into subtasks
+- Define acceptance criteria and validation steps
+- Consider impact on existing components
+
+### 2. TESTING (NEVER skip)
+- Unit tests for business logic
+- Component tests for UI behavior  
+- Integration tests for complete flows
+- Accessibility tests using jest-axe
+- Minimum 80% coverage for new code
+
+### 3. ACCESSIBILITY (ALWAYS implement)
+- ARIA labels and roles
+- Keyboard navigation support
+- Screen reader compatibility
+- WCAG 2.1 AA color contrast
+- Focus management
+
+### 4. INTERNATIONALIZATION (ALWAYS include)
+- Translation keys for ALL text content
+- Complete translations in 4 languages: pt-BR, en-US, es-ES, fr-FR
+- NO hardcoded text allowed
+- Localized data formatting
+
+### 5. VALIDATION CHECKLIST (ALWAYS verify before completion)
+- ✅ All tests passing
+- ✅ ESLint without errors  
+- ✅ Build successful
+- ✅ Accessibility validated
+- ✅ All translations implemented
+- ✅ Coverage > 80%
+
+## 🔄 WORKFLOW ORDER (follow strictly):
+1. Planning TODO item → 2. Implementation → 3. Tests → 4. Accessibility → 5. Translations → 6. Validation
+
+## 🚫 BLOCKING CRITERIA:
+Do NOT complete any feature that lacks: tests, accessibility, translations, or proper planning.
+
+See FEATURE_GUIDELINES.md for detailed implementation standards.
