@@ -437,7 +437,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         
         <TaskSidebar>
           <TaskSidebarTitle>{t('tasks.title')}</TaskSidebarTitle>
-          <TaskCounter>{t('tasks.pendingCount', { count: 0 })} • {t('tasks.completedCount', { count: 0, plural: 's' })}</TaskCounter>
+          <TaskCounter>{t('tasks.pendingCount', { count: 0, plural: 's' })} • {t('tasks.completedCount', { count: 0, plural: 's' })}</TaskCounter>
           <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>
             {t('tasks.empty')}
           </div>
@@ -537,7 +537,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         <TaskSidebarTitle>{t('tasks.title')}</TaskSidebarTitle>
         
         <TaskCounter>
-          {t('tasks.pendingCount', { count: pendingTasks.length })} • {t('tasks.completedCount', { count: completedTasks.length, plural: completedTasks.length !== 1 ? 's' : '' })}
+          {t('tasks.pendingCount', { count: pendingTasks.length, plural: pendingTasks.length !== 1 ? 's' : '' })} • {t('tasks.completedCount', { count: completedTasks.length, plural: completedTasks.length !== 1 ? 's' : '' })}
         </TaskCounter>
 
         <TaskList>

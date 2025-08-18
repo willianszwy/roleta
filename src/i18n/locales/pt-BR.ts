@@ -48,7 +48,7 @@ export const ptBR: Translation = {
   'tasks.bulkAddDescription': 'Adicione múltiplas tarefas, uma por linha',
   'tasks.pending': 'aguardando',
   'tasks.completed': 'concluída',
-  'tasks.pendingCount': '{{count}} aguardando',
+  'tasks.pendingCount': '{{count}} aguardando{{plural}}',
   'tasks.completedCount': '{{count}} concluída{{plural}}',
   'tasks.noneDrawn': 'Nenhuma tarefa foi sorteada ainda',
   'tasks.noTasks': 'Sem tarefas',

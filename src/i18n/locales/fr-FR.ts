@@ -48,7 +48,7 @@ export const frFR: Translation = {
   'tasks.bulkAddDescription': 'Ajoutez plusieurs tâches, une par ligne',
   'tasks.pending': 'en attente',
   'tasks.completed': 'terminée',
-  'tasks.pendingCount': '{{count}} en attente',
+  'tasks.pendingCount': '{{count}} en attente{{plural}}',
   'tasks.completedCount': '{{count}} terminée{{plural}}',
   'tasks.noneDrawn': 'Aucune tâche n\'a encore été tirée',
   'tasks.noTasks': 'Aucune tâche',
