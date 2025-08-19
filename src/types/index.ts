@@ -19,13 +19,16 @@ export interface Task {
   name: string;
   description?: string;
   color?: string;
+  requiredParticipants: number; // Number of participants needed for this task (1-10)
   createdAt: Date;
 }
 
 export interface TaskHistory {
   id: string;
-  participantId: string;
-  participantName: string;
+  participants: Array<{
+    id: string;
+    name: string;
+  }>; // Support multiple participants per task
   taskId: string;
   taskName: string;
   taskDescription?: string;
@@ -110,4 +113,66 @@ export interface ConfettiConfig {
   gravity: number;
   drift: number;
   scalar: number;
+}
+
+// Team Management Types
+export interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  members: Participant[];
+  color?: string;
+  createdAt: Date;
+}
+
+// Project Management Types
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  participants: Participant[];
+  tasks: Task[];
+  teams: Team[];
+  history: RouletteHistory[];
+  taskHistory: TaskHistory[];
+  settings: ProjectSettings;
+  createdAt: Date;
+  lastModified: Date;
+}
+
+export interface ProjectSettings {
+  autoRemoveParticipants: boolean;
+  animationDuration: number;
+  allowDuplicateParticipantsInTask: boolean; // For multi-participant tasks
+}
+
+// Project Manager State
+export interface ProjectManagerState {
+  projects: Project[];
+  activeProjectId: string | null;
+  isSpinning: boolean;
+  selectedParticipant?: Participant;
+  selectedTask?: Task;
+  selectedParticipants?: Participant[]; // For multi-participant task results
+}
+
+// Team Manager Props
+export interface TeamManagerProps {
+  teams: Team[];
+  onAddTeam: (name: string, description?: string) => void;
+  onRemoveTeam: (id: string) => void;
+  onEditTeam: (id: string, name: string, description?: string) => void;
+  onAddMemberToTeam: (teamId: string, participant: Participant) => void;
+  onRemoveMemberFromTeam: (teamId: string, participantId: string) => void;
+  onImportTeamToProject: (teamId: string) => void;
+}
+
+// Project Manager Props
+export interface ProjectManagerProps {
+  projects: Project[];
+  activeProjectId: string | null;
+  onCreateProject: (name: string, description?: string) => void;
+  onDeleteProject: (id: string) => void;
+  onSwitchProject: (id: string) => void;
+  onRenameProject: (id: string, name: string) => void;
 }

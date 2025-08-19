@@ -312,7 +312,9 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   // Memoize calculations to avoid recalculating on every render
   const stats = useMemo(() => {
     const totalAssignments = taskHistory.length;
-    const uniqueParticipants = new Set(taskHistory.map(h => h.participantId)).size;
+    const uniqueParticipants = new Set(
+      taskHistory.flatMap(h => (h.participants || []).map(p => p.id))
+    ).size;
     const uniqueTasks = new Set(taskHistory.map(h => h.taskId)).size;
     
     return { totalAssignments, uniqueParticipants, uniqueTasks };
@@ -346,18 +348,18 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   return (
     <>
       <Header>
-        <Title>Histórico de Tarefas</Title>
+        <Title>{t('history.taskHistory')}</Title>
         <HistoryCount>{stats.totalAssignments}</HistoryCount>
       </Header>
 
       <StatsContainer>
         <StatItem>
           <StatValue>{stats.totalAssignments}</StatValue>
-          <StatLabel>Sorteios</StatLabel>
+          <StatLabel>{t('stats.assignments')}</StatLabel>
         </StatItem>
         <StatItem>
           <StatValue>{stats.uniqueParticipants}</StatValue>
-          <StatLabel>Pessoas</StatLabel>
+          <StatLabel>{t('stats.people')}</StatLabel>
         </StatItem>
         <StatItem>
           <StatValue>{stats.uniqueTasks}</StatValue>
@@ -371,7 +373,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Exportar CSV
+          {t('stats.exportCsv')}
         </ActionButton>
         <ActionButton
           variant="secondary"
@@ -379,7 +381,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Exportar JSON
+          {t('stats.exportJson')}
         </ActionButton>
         <ActionButton
           variant="danger"
@@ -397,13 +399,13 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
             onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
             disabled={currentPage === 0}
           >
-            ← Anterior
+            ← {t('pagination.previous')}
           </PaginationButton>
           
           <PaginationInfo>
-            Página {currentPage + 1} de {totalPages} 
+            {t('pagination.page', { current: currentPage + 1, total: totalPages })}
             <span style={{ opacity: 0.7, fontSize: '0.7rem' }}>
-              ({paginatedItems.length} de {taskHistory.length} itens)
+              {t('pagination.items', { showing: paginatedItems.length, total: taskHistory.length })}
             </span>
           </PaginationInfo>
           
@@ -411,7 +413,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
             onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
             disabled={currentPage >= totalPages - 1}
           >
-            {t('tasks.nextTask')}
+            {t('pagination.next')} →
           </PaginationButton>
         </PaginationContainer>
       )}
@@ -421,7 +423,9 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           <HistoryItem key={item.id}>
             <ItemHeader>
               <div>
-                <ParticipantName>{item.participantName}</ParticipantName>
+                <ParticipantName>
+                  {(item.participants || []).map(p => p.name).join(', ')}
+                </ParticipantName>
                 <TaskName>{item.taskName}</TaskName>
                 {item.taskDescription && (
                   <TaskDescription>{item.taskDescription}</TaskDescription>

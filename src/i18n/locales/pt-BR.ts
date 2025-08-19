@@ -84,6 +84,14 @@ export const ptBR: Translation = {
   'history.clearTaskConfirm': 'Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.',
   'history.noDraws': 'Nenhum sorteio realizado ainda',
   
+  // Stats
+  'stats.draws': 'Sorteios',
+  'stats.assignments': 'Atribuições',
+  'stats.people': 'Pessoas',
+  'stats.participants': 'Participantes',
+  'stats.exportCsv': 'Exportar CSV',
+  'stats.exportJson': 'Exportar JSON',
+  
   // Settings
   'settings.title': 'Configurações',
   'settings.language': 'Idioma',
@@ -166,4 +174,49 @@ export const ptBR: Translation = {
   'a11y.spinCompleted': 'Sorteio concluído! Vencedor: {{winner}}',
   'a11y.taskAssigned': 'Tarefa atribuída! {{participant}} recebeu a tarefa: {{task}}',
   'a11y.participantSelected': 'Participante selecionado: {{participant}}',
+
+  // Teams
+  'teams.title': 'Equipes',
+  'teams.add': 'Adicionar Equipe',
+  'teams.name': 'Nome da equipe',
+  'teams.namePlaceholder': 'Digite o nome da equipe',
+  'teams.description': 'Descrição',
+  'teams.descriptionPlaceholder': 'Descrição opcional da equipe',
+  'teams.remove': 'Remover equipe',
+  'teams.edit': 'Editar',
+  'teams.import': 'Importar',
+  'teams.imported': 'Importado',
+  'teams.importToProject': 'Importar equipe para o projeto',
+  'teams.empty': 'Nenhuma equipe criada',
+  'teams.noMembers': 'Nenhum membro na equipe',
+  'teams.members': 'Membros',
+  'teams.addMember': 'Adicionar Membro',
+  'teams.memberName': 'Nome do membro',
+  'teams.removeMember': 'Remover membro',
+
+  // Projects
+  'projects.title': 'Projetos',
+  'projects.current': 'Projeto Atual',
+  'projects.selector': 'Projetos',
+  'projects.selectProject': 'Selecionar projeto',
+  'projects.create': 'Criar Projeto',
+  'projects.enterName': 'Digite o nome do projeto',
+  'projects.enterDescription': 'Digite a descrição do projeto (opcional)',
+  'projects.empty': 'Nenhum projeto criado',
+  'projects.stats': '{{participants}} participantes • {{tasks}} tarefas • {{teams}} equipes',
+  'projects.createNew': 'Criar Novo Projeto',
+  'projects.projectName': 'Nome do Projeto',
+  'projects.projectDescription': 'Descrição do Projeto',
+  
+  // Pagination
+  'pagination.previous': 'Anterior',
+  'pagination.next': 'Próximo',
+  'pagination.page': 'Página {{current}} de {{total}}',
+  'pagination.items': '({{showing}} de {{total}} itens)',
+
+  // Common
+  'common.cancel': 'Cancelar',
+  'common.create': 'Criar',
+  'common.save': 'Salvar',
+  'common.delete': 'Excluir',
 };

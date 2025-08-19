@@ -216,7 +216,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setShowCreateModal(false);
+        // Don't close create modal on outside click - let the modal handle it
       }
     };
 

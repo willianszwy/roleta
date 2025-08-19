@@ -100,6 +100,7 @@ export function useTaskRoulette() {
       id: generateId(),
       name: name.trim(),
       description: description?.trim() || undefined,
+      requiredParticipants: 1,
       color: getRandomColor(),
       createdAt: new Date(),
     };
@@ -122,6 +123,7 @@ export function useTaskRoulette() {
         id: generateId(),
         name,
         description: description || undefined,
+        requiredParticipants: 1,
         color: getRandomColor(),
         createdAt: new Date(),
       };
@@ -177,8 +179,7 @@ export function useTaskRoulette() {
       // Add to history
       const historyEntry: TaskHistory = {
         id: generateId(),
-        participantId: selectedParticipant.id,
-        participantName: selectedParticipant.name,
+        participants: [{ id: selectedParticipant.id, name: selectedParticipant.name }],
         taskId: selectedTask.id,
         taskName: selectedTask.name,
         taskDescription: selectedTask.description,

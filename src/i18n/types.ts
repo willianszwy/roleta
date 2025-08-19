@@ -85,6 +85,14 @@ export type TranslationKey =
   | 'history.clearTaskConfirm'
   | 'history.noDraws'
   
+  // Stats
+  | 'stats.draws'
+  | 'stats.assignments'
+  | 'stats.people'
+  | 'stats.participants'
+  | 'stats.exportCsv'
+  | 'stats.exportJson'
+  
   // Settings
   | 'settings.title'
   | 'settings.language'
@@ -166,7 +174,52 @@ export type TranslationKey =
   | 'a11y.required'
   | 'a11y.spinCompleted'
   | 'a11y.taskAssigned'
-  | 'a11y.participantSelected';
+  | 'a11y.participantSelected'
+
+  // Teams
+  | 'teams.title'
+  | 'teams.add'
+  | 'teams.name'
+  | 'teams.namePlaceholder'
+  | 'teams.description'
+  | 'teams.descriptionPlaceholder'
+  | 'teams.remove'
+  | 'teams.edit'
+  | 'teams.import'
+  | 'teams.imported'
+  | 'teams.importToProject'
+  | 'teams.empty'
+  | 'teams.noMembers'
+  | 'teams.members'
+  | 'teams.addMember'
+  | 'teams.memberName'
+  | 'teams.removeMember'
+
+  // Projects
+  | 'projects.title'
+  | 'projects.current'
+  | 'projects.selector'
+  | 'projects.selectProject'
+  | 'projects.create'
+  | 'projects.enterName'
+  | 'projects.enterDescription'
+  | 'projects.empty'
+  | 'projects.stats'
+  | 'projects.createNew'
+  | 'projects.projectName'
+  | 'projects.projectDescription'
+  
+  // Pagination
+  | 'pagination.previous'
+  | 'pagination.next'
+  | 'pagination.page'
+  | 'pagination.items'
+
+  // Common
+  | 'common.cancel'
+  | 'common.create'
+  | 'common.save'
+  | 'common.delete';
 
 export interface TranslationValues {
   [key: string]: string | number | boolean;

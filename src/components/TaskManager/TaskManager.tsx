@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Task } from '../../types';
 import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
 import { useI18n } from '../../i18n';
+import { useDropdown } from '../../context/useDropdown';
 
 interface TaskManagerProps {
   tasks: Task[];
-  onAdd: (name: string, description?: string) => void;
+  onAdd: (name: string, description?: string, requiredParticipants?: number) => void;
   onAddBulk: (taskLines: string[]) => void;
   onRemove: (id: string) => void;
   onClear: () => void;
@@ -307,21 +308,28 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   onClear,
 }) => {
   const { t } = useI18n();
+  const { activeDropdown, setActiveDropdown, closeAllDropdowns } = useDropdown();
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [requiredParticipants, setRequiredParticipants] = useState(1);
   const [bulkValue, setBulkValue] = useState('');
   const [showBulkImport, setShowBulkImport] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
+  
+  const MAIN_MENU_ID = 'tasks-main-menu';
+  const getItemMenuId = (itemId: string) => `tasks-item-${itemId}`;
+  
+  const menuOpen = activeDropdown === MAIN_MENU_ID;
+  const openItemMenu = activeDropdown?.startsWith('tasks-item-') ? activeDropdown : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (taskName.trim()) {
-      onAdd(taskName.trim(), taskDescription.trim() || undefined);
+      onAdd(taskName.trim(), taskDescription.trim() || undefined, requiredParticipants);
       setTaskName('');
       setTaskDescription('');
+      setRequiredParticipants(1);
     }
   };
 
@@ -349,14 +357,14 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     if (window.confirm(t('tasks.remove') + ` "${name}"?`)) {
       onRemove(id);
     }
-    setOpenItemMenu(null);
+    closeAllDropdowns();
   };
 
   const handleClear = () => {
     if (window.confirm(t('tasks.clear') + '?')) {
       onClear();
     }
-    setMenuOpen(false);
+    closeAllDropdowns();
   };
 
   const toggleBulkImport = () => {
@@ -368,8 +376,10 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
   const toggleItemMenu = (itemId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    if (openItemMenu === itemId) {
-      setOpenItemMenu(null);
+    const dropdownId = getItemMenuId(itemId);
+    
+    if (activeDropdown === dropdownId) {
+      closeAllDropdowns();
     } else {
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
@@ -377,14 +387,14 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         top: rect.bottom + 4,
         left: Math.max(10, rect.right - 140),
       });
-      setOpenItemMenu(itemId);
+      setActiveDropdown(dropdownId);
     }
   };
 
   const handleMainMenuClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    if (menuOpen) {
-      setMenuOpen(false);
+    if (activeDropdown === MAIN_MENU_ID) {
+      closeAllDropdowns();
     } else {
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
@@ -392,21 +402,20 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         top: Math.max(10, rect.top - 70),
         left: Math.max(10, rect.right - 140),
       });
-      setMenuOpen(true);
+      setActiveDropdown(MAIN_MENU_ID);
     }
   };
 
   useEffect(() => {
     const handleClickOutside = () => {
-      setMenuOpen(false);
-      setOpenItemMenu(null);
+      closeAllDropdowns();
     };
 
-    if (menuOpen || openItemMenu) {
+    if (activeDropdown) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [menuOpen, openItemMenu]);
+  }, [activeDropdown, closeAllDropdowns]);
 
   return (
     <>
@@ -437,14 +446,29 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             {t('tasks.add')}
           </Button>
         </InputRow>
-        <DSInput
-          type="text"
-          value={taskDescription}
-          onChange={(e) => setTaskDescription(e.target.value)}
-          placeholder={t('tasks.descriptionPlaceholder')}
-          maxLength={100}
-          fullWidth
-        />
+        <InputRow>
+          <div style={{ flex: 1 }}>
+            <DSInput
+              type="text"
+              value={taskDescription}
+              onChange={(e) => setTaskDescription(e.target.value)}
+              placeholder={t('tasks.descriptionPlaceholder')}
+              maxLength={100}
+              fullWidth
+            />
+          </div>
+          <div style={{ width: '120px' }}>
+            <DSInput
+              type="number"
+              value={requiredParticipants}
+              onChange={(e) => setRequiredParticipants(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+              placeholder="Pessoas"
+              min={1}
+              max={10}
+              fullWidth
+            />
+          </div>
+        </InputRow>
       </AddForm>
 
       <BulkActions style={{ marginBottom: '1rem' }}>
@@ -474,7 +498,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                 rows={4}
               />
               <BulkHint>
-                Use "Nome da tarefa | Descrição" para adicionar descrições (opcional)
+                Use "Nome da tarefa | Descrição | Pessoas" (ex: "Revisar código | Fazer code review | 2")
               </BulkHint>
               <BulkActions>
                 <Button
@@ -588,7 +612,8 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         >
           <MenuItem
             onClick={() => {
-              const task = tasks.find(t => t.id === openItemMenu);
+              const itemId = openItemMenu?.replace('tasks-item-', '');
+              const task = tasks.find(t => t.id === itemId);
               if (task) {
                 handleRemove(task.id, task.name);
               }

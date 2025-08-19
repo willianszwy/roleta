@@ -1,21 +1,26 @@
 import { createContext, useContext } from 'react';
-import type { Participant, Task, RouletteHistory, TaskHistory } from '../types';
+import type { 
+  Participant, 
+  Task, 
+  RouletteHistory, 
+  TaskHistory, 
+  Project, 
+  Team, 
+  ProjectManagerState 
+} from '../types';
 
-export interface RouletteState {
-  // Participants
+export interface RouletteState extends ProjectManagerState {
+  // Global teams (shared across projects)
+  globalTeams: Team[];
+  // Current active project data (for backward compatibility)
   participants: Participant[];
-  // Tasks
   tasks: Task[];
-  // History
   history: RouletteHistory[];
   taskHistory: TaskHistory[];
-  // Spinning state
-  isSpinning: boolean;
-  selectedParticipant?: Participant;
-  selectedTask?: Task;
-  // Settings
+  // Settings from active project
   autoRemoveParticipants: boolean;
   animationDuration: number;
+  allowDuplicateParticipantsInTask: boolean;
   // Last winner tracking for auto-removal
   lastWinner?: Participant;
 }
@@ -27,17 +32,17 @@ export interface RouletteActions {
   removeParticipant: (id: string) => void;
   clearParticipants: () => void;
   
-  // Task actions
-  addTask: (name: string, description?: string) => void;
+  // Task actions  
+  addTask: (name: string, description?: string, requiredParticipants?: number) => void;
   addTasksBulk: (taskLines: string[]) => void;
   removeTask: (id: string) => void;
   clearTasks: () => void;
   
   // Spin actions
   spinRoulette: () => Promise<Participant | null>;
-  spinTaskRoulette: () => Promise<{ participant: Participant; task: Task } | null>;
+  spinTaskRoulette: () => Promise<{ participants: Participant[]; task: Task } | null>;
   finishSpin: (selectedParticipant?: Participant) => void;
-  finishTaskSpin: (selectedParticipant?: Participant, selectedTask?: Task) => void;
+  finishTaskSpin: (selectedParticipants?: Participant[], selectedTask?: Task) => void;
   
   // History actions
   clearHistory: () => void;
@@ -48,8 +53,23 @@ export interface RouletteActions {
   // Settings actions
   setAutoRemoveParticipants: (enabled: boolean) => void;
   
+  // Project management actions
+  createProject: (name: string, description?: string) => void;
+  deleteProject: (id: string) => void;
+  switchProject: (id: string) => void;
+  renameProject: (id: string, name: string) => void;
+  
+  // Team management actions
+  addTeam: (name: string, description?: string) => void;
+  removeTeam: (id: string) => void;
+  editTeam: (id: string, name: string, description?: string) => void;
+  addMemberToTeam: (teamId: string, participant: Participant) => void;
+  removeMemberFromTeam: (teamId: string, participantId: string) => void;
+  importTeamToProject: (teamId: string) => void;
+  
   // Utility actions
-  getCurrentTask: () => Task | undefined;
+  getCurrentTask: (currentState: RouletteState) => Task | undefined;
+  getActiveProject: (currentState: RouletteState) => Project | undefined;
 }
 
 export interface RouletteContextType {

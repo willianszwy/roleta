@@ -28,7 +28,9 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   helpText?: string;
 }
 
-const InputContainer = styled.div<{ fullWidth: boolean }>`
+const InputContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'fullWidth',
+})<{ fullWidth: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tokens.spacing.sm};
@@ -84,7 +86,9 @@ const baseInputStyles = css`
   }
 `;
 
-const StyledInput = styled.input<{ hasStartIcon: boolean; hasEndIcon: boolean; hasError: boolean }>`
+const StyledInput = styled.input.withConfig({
+  shouldForwardProp: (prop) => !['hasStartIcon', 'hasEndIcon', 'hasError'].includes(prop),
+})<{ hasStartIcon: boolean; hasEndIcon: boolean; hasError: boolean }>`
   ${baseInputStyles}
   
   ${props => props.hasStartIcon && css`
@@ -105,7 +109,9 @@ const StyledInput = styled.input<{ hasStartIcon: boolean; hasEndIcon: boolean; h
   `}
 `;
 
-const StyledTextArea = styled.textarea<{ hasError: boolean }>`
+const StyledTextArea = styled.textarea.withConfig({
+  shouldForwardProp: (prop) => prop !== 'hasError',
+})<{ hasError: boolean }>`
   ${baseInputStyles}
   min-height: 80px;
   resize: vertical;

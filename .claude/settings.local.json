@@ -25,7 +25,8 @@
       "Bash(timeout 10 npm run dev)",
       "Bash(npm run preview:*)",
       "Bash(taskkill:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(timeout 5 npm run dev)"
     ],
     "deny": []
   }

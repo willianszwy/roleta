@@ -53,22 +53,36 @@ export function WinnerModal({
 }: WinnerModalProps) {
   const { t } = useI18n();
   const [sparkles, setSparkles] = useState<Array<{x: number, y: number, delay: number}>>([]);
+  
+  // Cleanup sparkles when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSparkles([]);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && winner) {
-      // Trigger confetti with optimized performance
-      const colors = ['#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#fbbf24'];
-      
-      confetti({
-        particleCount: 100,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: colors,
-        gravity: 0.8,
-        scalar: 1.2,
-        drift: 0,
-        ticks: 300
-      });
+      // Add small delay to ensure confetti fires after modal is rendered
+      const confettiTimer = setTimeout(() => {
+        try {
+          // Trigger confetti with optimized performance
+          const colors = ['#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#fbbf24'];
+          
+          confetti({
+            particleCount: 100,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: colors,
+            gravity: 0.8,
+            scalar: 1.2,
+            drift: 0,
+            ticks: 300
+          });
+        } catch (error) {
+          console.warn('Confetti animation failed:', error);
+        }
+      }, 150); // 150ms delay for better timing
 
       // Generate sparkles for visual effect
       const newSparkles = Array.from({ length: 6 }, () => ({
@@ -79,10 +93,18 @@ export function WinnerModal({
       setSparkles(newSparkles);
 
       // Auto close timer
+      let autoCloseTimer: ReturnType<typeof setTimeout> | undefined;
       if (autoCloseDuration > 0) {
-        const timer = setTimeout(onClose, autoCloseDuration * 1000);
-        return () => clearTimeout(timer);
+        autoCloseTimer = setTimeout(onClose, autoCloseDuration * 1000);
       }
+
+      // Cleanup function
+      return () => {
+        clearTimeout(confettiTimer);
+        if (autoCloseTimer) {
+          clearTimeout(autoCloseTimer);
+        }
+      };
     }
   }, [isOpen, winner, autoCloseDuration, onClose]);
 

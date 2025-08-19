@@ -19,7 +19,7 @@ export function generateTaskCSV(data: TaskHistory[]): string {
     ...data.map(item => [
       formatDateForCSV(item.selectedAt),
       formatTimeForCSV(item.selectedAt),
-      `"${item.participantName.replace(/"/g, '""')}"`, // Escape quotes
+      `"${item.participants.map(p => p.name).join(', ').replace(/"/g, '""')}"`, // Escape quotes
       `"${item.taskName.replace(/"/g, '""')}"`, // Escape quotes
       `"${(item.taskDescription || '').replace(/"/g, '""')}"` // Escape quotes
     ].join(','))
@@ -49,7 +49,7 @@ export function downloadTaskCSV(csvContent: string, filename: string = 'sorteio-
 
 export function generateTaskJSON(data: TaskHistory[]): string {
   const exportData: TaskExportData[] = data.map(item => ({
-    participant: item.participantName,
+    participant: item.participants.map(p => p.name).join(', '),
     task: item.taskName,
     description: item.taskDescription,
     date: formatDateForExport(item.selectedAt),
@@ -132,7 +132,10 @@ export function getTaskHistoryStats(data: TaskHistory[]) {
   const taskCounts = new Map<string, number>();
   
   data.forEach(item => {
-    participantCounts.set(item.participantName, (participantCounts.get(item.participantName) || 0) + 1);
+    // Count each participant in multi-participant tasks
+    item.participants.forEach(participant => {
+      participantCounts.set(participant.name, (participantCounts.get(participant.name) || 0) + 1);
+    });
     taskCounts.set(item.taskName, (taskCounts.get(item.taskName) || 0) + 1);
   });
   

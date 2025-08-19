@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import type { RouletteHistory } from '../../types';
 import { formatDate } from '../../utils/helpers';
 import { useI18n } from '../../i18n';
+import { useDropdown } from '../../context/useDropdown';
 
 interface HistoryProps {
   history: RouletteHistory[];
@@ -260,10 +261,15 @@ export const History: React.FC<HistoryProps> = ({
   onClearHistory,
 }) => {
   const { t } = useI18n();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
+  const { activeDropdown, setActiveDropdown, closeAllDropdowns } = useDropdown();
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
+  
+  const MAIN_MENU_ID = 'history-main-menu';
+  const getItemMenuId = (itemId: string) => `history-item-${itemId}`;
+  
+  const menuOpen = activeDropdown === MAIN_MENU_ID;
+  const openItemMenu = activeDropdown?.startsWith('history-item-') ? activeDropdown : null;
 
   // Limit items to improve performance
   const displayedHistory = useMemo(() => 
@@ -275,20 +281,22 @@ export const History: React.FC<HistoryProps> = ({
     if (window.confirm(t('participants.remove') + ` "${participantName}"?`)) {
       onRemoveFromRoulette(participantId);
     }
-    setOpenItemMenu(null);
+    closeAllDropdowns();
   };
 
   const handleClearHistory = () => {
     if (window.confirm(t('history.clearConfirm'))) {
       onClearHistory();
     }
-    setMenuOpen(false);
+    closeAllDropdowns();
   };
 
   const toggleItemMenu = (itemId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    if (openItemMenu === itemId) {
-      setOpenItemMenu(null);
+    const dropdownId = getItemMenuId(itemId);
+    
+    if (activeDropdown === dropdownId) {
+      closeAllDropdowns();
     } else {
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
@@ -296,14 +304,14 @@ export const History: React.FC<HistoryProps> = ({
         top: rect.bottom + 4,
         left: Math.max(10, rect.right - 140),
       });
-      setOpenItemMenu(itemId);
+      setActiveDropdown(dropdownId);
     }
   };
 
   const handleMainMenuClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    if (menuOpen) {
-      setMenuOpen(false);
+    if (activeDropdown === MAIN_MENU_ID) {
+      closeAllDropdowns();
     } else {
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
@@ -311,21 +319,20 @@ export const History: React.FC<HistoryProps> = ({
         top: Math.max(10, rect.top - 70),
         left: Math.max(10, rect.right - 140),
       });
-      setMenuOpen(true);
+      setActiveDropdown(MAIN_MENU_ID);
     }
   };
 
   useEffect(() => {
     const handleClickOutside = () => {
-      setMenuOpen(false);
-      setOpenItemMenu(null);
+      closeAllDropdowns();
     };
 
-    if (menuOpen || openItemMenu) {
+    if (activeDropdown) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [menuOpen, openItemMenu]);
+  }, [activeDropdown, closeAllDropdowns]);
 
   return (
     <>
@@ -432,7 +439,8 @@ export const History: React.FC<HistoryProps> = ({
         >
           <MenuItem
             onClick={() => {
-              const item = history.find(h => h.id === openItemMenu);
+              const itemId = openItemMenu?.replace('history-item-', '');
+              const item = history.find(h => h.id === itemId);
               if (item) {
                 handleRemoveFromRoulette(item.participantId, item.participantName);
               }

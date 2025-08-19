@@ -12,8 +12,8 @@ interface TaskRouletteProps {
   isSpinning: boolean;
   selectedParticipant?: Participant;
   currentTask?: Task;
-  onSpin: () => Promise<{ participant: Participant; task: Task } | null>;
-  onSpinComplete: (participant?: Participant, task?: Task) => void;
+  onSpin: () => Promise<{ participants: Participant[]; task: Task } | null>;
+  onSpinComplete: (participants?: Participant[], task?: Task) => void;
 }
 
 const RouletteContainer = styled.div`
@@ -341,7 +341,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
   const [spinState, setSpinState] = useState<'idle' | 'spinning' | 'completed'>('idle');
-  const selectedResultRef = useRef<{ participant: Participant; task: Task } | null>(null);
+  const selectedResultRef = useRef<{ participants: Participant[]; task: Task } | null>(null);
 
   useEffect(() => {
     const updateSize = () => {
@@ -392,7 +392,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
       const result = selectedResultRef.current;
       selectedResultRef.current = null;
       setSpinState('idle');
-      onSpinComplete(result.participant, result.task);
+      onSpinComplete(result.participants, result.task);
     }
   }, [spinState, onSpinComplete]);
 
@@ -407,7 +407,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     if (result) {
       selectedResultRef.current = result;
       
-      const selectedIndex = participants.findIndex(p => p.id === result.participant.id);
+      const selectedIndex = participants.findIndex(p => p.id === result.participants[0].id);
       const extraRotations = 6;
       
       const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation, extraRotations);
@@ -569,7 +569,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                   transition={{ delay: (pendingTasks.length + index) * 0.05 }}
                 >
                   <TaskName isCompleted={true}>{task.name}</TaskName>
-                  {assignee && <TaskAssignee>→ {assignee.participantName}</TaskAssignee>}
+                  {assignee && assignee.participants && <TaskAssignee>→ {assignee.participants.map(p => p.name).join(', ')}</TaskAssignee>}
                 </TaskItem>
               );
             })}

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant } from '../../types';
 import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
 import { useI18n } from '../../i18n';
+import { useDropdown } from '../../context/useDropdown';
 
 interface ParticipantManagerProps {
   participants: Participant[];
@@ -291,13 +292,18 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
   onClear,
 }) => {
   const { t } = useI18n();
+  const { activeDropdown, setActiveDropdown, closeAllDropdowns } = useDropdown();
   const [inputValue, setInputValue] = useState('');
   const [bulkValue, setBulkValue] = useState('');
   const [showBulkImport, setShowBulkImport] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [openItemMenu, setOpenItemMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
+  
+  const MAIN_MENU_ID = 'participants-main-menu';
+  const getItemMenuId = (itemId: string) => `participants-item-${itemId}`;
+  
+  const menuOpen = activeDropdown === MAIN_MENU_ID;
+  const openItemMenu = activeDropdown?.startsWith('participants-item-') ? activeDropdown : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -331,14 +337,14 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
     if (window.confirm(t('participants.remove') + ` "${name}"?`)) {
       onRemove(id);
     }
-    setOpenItemMenu(null);
+    closeAllDropdowns();
   };
 
   const handleClear = () => {
     if (window.confirm(t('participants.clear') + '?')) {
       onClear();
     }
-    setMenuOpen(false);
+    closeAllDropdowns();
   };
 
   const toggleBulkImport = () => {
@@ -350,8 +356,10 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
 
   const toggleItemMenu = (itemId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    if (openItemMenu === itemId) {
-      setOpenItemMenu(null);
+    const dropdownId = getItemMenuId(itemId);
+    
+    if (activeDropdown === dropdownId) {
+      closeAllDropdowns();
     } else {
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
@@ -359,14 +367,14 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
         top: rect.bottom + 4,
         left: Math.max(10, rect.right - 140),
       });
-      setOpenItemMenu(itemId);
+      setActiveDropdown(dropdownId);
     }
   };
 
   const handleMainMenuClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    if (menuOpen) {
-      setMenuOpen(false);
+    if (activeDropdown === MAIN_MENU_ID) {
+      closeAllDropdowns();
     } else {
       const button = event.currentTarget as HTMLElement;
       const rect = button.getBoundingClientRect();
@@ -374,21 +382,20 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
         top: Math.max(10, rect.top - 70),
         left: Math.max(10, rect.right - 140),
       });
-      setMenuOpen(true);
+      setActiveDropdown(MAIN_MENU_ID);
     }
   };
 
   useEffect(() => {
     const handleClickOutside = () => {
-      setMenuOpen(false);
-      setOpenItemMenu(null);
+      closeAllDropdowns();
     };
 
-    if (menuOpen || openItemMenu) {
+    if (activeDropdown) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [menuOpen, openItemMenu]);
+  }, [activeDropdown, closeAllDropdowns]);
 
   return (
     <>
@@ -557,7 +564,8 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
         >
           <MenuItem
             onClick={() => {
-              const participant = participants.find(p => p.id === openItemMenu);
+              const itemId = openItemMenu?.replace('participants-item-', '');
+              const participant = participants.find(p => p.id === itemId);
               if (participant) {
                 handleRemove(participant.id, participant.name);
               }

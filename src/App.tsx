@@ -8,6 +8,7 @@ import { TaskRoulette } from './components/TaskRoulette/TaskRoulette';
 import { SidePanel } from './components/SidePanel/SidePanel';
 import { WinnerModal } from './components/WinnerModal/WinnerModal';
 import { SkipLinks } from './components/SkipLinks/SkipLinks';
+import { ProjectSelector } from './components/ProjectSelector/ProjectSelector';
 import { useRouletteContext } from './context/RouletteContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useScreenReaderAnnouncements } from './hooks/useA11y';
@@ -173,6 +174,7 @@ const defaultSettings: SettingsConfig = {
 };
 
 function App() {
+  // All hooks must be called unconditionally at the top level
   const { state, actions } = useRouletteContext();
   const [settings, setSettings] = useLocalStorage<SettingsConfig>('taskroulette-settings', defaultSettings);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
@@ -181,18 +183,39 @@ function App() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const { announce, LiveRegion } = useScreenReaderAnnouncements();
   const { t } = useI18n();
-
+  
   // Set auto-remove setting in context when settings change
   React.useEffect(() => {
-    actions.setAutoRemoveParticipants(settings.autoRemoveWinner);
+    if (actions && actions.setAutoRemoveParticipants) {
+      actions.setAutoRemoveParticipants(settings.autoRemoveWinner);
+    }
   }, [settings.autoRemoveWinner, actions]);
+  
+  // Early return after all hooks are called
+  if (!state || !actions) {
+    return (
+      <div style={{ 
+        color: 'white', 
+        background: '#0f0f23', 
+        minHeight: '100vh', 
+        padding: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <h1>Loading...</h1>
+        <p>Initializing application state</p>
+      </div>
+    );
+  }
 
   const handleParticipantSpin = async (): Promise<Participant | null> => {
     const result = await actions.spinRoulette();
     return result;
   };
 
-  const handleTaskSpin = (): Promise<{ participant: Participant; task: Task } | null> => {
+  const handleTaskSpin = (): Promise<{ participants: Participant[]; task: Task } | null> => {
     return actions.spinTaskRoulette();
   };
 
@@ -225,15 +248,16 @@ function App() {
   };
 
 
-  const handleTaskSpinComplete = (selectedParticipant?: Participant, selectedTask?: Task) => {
-    actions.finishTaskSpin(selectedParticipant, selectedTask);
+  const handleTaskSpinComplete = (selectedParticipants?: Participant[], selectedTask?: Task) => {
+    actions.finishTaskSpin(selectedParticipants, selectedTask);
     
-    if (selectedParticipant && selectedTask) {
-      setCurrentWinner(selectedParticipant);
+    if (selectedParticipants && selectedParticipants.length > 0 && selectedTask) {
+      setCurrentWinner(selectedParticipants[0]); // First participant for modal compatibility
       setCurrentTask(selectedTask);
       
       // Announce task assignment to screen readers
-      announce(t('a11y.taskAssigned', { participant: selectedParticipant.name, task: selectedTask.name }));
+      const participantNames = selectedParticipants.map(p => p.name).join(', ');
+      announce(t('a11y.taskAssigned', { participant: participantNames, task: selectedTask.name }));
       
       // Show winner modal if enabled, otherwise trigger confetti immediately
       if (settings.showWinnerModal) {
@@ -282,6 +306,13 @@ function App() {
           role="banner"
         >
           <HeaderTitle>{t('app.title')}</HeaderTitle>
+          <ProjectSelector
+            projects={state.projects}
+            activeProjectId={state.activeProjectId}
+            onSwitchProject={actions.switchProject}
+            onCreateProject={actions.createProject}
+            onDeleteProject={actions.deleteProject}
+          />
           <HeaderMenuButton
             onClick={togglePanel}
             whileHover={{ scale: 1.05 }}
@@ -340,7 +371,7 @@ function App() {
                     taskHistory={state.taskHistory}
                     isSpinning={state.isSpinning}
                     selectedParticipant={state.selectedParticipant}
-                    currentTask={actions.getCurrentTask()}
+                    currentTask={actions.getCurrentTask(state)}
                     onSpin={handleTaskSpin}
                     onSpinComplete={handleTaskSpinComplete}
                   />
@@ -356,6 +387,7 @@ function App() {
             history={state.history}
             tasks={state.tasks}
             taskHistory={state.taskHistory}
+            teams={state.globalTeams}
             settings={settings}
             onAddParticipant={actions.addParticipant}
             onAddParticipantsBulk={actions.addParticipantsBulk}
@@ -368,6 +400,12 @@ function App() {
             onRemoveTask={actions.removeTask}
             onClearTasks={actions.clearTasks}
             onClearTaskHistory={actions.clearTaskHistory}
+            onAddTeam={actions.addTeam}
+            onRemoveTeam={actions.removeTeam}
+            onEditTeam={actions.editTeam}
+            onAddMemberToTeam={actions.addMemberToTeam}
+            onRemoveMemberFromTeam={actions.removeMemberFromTeam}
+            onImportTeamToProject={actions.importTeamToProject}
             onSettingsChange={handleSettingsChange}
             onResetSettings={handleResetSettings}
           />

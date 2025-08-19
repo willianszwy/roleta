@@ -84,6 +84,14 @@ export const frFR: Translation = {
   'history.clearTaskConfirm': 'Êtes-vous sûr de vouloir effacer tout l\'historique? Cette action ne peut pas être annulée.',
   'history.noDraws': 'Aucun tirage effectué encore',
   
+  // Stats
+  'stats.draws': 'Tirages',
+  'stats.assignments': 'Affectations',
+  'stats.people': 'Personnes',
+  'stats.participants': 'Participants',
+  'stats.exportCsv': 'Exporter CSV',
+  'stats.exportJson': 'Exporter JSON',
+  
   // Settings
   'settings.title': 'Paramètres',
   'settings.language': 'Langue',
@@ -166,4 +174,49 @@ export const frFR: Translation = {
   'a11y.spinCompleted': 'Tirage au sort terminé! Gagnant: {{winner}}',
   'a11y.taskAssigned': 'Tâche attribuée! {{participant}} a reçu la tâche: {{task}}',
   'a11y.participantSelected': 'Participant sélectionné: {{participant}}',
+
+  // Teams
+  'teams.title': 'Équipes',
+  'teams.add': 'Ajouter une Équipe',
+  'teams.name': 'Nom de l\'équipe',
+  'teams.namePlaceholder': 'Entrez le nom de l\'équipe',
+  'teams.description': 'Description',
+  'teams.descriptionPlaceholder': 'Description optionnelle de l\'équipe',
+  'teams.remove': 'Supprimer l\'équipe',
+  'teams.edit': 'Modifier',
+  'teams.import': 'Importer',
+  'teams.imported': 'Importé',
+  'teams.importToProject': 'Importer l\'équipe dans le projet',
+  'teams.empty': 'Aucune équipe créée',
+  'teams.noMembers': 'Aucun membre dans l\'équipe',
+  'teams.members': 'Membres',
+  'teams.addMember': 'Ajouter un Membre',
+  'teams.memberName': 'Nom du membre',
+  'teams.removeMember': 'Supprimer le membre',
+
+  // Projects
+  'projects.title': 'Projets',
+  'projects.current': 'Projet Actuel',
+  'projects.selector': 'Projets',
+  'projects.selectProject': 'Sélectionner un projet',
+  'projects.create': 'Créer un Projet',
+  'projects.enterName': 'Entrez le nom du projet',
+  'projects.enterDescription': 'Entrez la description du projet (optionnel)',
+  'projects.empty': 'Aucun projet créé',
+  'projects.stats': '{{participants}} participants • {{tasks}} tâches • {{teams}} équipes',
+  'projects.createNew': 'Créer un Nouveau Projet',
+  'projects.projectName': 'Nom du Projet',
+  'projects.projectDescription': 'Description du Projet',
+  
+  // Pagination
+  'pagination.previous': 'Précédent',
+  'pagination.next': 'Suivant',
+  'pagination.page': 'Page {{current}} de {{total}}',
+  'pagination.items': '({{showing}} de {{total}} éléments)',
+
+  // Common
+  'common.cancel': 'Annuler',
+  'common.create': 'Créer',
+  'common.save': 'Sauvegarder',
+  'common.delete': 'Supprimer',
 };

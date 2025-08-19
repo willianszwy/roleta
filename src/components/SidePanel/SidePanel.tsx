@@ -1,7 +1,7 @@
 import React, { useState, Suspense, lazy } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Participant, RouletteHistory, Task, TaskHistory as TaskHistoryType } from '../../types';
+import type { Participant, RouletteHistory, Task, TaskHistory as TaskHistoryType, Team } from '../../types';
 import type { SettingsConfig } from '../Settings/Settings';
 import { Loading } from '../Loading/Loading';
 import { useI18n } from '../../i18n';
@@ -12,6 +12,7 @@ const History = lazy(() => import('../History/History').then(module => ({ defaul
 const Settings = lazy(() => import('../Settings/Settings').then(module => ({ default: module.Settings })));
 const TaskManager = lazy(() => import('../TaskManager/TaskManager').then(module => ({ default: module.TaskManager })));
 const TaskHistory = lazy(() => import('../TaskHistory/TaskHistory').then(module => ({ default: module.TaskHistory })));
+const TeamManager = lazy(() => import('../TeamManager/TeamManager').then(module => ({ default: module.TeamManager })));
 
 const PanelContainer = styled.div`
   position: fixed;
@@ -206,6 +207,7 @@ interface SidePanelProps {
   history: RouletteHistory[];
   tasks?: Task[];
   taskHistory?: TaskHistoryType[];
+  teams?: Team[];
   settings: SettingsConfig;
   onAddParticipant: (name: string) => void;
   onAddParticipantsBulk: (names: string[]) => void;
@@ -213,11 +215,17 @@ interface SidePanelProps {
   onClearParticipants: () => void;
   onRemoveFromRoulette: (participantId: string) => void;
   onClearHistory: () => void;
-  onAddTask?: (name: string, description?: string) => void;
+  onAddTask?: (name: string, description?: string, requiredParticipants?: number) => void;
   onAddTasksBulk?: (taskLines: string[]) => void;
   onRemoveTask?: (id: string) => void;
   onClearTasks?: () => void;
   onClearTaskHistory?: () => void;
+  onAddTeam?: (name: string, description?: string) => void;
+  onRemoveTeam?: (id: string) => void;
+  onEditTeam?: (id: string, name: string, description?: string) => void;
+  onAddMemberToTeam?: (teamId: string, participant: Participant) => void;
+  onRemoveMemberFromTeam?: (teamId: string, participantId: string) => void;
+  onImportTeamToProject?: (teamId: string) => void;
   onSettingsChange: (settings: SettingsConfig) => void;
   onResetSettings: () => void;
 }
@@ -229,6 +237,7 @@ export function SidePanel({
   history,
   tasks = [],
   taskHistory = [],
+  teams = [],
   settings,
   onAddParticipant,
   onAddParticipantsBulk,
@@ -241,11 +250,17 @@ export function SidePanel({
   onRemoveTask,
   onClearTasks,
   onClearTaskHistory,
+  onAddTeam,
+  onRemoveTeam,
+  onEditTeam,
+  onAddMemberToTeam,
+  onRemoveMemberFromTeam,
+  onImportTeamToProject,
   onSettingsChange,
   onResetSettings,
 }: SidePanelProps) {
   const { t } = useI18n();
-  const [activeSection, setActiveSection] = useState<'participants' | 'tasks' | 'history' | 'taskHistory' | 'settings'>('participants');
+  const [activeSection, setActiveSection] = useState<'participants' | 'tasks' | 'teams' | 'history' | 'taskHistory' | 'settings'>('participants');
 
   return (
     <PanelContainer data-testid="side-panel">
@@ -283,6 +298,12 @@ export function SidePanel({
                     </NavButton>
                   )}
                   <NavButton
+                    active={activeSection === 'teams'}
+                    onClick={() => setActiveSection('teams')}
+                  >
+                    <span>{t('teams.title')}</span>
+                  </NavButton>
+                  <NavButton
                     active={activeSection === (
                       settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
                     )}
@@ -290,19 +311,19 @@ export function SidePanel({
                       settings.rouletteMode === 'tasks' ? 'taskHistory' : 'history'
                     )}
                   >
-                    <span>Histórico</span>
+                    <span>{t('nav.history')}</span>
                   </NavButton>
                   <NavButton
                     active={activeSection === 'settings'}
                     onClick={() => setActiveSection('settings')}
                   >
-                    <span>Config</span>
+                    <span>{t('nav.settings')}</span>
                   </NavButton>
                 </MenuNav>
               </PanelHeader>
               
               <PanelBody>
-                <Suspense fallback={<Loading text="Carregando seção..." />}>
+                <Suspense fallback={<Loading text={t('status.loading')} />}>
                   {activeSection === 'participants' && (
                     <div style={{ marginTop: '1.5rem' }}>
                       <ParticipantManager
@@ -339,6 +360,19 @@ export function SidePanel({
                       <TaskHistory
                       taskHistory={taskHistory}
                       onClearHistory={onClearTaskHistory!}
+                      />
+                    </div>
+                  )}
+                  {activeSection === 'teams' && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <TeamManager
+                        teams={teams}
+                        onAddTeam={onAddTeam!}
+                        onRemoveTeam={onRemoveTeam!}
+                        onEditTeam={onEditTeam!}
+                        onAddMemberToTeam={onAddMemberToTeam!}
+                        onRemoveMemberFromTeam={onRemoveMemberFromTeam!}
+                        onImportTeamToProject={onImportTeamToProject!}
                       />
                     </div>
                   )}

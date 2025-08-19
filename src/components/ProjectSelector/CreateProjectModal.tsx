@@ -12,11 +12,15 @@ const Overlay = styled(motion.div)`
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
-  z-index: 2000;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  
+  /* Garantir que o modal apareça corretamente */
+  min-height: 100vh;
+  min-width: 100vw;
 `;
 
 const Modal = styled(motion.div)`
@@ -32,7 +36,12 @@ const Modal = styled(motion.div)`
   display: flex;
   flex-direction: column;
   position: relative;
-  z-index: 2001;
+  z-index: 10001;
+  
+  /* Garantir posicionamento correto */
+  margin: auto;
+  max-height: 90vh;
+  overflow-y: auto;
 `;
 
 const Title = styled.h2`

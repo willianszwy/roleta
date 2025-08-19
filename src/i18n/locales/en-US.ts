@@ -84,6 +84,14 @@ export const enUS: Translation = {
   'history.clearTaskConfirm': 'Are you sure you want to clear all history? This action cannot be undone.',
   'history.noDraws': 'No draws performed yet',
   
+  // Stats
+  'stats.draws': 'Draws',
+  'stats.assignments': 'Assignments',
+  'stats.people': 'People',
+  'stats.participants': 'Participants',
+  'stats.exportCsv': 'Export CSV',
+  'stats.exportJson': 'Export JSON',
+  
   // Settings
   'settings.title': 'Settings',
   'settings.language': 'Language',
@@ -166,4 +174,49 @@ export const enUS: Translation = {
   'a11y.spinCompleted': 'Draw completed! Winner: {{winner}}',
   'a11y.taskAssigned': 'Task assigned! {{participant}} received the task: {{task}}',
   'a11y.participantSelected': 'Participant selected: {{participant}}',
+
+  // Teams
+  'teams.title': 'Teams',
+  'teams.add': 'Add Team',
+  'teams.name': 'Team name',
+  'teams.namePlaceholder': 'Enter team name',
+  'teams.description': 'Description',
+  'teams.descriptionPlaceholder': 'Optional team description',
+  'teams.remove': 'Remove team',
+  'teams.edit': 'Edit',
+  'teams.import': 'Import',
+  'teams.imported': 'Imported',
+  'teams.importToProject': 'Import team to project',
+  'teams.empty': 'No teams created',
+  'teams.noMembers': 'No team members',
+  'teams.members': 'Members',
+  'teams.addMember': 'Add Member',
+  'teams.memberName': 'Member name',
+  'teams.removeMember': 'Remove member',
+
+  // Projects
+  'projects.title': 'Projects',
+  'projects.current': 'Current Project',
+  'projects.selector': 'Projects',
+  'projects.selectProject': 'Select project',
+  'projects.create': 'Create Project',
+  'projects.enterName': 'Enter project name',
+  'projects.enterDescription': 'Enter project description (optional)',
+  'projects.empty': 'No projects created',
+  'projects.stats': '{{participants}} participants • {{tasks}} tasks • {{teams}} teams',
+  'projects.createNew': 'Create New Project',
+  'projects.projectName': 'Project Name',
+  'projects.projectDescription': 'Project Description',
+  
+  // Pagination
+  'pagination.previous': 'Previous',
+  'pagination.next': 'Next',
+  'pagination.page': 'Page {{current}} of {{total}}',
+  'pagination.items': '({{showing}} of {{total}} items)',
+
+  // Common
+  'common.cancel': 'Cancel',
+  'common.create': 'Create',
+  'common.save': 'Save',
+  'common.delete': 'Delete',
 };
