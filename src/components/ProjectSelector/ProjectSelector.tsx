@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '../../i18n';
-import type { Project, ProjectManagerProps } from '../../types';
+import type { ProjectManagerProps } from '../../types';
 import { Button } from '../../design-system';
 import { CreateProjectModal } from './CreateProjectModal';
 

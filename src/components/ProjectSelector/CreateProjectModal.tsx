@@ -183,7 +183,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t('projects.enterName')}
-                  autoFocus
                   required
                 />
               </FormGroup>
