@@ -21,7 +21,11 @@
       "Bash(npm run test:*)",
       "Bash(npm test:*)",
       "Bash(gh run list:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(npm run preview:*)",
+      "Bash(taskkill:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }
