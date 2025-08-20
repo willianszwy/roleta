@@ -12,8 +12,18 @@ interface TaskRouletteProps {
   isSpinning: boolean;
   selectedParticipant?: Participant;
   currentTask?: Task;
+  currentTaskSpin?: {
+    task: Task;
+    requiredParticipants: number;
+    selectedParticipants: Participant[];
+    currentSpinIndex: number;
+    isSpinning: boolean;
+  };
   onSpin: () => Promise<{ participants: Participant[]; task: Task } | null>;
   onSpinComplete: (participants?: Participant[], task?: Task) => void;
+  onStartMultiParticipantTaskSpin: (task: Task) => void;
+  onFinishSingleParticipantSpin: (participant: Participant) => void;
+  onCompleteMultiParticipantTaskSpin: () => void;
 }
 
 const RouletteContainer = styled.div`
@@ -58,9 +68,9 @@ const RouletteWrapper = styled.div`
   justify-content: center;
 `;
 
-const WheelContainer = styled.div<{ size: number }>`
-  width: ${props => props.size}px;
-  height: ${props => props.size}px;
+const WheelContainer = styled.div<{ $size: number }>`
+  width: ${props => props.$size}px;
+  height: ${props => props.$size}px;
   position: relative;
   border-radius: 50%;
   overflow: hidden;
@@ -72,7 +82,7 @@ const WheelContainer = styled.div<{ size: number }>`
   margin: 1rem;
 `;
 
-const WheelSVG = styled(motion.svg)<{ size: number }>`
+const WheelSVG = styled(motion.svg)<{ $size: number }>`
   width: 100%;
   height: 100%;
   position: absolute;
@@ -80,40 +90,40 @@ const WheelSVG = styled(motion.svg)<{ size: number }>`
   left: 0;
 `;
 
-const CenterCircle = styled.div<{ size: number }>`
+const CenterCircle = styled.div<{ $size: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: ${props => Math.max(30, props.size * 0.08)}px;
-  height: ${props => Math.max(30, props.size * 0.08)}px;
+  width: ${props => Math.max(30, props.$size * 0.08)}px;
+  height: ${props => Math.max(30, props.$size * 0.08)}px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
   z-index: 10;
 `;
 
-const RoulettePointer = styled.div<{ size: number }>`
+const RoulettePointer = styled.div<{ $size: number }>`
   position: absolute;
-  top: ${props => Math.max(-12, -props.size * 0.03)}px;
+  top: ${props => Math.max(-12, -props.$size * 0.03)}px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: ${props => Math.max(12, props.size * 0.03)}px solid transparent;
-  border-right: ${props => Math.max(12, props.size * 0.03)}px solid transparent;
-  border-top: ${props => Math.max(24, props.size * 0.06)}px solid #ff4757;
+  border-left: ${props => Math.max(12, props.$size * 0.03)}px solid transparent;
+  border-right: ${props => Math.max(12, props.$size * 0.03)}px solid transparent;
+  border-top: ${props => Math.max(24, props.$size * 0.06)}px solid #ff4757;
   z-index: 20;
   filter: drop-shadow(0 4px 8px rgba(255, 71, 87, 0.4));
   
   &::after {
     content: '';
     position: absolute;
-    top: ${props => -Math.max(24, props.size * 0.06)}px;
+    top: ${props => -Math.max(24, props.$size * 0.06)}px;
     left: 50%;
     transform: translateX(-50%);
-    width: ${props => Math.max(10, props.size * 0.025)}px;
-    height: ${props => Math.max(10, props.size * 0.025)}px;
+    width: ${props => Math.max(10, props.$size * 0.025)}px;
+    height: ${props => Math.max(10, props.$size * 0.025)}px;
     background: #ff4757;
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
@@ -313,6 +323,152 @@ const EmptyStateText = styled.p`
   margin: 0;
 `;
 
+const ProgressContainer = styled.div`
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  text-align: center;
+`;
+
+const ProgressTitle = styled.h4`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(102, 126, 234, 0.9);
+  margin: 0 0 0.75rem 0;
+`;
+
+const ProgressInfo = styled.div`
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.75rem;
+`;
+
+const SelectedParticipantsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.75rem;
+`;
+
+const SelectedParticipantChip = styled.div`
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  border-radius: 1rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(102, 126, 234, 0.9);
+`;
+
+const ProgressBar = styled.div`
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+`;
+
+const ProgressFill = styled.div<{ $progress: number }>`
+  width: ${props => props.$progress}%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+`;
+
+const CompletionModal = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const CompletionModalContent = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+`;
+
+const CompletionIcon = styled.div`
+  font-size: 4rem;
+  margin-bottom: 1rem;
+`;
+
+const CompletionTitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1rem 0;
+`;
+
+const CompletionTaskName = styled.div`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(102, 126, 234, 0.9);
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+`;
+
+const CompletionText = styled.p`
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1rem 0;
+`;
+
+const CompletionParticipants = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+`;
+
+const CompletionParticipant = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+`;
+
+const CompletionButton = styled.button`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+`;
+
 
 
 
@@ -334,14 +490,36 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   isSpinning,
   selectedParticipant,
   currentTask,
+  currentTaskSpin,
   onSpin,
   onSpinComplete,
+  onStartMultiParticipantTaskSpin,
+  onFinishSingleParticipantSpin,
+  onCompleteMultiParticipantTaskSpin,
 }) => {
+  // Check for empty state BEFORE any hooks
+  const isEmpty = participants.length === 0 || tasks.length === 0;
+  
   const { t } = useI18n();
   const [rotation, setRotation] = useState(0);
   const [wheelSize, setWheelSize] = useState(400);
   const [spinState, setSpinState] = useState<'idle' | 'spinning' | 'completed'>('idle');
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completedTaskData, setCompletedTaskData] = useState<{task: Task, participants: Participant[]} | null>(null);
   const selectedResultRef = useRef<{ participants: Participant[]; task: Task } | null>(null);
+
+  // Debug: Monitor currentTaskSpin prop changes
+  useEffect(() => {
+    console.log('🔄 TaskRoulette currentTaskSpin prop changed', { 
+      hasCurrentTaskSpin: !!currentTaskSpin, 
+      currentTaskSpin 
+    });
+  }, [currentTaskSpin]);
+
+  // Debug: Monitor spinState changes
+  useEffect(() => {
+    console.log('🎭 spinState changed:', spinState);
+  }, [spinState]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -396,12 +574,26 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     }
   }, [spinState, onSpinComplete]);
 
-  const handleSpin = async () => {
+  const handleSpin = React.useCallback(async () => {
+    console.log('🎯 handleSpin called', { 
+      participantsCount: participants.length, 
+      currentTask: currentTask?.name, 
+      requiredParticipants: currentTask?.requiredParticipants,
+      spinState 
+    });
+    
     if (participants.length === 0 || !currentTask || spinState !== 'idle') return;
 
-    // Transition to spinning state
-    setSpinState('spinning');
+    // Check if this is a multi-participant task
+    if (currentTask.requiredParticipants > 1) {
+      console.log('🎯 Starting multi-participant flow for task:', currentTask.name);
+      // Start multi-participant flow
+      onStartMultiParticipantTaskSpin(currentTask);
+      return;
+    }
 
+    // Single participant flow (legacy)
+    setSpinState('spinning');
     const result = await onSpin();
     
     if (result) {
@@ -413,12 +605,77 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
       const rotationToAdd = calculateRouletteRotation(selectedIndex, participants.length, rotation, extraRotations);
       const newRotation = rotation + rotationToAdd;
       setRotation(newRotation);
-      
-      // onSpinComplete will be called by onAnimationComplete
     }
-  };
+  }, [participants, currentTask, spinState, onStartMultiParticipantTaskSpin, onSpin, rotation]);
 
-  if (participants.length === 0 || tasks.length === 0) {
+  const handleSingleSpin = React.useCallback(async () => {
+    console.log('🔄 handleSingleSpin called', { 
+      currentTaskSpin: currentTaskSpin ? {
+        taskName: currentTaskSpin.task.name,
+        currentSpinIndex: currentTaskSpin.currentSpinIndex,
+        requiredParticipants: currentTaskSpin.requiredParticipants,
+        selectedCount: currentTaskSpin.selectedParticipants.length,
+        isSpinning: currentTaskSpin.isSpinning
+      } : null,
+      spinState,
+      isSpinning 
+    });
+
+    if (!currentTaskSpin || spinState !== 'idle' || isSpinning) {
+      console.log('🚫 handleSingleSpin blocked', { currentTaskSpin: !!currentTaskSpin, spinState, isSpinning });
+      return;
+    }
+
+    console.log('🔄 Starting single spin...');
+    setSpinState('spinning');
+    
+    // Set global spinning state for animation
+    // Note: We'll manage this locally for individual spins
+
+    // Get available participants (excluding already selected ones)
+    const availableParticipants = participants.filter(p => 
+      !currentTaskSpin.selectedParticipants.some(sp => sp.id === p.id)
+    );
+
+    if (availableParticipants.length === 0) {
+      setSpinState('idle');
+      return;
+    }
+
+    // Simulate spin delay - shorter for individual spins
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Select random participant
+    const selectedIndex = Math.floor(Math.random() * availableParticipants.length);
+    const selectedParticipant = availableParticipants[selectedIndex];
+
+    // Calculate rotation
+    const participantIndex = participants.findIndex(p => p.id === selectedParticipant.id);
+    const extraRotations = 6;
+    const rotationToAdd = calculateRouletteRotation(participantIndex, participants.length, rotation, extraRotations);
+    const newRotation = rotation + rotationToAdd;
+    setRotation(newRotation);
+
+    // Store selected participant for animation complete
+    selectedResultRef.current = { participants: [selectedParticipant], task: currentTaskSpin.task };
+  }, [currentTaskSpin, spinState, isSpinning, participants, rotation]);
+
+  const handleButtonClick = React.useCallback(() => {
+    console.log('🖱️ Button clicked!', { 
+      currentTaskSpin: !!currentTaskSpin,
+      isSpinning,
+      willCall: currentTaskSpin ? 'handleSingleSpin' : 'handleSpin',
+      disabled: isSpinning || (!currentTask && !currentTaskSpin)
+    });
+    if (currentTaskSpin) {
+      handleSingleSpin();
+    } else {
+      handleSpin();
+    }
+  }, [currentTaskSpin, isSpinning, currentTask, handleSingleSpin, handleSpin]);
+
+  // Early return for empty state AFTER all hooks
+  if (isEmpty) {
     return (
       <RouletteContainer>
         <RouletteSection>
@@ -442,6 +699,40 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
             {t('tasks.empty')}
           </div>
         </TaskSidebar>
+
+        {/* Completion Modal - must be shown even in empty state */}
+        <AnimatePresence>
+          {showCompletionModal && completedTaskData && (
+            <CompletionModal
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CompletionModalContent>
+                <CompletionIcon>🎉</CompletionIcon>
+                <CompletionTitle>Tarefa Concluída!</CompletionTitle>
+                <CompletionTaskName>{completedTaskData.task.name}</CompletionTaskName>
+                <CompletionText>
+                  Responsáveis selecionados:
+                </CompletionText>
+                <CompletionParticipants>
+                  {completedTaskData.participants.map((participant, index) => (
+                    <CompletionParticipant key={participant.id}>
+                      {index + 1}. {participant.name}
+                    </CompletionParticipant>
+                  ))}
+                </CompletionParticipants>
+                <CompletionButton onClick={() => {
+                  setShowCompletionModal(false);
+                  setCompletedTaskData(null);
+                }}>
+                  Continuar
+                </CompletionButton>
+              </CompletionModalContent>
+            </CompletionModal>
+          )}
+        </AnimatePresence>
       </RouletteContainer>
     );
   }
@@ -465,10 +756,10 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
       <RouletteSection>
 
         <RouletteWrapper>
-          <RoulettePointer size={wheelSize} />
-          <WheelContainer size={wheelSize}>
+          <RoulettePointer $size={wheelSize} />
+          <WheelContainer $size={wheelSize}>
             <WheelSVG
-              size={wheelSize}
+              $size={wheelSize}
               viewBox={`0 0 ${wheelSize} ${wheelSize}`}
               animate={{ rotate: rotation }}
               transition={{
@@ -476,7 +767,56 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 ease: [0.2, 0, 0.2, 1],
               }}
               onAnimationComplete={() => {
-                if (spinState === 'spinning') {
+                console.log('🎬 Animation completed', { 
+                  spinState, 
+                  currentTaskSpin: !!currentTaskSpin, 
+                  selectedResult: !!selectedResultRef.current,
+                  selectedResultData: selectedResultRef.current 
+                });
+                
+                // Check if this is multi-participant flow regardless of spinState
+                if (currentTaskSpin && selectedResultRef.current) {
+                  console.log('🎬 Multi-participant flow detected, processing...', {
+                    spinState,
+                    hasCurrentTaskSpin: !!currentTaskSpin,
+                    hasSelectedResult: !!selectedResultRef.current
+                  });
+                  
+                  console.log('🎬 Multi-participant flow animation complete');
+                  // Multi-participant flow: finish single spin
+                  const participant = selectedResultRef.current.participants[0];
+                  console.log('🎬 Finishing single participant spin for:', participant.name);
+                  onFinishSingleParticipantSpin(participant);
+                  selectedResultRef.current = null;
+                  setSpinState('idle');
+                  
+                  // Check if we need more participants (using array length + 1 for the one we just added)
+                  const totalSelected = currentTaskSpin.selectedParticipants.length + 1;
+                  console.log('🎬 Total selected after this spin:', totalSelected, 'of', currentTaskSpin.requiredParticipants);
+                  
+                  if (totalSelected >= currentTaskSpin.requiredParticipants) {
+                    console.log('🎬 All participants selected, completing task...');
+                    
+                    // Store completion data for modal
+                    setCompletedTaskData({
+                      task: currentTaskSpin.task,
+                      participants: [...currentTaskSpin.selectedParticipants, participant]
+                    });
+                    
+                    // All participants selected, complete the task
+                    setTimeout(() => {
+                      setShowCompletionModal(true);
+                      // Wait for modal to be shown before completing
+                      setTimeout(() => {
+                        onCompleteMultiParticipantTaskSpin();
+                      }, 100);
+                    }, 1000);
+                  } else {
+                    console.log('🎬 Need more participants, ready for next spin');
+                  }
+                } else if (spinState === 'spinning') {
+                  console.log('🎬 Single participant flow animation complete');
+                  // Single participant flow
                   setSpinState('completed');
                 }
               }}
@@ -519,16 +859,65 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
               })}
             </WheelSVG>
           </WheelContainer>
-          <CenterCircle size={wheelSize} />
+          <CenterCircle $size={wheelSize} />
         </RouletteWrapper>
 
+        {currentTaskSpin && (
+          <ProgressContainer>
+            <ProgressTitle>
+              Sorteando responsáveis para: {currentTaskSpin.task.name}
+            </ProgressTitle>
+            <ProgressInfo>
+              Participante {currentTaskSpin.currentSpinIndex + 1} de {currentTaskSpin.requiredParticipants}
+            </ProgressInfo>
+            <ProgressBar>
+              <ProgressFill $progress={(currentTaskSpin.currentSpinIndex / currentTaskSpin.requiredParticipants) * 100} />
+            </ProgressBar>
+            {currentTaskSpin.selectedParticipants.length > 0 && (
+              <SelectedParticipantsList>
+                {currentTaskSpin.selectedParticipants.map((participant, index) => (
+                  <SelectedParticipantChip key={participant.id}>
+                    {index + 1}. {participant.name}
+                  </SelectedParticipantChip>
+                ))}
+              </SelectedParticipantsList>
+            )}
+          </ProgressContainer>
+        )}
+
         <SpinButton
-          disabled={isSpinning || !currentTask}
-          onClick={handleSpin}
-          whileHover={!(isSpinning || !currentTask) ? { scale: 1.02 } : {}}
-          whileTap={!(isSpinning || !currentTask) ? { scale: 0.98 } : {}}
+          disabled={
+            isSpinning || 
+            (!currentTask && !currentTaskSpin)
+          }
+          onClick={handleButtonClick}
+          whileHover={!(
+            isSpinning || 
+            (!currentTask && !currentTaskSpin)
+          ) ? { scale: 1.02 } : {}}
+          whileTap={!(
+            isSpinning || 
+            (!currentTask && !currentTaskSpin)
+          ) ? { scale: 0.98 } : {}}
         >
-          {isSpinning ? t('tasks.drawing') : currentTask ? t('tasks.drawResponsible') : t('tasks.noTasks')}
+          {(() => {
+            const buttonText = isSpinning 
+              ? t('tasks.drawing') 
+              : currentTaskSpin 
+              ? `Sortear ${currentTaskSpin.currentSpinIndex + 1}º participante` 
+              : currentTask 
+              ? t('tasks.drawResponsible') 
+              : t('tasks.noTasks');
+              
+            console.log('🔘 Button text render', { 
+              isSpinning, 
+              hasCurrentTaskSpin: !!currentTaskSpin,
+              currentSpinIndex: currentTaskSpin?.currentSpinIndex,
+              buttonText 
+            });
+            
+            return buttonText;
+          })()}
         </SpinButton>
 
       </RouletteSection>
@@ -576,6 +965,40 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
           </AnimatePresence>
         </TaskList>
       </TaskSidebar>
+
+      {/* Completion Modal */}
+      <AnimatePresence>
+        {showCompletionModal && completedTaskData && (
+          <CompletionModal
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <CompletionModalContent>
+              <CompletionIcon>🎉</CompletionIcon>
+              <CompletionTitle>Tarefa Concluída!</CompletionTitle>
+              <CompletionTaskName>{completedTaskData.task.name}</CompletionTaskName>
+              <CompletionText>
+                Responsáveis selecionados:
+              </CompletionText>
+              <CompletionParticipants>
+                {completedTaskData.participants.map((participant, index) => (
+                  <CompletionParticipant key={participant.id}>
+                    {index + 1}. {participant.name}
+                  </CompletionParticipant>
+                ))}
+              </CompletionParticipants>
+              <CompletionButton onClick={() => {
+                setShowCompletionModal(false);
+                setCompletedTaskData(null);
+              }}>
+                Continuar
+              </CompletionButton>
+            </CompletionModalContent>
+          </CompletionModal>
+        )}
+      </AnimatePresence>
     </RouletteContainer>
   );
 };

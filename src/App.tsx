@@ -372,8 +372,18 @@ function App() {
                     isSpinning={state.isSpinning}
                     selectedParticipant={state.selectedParticipant}
                     currentTask={actions.getCurrentTask(state)}
+                    currentTaskSpin={(() => {
+                      console.log('📱 App passing currentTaskSpin to TaskRoulette', { 
+                        hasCurrentTaskSpin: !!state.currentTaskSpin,
+                        currentTaskSpin: state.currentTaskSpin 
+                      });
+                      return state.currentTaskSpin;
+                    })()}
                     onSpin={handleTaskSpin}
                     onSpinComplete={handleTaskSpinComplete}
+                    onStartMultiParticipantTaskSpin={actions.startMultiParticipantTaskSpin}
+                    onFinishSingleParticipantSpin={actions.finishSingleParticipantSpin}
+                    onCompleteMultiParticipantTaskSpin={actions.completeMultiParticipantTaskSpin}
                   />
                 )}
               </RouletteSection>

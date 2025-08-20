@@ -23,6 +23,14 @@ export interface RouletteState extends ProjectManagerState {
   allowDuplicateParticipantsInTask: boolean;
   // Last winner tracking for auto-removal
   lastWinner?: Participant;
+  // Multi-participant task state
+  currentTaskSpin?: {
+    task: Task;
+    requiredParticipants: number;
+    selectedParticipants: Participant[];
+    currentSpinIndex: number;
+    isSpinning: boolean;
+  };
 }
 
 export interface RouletteActions {
@@ -43,6 +51,12 @@ export interface RouletteActions {
   spinTaskRoulette: () => Promise<{ participants: Participant[]; task: Task } | null>;
   finishSpin: (selectedParticipant?: Participant) => void;
   finishTaskSpin: (selectedParticipants?: Participant[], selectedTask?: Task) => void;
+  
+  // Multi-participant task spin actions
+  startMultiParticipantTaskSpin: (task: Task) => void;
+  finishSingleParticipantSpin: (participant: Participant) => void;
+  completeMultiParticipantTaskSpin: () => void;
+  cancelMultiParticipantTaskSpin: () => void;
   
   // History actions
   clearHistory: () => void;

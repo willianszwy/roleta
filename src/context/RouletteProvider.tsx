@@ -6,15 +6,18 @@ import { rouletteReducer } from './RouletteReducer';
 import { DropdownProvider } from './DropdownContext';
 import type { Participant, Task, Project } from '../types';
 
-// Storage keys
-const PARTICIPANTS_KEY = 'roulette-participants';
-const TASKS_KEY = 'task-roulette-tasks';
-const HISTORY_KEY = 'roulette-history';
-const TASK_HISTORY_KEY = 'task-roulette-history';
-const SETTINGS_KEY = 'roulette-settings';
+// Storage keys (only project-based system)
 const PROJECTS_KEY = 'roulette-projects';
 const GLOBAL_TEAMS_KEY = 'roulette-global-teams';
 const ACTIVE_PROJECT_KEY = 'roulette-active-project';
+const MIGRATION_COMPLETE_KEY = 'roulette-migration-complete';
+
+// Legacy keys for one-time migration
+const LEGACY_PARTICIPANTS_KEY = 'roulette-participants';
+const LEGACY_TASKS_KEY = 'task-roulette-tasks';
+const LEGACY_HISTORY_KEY = 'roulette-history';
+const LEGACY_TASK_HISTORY_KEY = 'task-roulette-history';
+const LEGACY_SETTINGS_KEY = 'roulette-settings';
 
 // Storage utilities
 function loadFromStorage<T>(key: string, defaultValue: T): T {
@@ -66,6 +69,9 @@ const initialState: RouletteState = {
   
   // Last winner tracking for auto-removal
   lastWinner: undefined,
+  
+  // Multi-participant task state
+  currentTaskSpin: undefined,
 };
 
 interface RouletteProviderProps {
@@ -75,16 +81,19 @@ interface RouletteProviderProps {
 export function RouletteProvider({ children }: RouletteProviderProps) {
   // Load initial state from localStorage
   const loadInitialState = (): RouletteState => {
-    const projects = loadFromStorage(PROJECTS_KEY, []);
+    let projects: Project[] = loadFromStorage(PROJECTS_KEY, []);
     const globalTeams = loadFromStorage(GLOBAL_TEAMS_KEY, []);
-    const activeProjectId = loadFromStorage(ACTIVE_PROJECT_KEY, null);
+    let activeProjectId: string | null = loadFromStorage(ACTIVE_PROJECT_KEY, null);
     
-    // Legacy data migration
-    const legacyParticipants = loadFromStorage(PARTICIPANTS_KEY, []);
-    const legacyTasksRaw = loadFromStorage(TASKS_KEY, []);
-    const legacyHistory = loadFromStorage(HISTORY_KEY, []);
-    const legacyTaskHistoryRaw = loadFromStorage(TASK_HISTORY_KEY, []);
-    const legacySettings = loadFromStorage(SETTINGS_KEY, { autoRemoveParticipants: false });
+    const migrationComplete = loadFromStorage(MIGRATION_COMPLETE_KEY, false);
+    
+    // One-time legacy data migration
+    if (!migrationComplete) {
+      const legacyParticipants = loadFromStorage(LEGACY_PARTICIPANTS_KEY, []);
+      const legacyTasksRaw = loadFromStorage(LEGACY_TASKS_KEY, []);
+      const legacyHistory = loadFromStorage(LEGACY_HISTORY_KEY, []);
+      const legacyTaskHistoryRaw = loadFromStorage(LEGACY_TASK_HISTORY_KEY, []);
+      const legacySettings = loadFromStorage(LEGACY_SETTINGS_KEY, { autoRemoveParticipants: false });
 
     // Migrate legacy tasks to include requiredParticipants
     const legacyTasks = legacyTasksRaw.map((task: any) => ({
@@ -107,34 +116,45 @@ export function RouletteProvider({ children }: RouletteProviderProps) {
       };
     });
 
-    // If no projects exist but legacy data exists, create a default project
-    let finalProjects: Project[] = projects;
-    let finalActiveProjectId: string | null = activeProjectId;
-    
-    if (projects.length === 0 && (legacyParticipants.length > 0 || legacyTasks.length > 0)) {
-      const defaultProject: Project = {
-        id: 'default-project',
-        name: 'Projeto Principal',
-        description: 'Projeto migrado dos dados anteriores',
-        participants: legacyParticipants,
-        tasks: legacyTasks,
-        teams: [],
-        history: legacyHistory,
-        taskHistory: legacyTaskHistory,
-        settings: {
-          autoRemoveParticipants: legacySettings.autoRemoveParticipants,
-          animationDuration: 3000,
-          allowDuplicateParticipantsInTask: false,
-        },
-        createdAt: new Date(),
-        lastModified: new Date(),
-      };
-      finalProjects = [defaultProject];
-      finalActiveProjectId = defaultProject.id;
+      // Create default project if legacy data exists or no projects exist
+      if (projects.length === 0) {
+        const defaultProject: Project = {
+          id: 'default-project',
+          name: legacyParticipants.length > 0 || legacyTasks.length > 0 ? 'Projeto Principal' : 'Meu Primeiro Projeto',
+          description: legacyParticipants.length > 0 || legacyTasks.length > 0 ? 'Projeto migrado dos dados anteriores' : 'Comece adicionando participantes e tarefas',
+          participants: legacyParticipants,
+          tasks: legacyTasks,
+          teams: [],
+          history: legacyHistory,
+          taskHistory: legacyTaskHistory,
+          settings: {
+            autoRemoveParticipants: legacySettings.autoRemoveParticipants || false,
+            animationDuration: 3000,
+            allowDuplicateParticipantsInTask: false,
+          },
+          createdAt: new Date(),
+          lastModified: new Date(),
+        };
+        
+        projects = [defaultProject];
+        activeProjectId = defaultProject.id;
+      }
+      
+      // Save migrated data and mark migration complete
+      saveToStorage(PROJECTS_KEY, projects);
+      saveToStorage(ACTIVE_PROJECT_KEY, activeProjectId);
+      saveToStorage(MIGRATION_COMPLETE_KEY, true);
+      
+      // Clean up legacy keys
+      localStorage.removeItem(LEGACY_PARTICIPANTS_KEY);
+      localStorage.removeItem(LEGACY_TASKS_KEY);
+      localStorage.removeItem(LEGACY_HISTORY_KEY);
+      localStorage.removeItem(LEGACY_TASK_HISTORY_KEY);
+      localStorage.removeItem(LEGACY_SETTINGS_KEY);
     }
 
     // Get active project data
-    const activeProject = finalProjects.find(p => p.id === finalActiveProjectId);
+    const activeProject = projects.find(p => p.id === activeProjectId);
     const currentProjectData = activeProject ? {
       participants: activeProject.participants,
       tasks: activeProject.tasks,
@@ -155,8 +175,8 @@ export function RouletteProvider({ children }: RouletteProviderProps) {
 
     return {
       ...initialState,
-      projects: finalProjects,
-      activeProjectId: finalActiveProjectId,
+      projects,
+      activeProjectId,
       globalTeams,
       ...currentProjectData,
     };
@@ -177,26 +197,7 @@ export function RouletteProvider({ children }: RouletteProviderProps) {
     saveToStorage(ACTIVE_PROJECT_KEY, state.activeProjectId);
   }, [state.activeProjectId]);
 
-  // Legacy storage for backward compatibility
-  useEffect(() => {
-    saveToStorage(PARTICIPANTS_KEY, state.participants);
-  }, [state.participants]);
-
-  useEffect(() => {
-    saveToStorage(TASKS_KEY, state.tasks);
-  }, [state.tasks]);
-
-  useEffect(() => {
-    saveToStorage(HISTORY_KEY, state.history);
-  }, [state.history]);
-
-  useEffect(() => {
-    saveToStorage(TASK_HISTORY_KEY, state.taskHistory);
-  }, [state.taskHistory]);
-
-  useEffect(() => {
-    saveToStorage(SETTINGS_KEY, { autoRemoveParticipants: state.autoRemoveParticipants });
-  }, [state.autoRemoveParticipants]);
+  // No more legacy storage - everything is project-based now
 
   // Actions
   const actions: RouletteActions = useMemo(() => ({
@@ -253,6 +254,23 @@ export function RouletteProvider({ children }: RouletteProviderProps) {
 
     finishTaskSpin: (selectedParticipants?: Participant[], selectedTask?: Task) => {
       dispatch({ type: 'FINISH_TASK_SPIN', payload: { participants: selectedParticipants, task: selectedTask } });
+    },
+
+    // Multi-participant task spin actions
+    startMultiParticipantTaskSpin: (task: Task) => {
+      dispatch({ type: 'START_MULTI_PARTICIPANT_TASK_SPIN', payload: { task } });
+    },
+
+    finishSingleParticipantSpin: (participant: Participant) => {
+      dispatch({ type: 'FINISH_SINGLE_PARTICIPANT_SPIN', payload: { participant } });
+    },
+
+    completeMultiParticipantTaskSpin: () => {
+      dispatch({ type: 'COMPLETE_MULTI_PARTICIPANT_TASK_SPIN' });
+    },
+
+    cancelMultiParticipantTaskSpin: () => {
+      dispatch({ type: 'CANCEL_MULTI_PARTICIPANT_TASK_SPIN' });
     },
 
     // History actions

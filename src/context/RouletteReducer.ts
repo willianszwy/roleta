@@ -19,6 +19,11 @@ export type RouletteAction =
   | { type: 'SPIN_TASK_ROULETTE_REQUEST'; payload: { resolve: (value: { participants: Participant[]; task: Task } | null) => void } }
   | { type: 'FINISH_SPIN'; payload: { participant?: Participant } }
   | { type: 'FINISH_TASK_SPIN'; payload: { participants?: Participant[]; task?: Task } }
+  // Multi-participant task spin actions
+  | { type: 'START_MULTI_PARTICIPANT_TASK_SPIN'; payload: { task: Task } }
+  | { type: 'FINISH_SINGLE_PARTICIPANT_SPIN'; payload: { participant: Participant } }
+  | { type: 'COMPLETE_MULTI_PARTICIPANT_TASK_SPIN' }
+  | { type: 'CANCEL_MULTI_PARTICIPANT_TASK_SPIN' }
   // History actions
   | { type: 'CLEAR_HISTORY' }
   | { type: 'CLEAR_TASK_HISTORY' }
@@ -67,9 +72,20 @@ export function rouletteReducer(state: RouletteState, action: RouletteAction): R
         createdAt: new Date(),
       };
 
+      const updatedParticipants = [...state.participants, newParticipant];
+      
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, participants: updatedParticipants, lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
-        participants: [...state.participants, newParticipant],
+        participants: updatedParticipants,
+        projects: updatedProjects,
       };
     }
 
@@ -108,24 +124,55 @@ export function rouletteReducer(state: RouletteState, action: RouletteAction): R
         newParticipants.push(newParticipant);
       });
 
+      const updatedParticipants = [...state.participants, ...newParticipants];
+      
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, participants: updatedParticipants, lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
-        participants: [...state.participants, ...newParticipants],
+        participants: updatedParticipants,
+        projects: updatedProjects,
       };
     }
 
     case 'REMOVE_PARTICIPANT': {
       const { id } = action.payload;
+      const updatedParticipants = state.participants.filter(p => p.id !== id);
+      
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, participants: updatedParticipants, lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
-        participants: state.participants.filter(p => p.id !== id),
+        participants: updatedParticipants,
+        projects: updatedProjects,
       };
     }
 
     case 'CLEAR_PARTICIPANTS': {
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, participants: [], lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
         participants: [],
+        projects: updatedProjects,
       };
     }
 
@@ -142,9 +189,20 @@ export function rouletteReducer(state: RouletteState, action: RouletteAction): R
         createdAt: new Date(),
       };
 
+      const updatedTasks = [...state.tasks, newTask];
+      
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, tasks: updatedTasks, lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
-        tasks: [...state.tasks, newTask],
+        tasks: updatedTasks,
+        projects: updatedProjects,
       };
     }
 
@@ -171,24 +229,55 @@ export function rouletteReducer(state: RouletteState, action: RouletteAction): R
         };
       });
 
+      const updatedTasks = [...state.tasks, ...newTasks];
+      
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, tasks: updatedTasks, lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
-        tasks: [...state.tasks, ...newTasks],
+        tasks: updatedTasks,
+        projects: updatedProjects,
       };
     }
 
     case 'REMOVE_TASK': {
       const { id } = action.payload;
+      const updatedTasks = state.tasks.filter(t => t.id !== id);
+      
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, tasks: updatedTasks, lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
-        tasks: state.tasks.filter(t => t.id !== id),
+        tasks: updatedTasks,
+        projects: updatedProjects,
       };
     }
 
     case 'CLEAR_TASKS': {
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { ...project, tasks: [], lastModified: new Date() }
+            : project
+        ) : state.projects;
+
       return {
         ...state,
         tasks: [],
+        projects: updatedProjects,
       };
     }
 
@@ -247,25 +336,159 @@ export function rouletteReducer(state: RouletteState, action: RouletteAction): R
         selectedAt: new Date(),
       };
 
-      let newState = {
+      const updatedTaskHistory = [historyEntry, ...state.taskHistory];
+      let updatedParticipants = state.participants;
+
+      // Auto-remove participants if enabled
+      if (state.autoRemoveParticipants) {
+        const participantIds = participants.map(p => p.id);
+        updatedParticipants = updatedParticipants.filter(p => !participantIds.includes(p.id));
+      }
+
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { 
+                ...project, 
+                taskHistory: updatedTaskHistory, 
+                participants: updatedParticipants,
+                lastModified: new Date() 
+              }
+            : project
+        ) : state.projects;
+
+      return {
         ...state,
         isSpinning: false,
         selectedParticipants: participants,
         selectedTask: task,
         lastWinner: participants[0], // First participant for compatibility
-        taskHistory: [historyEntry, ...state.taskHistory],
+        taskHistory: updatedTaskHistory,
+        participants: updatedParticipants,
+        projects: updatedProjects,
       };
+    }
+
+    case 'START_MULTI_PARTICIPANT_TASK_SPIN': {
+      const { task } = action.payload;
+      console.log('🎮 START_MULTI_PARTICIPANT_TASK_SPIN', { taskName: task.name, requiredParticipants: task.requiredParticipants });
+      
+      const newState = {
+        ...state,
+        currentTaskSpin: {
+          task,
+          requiredParticipants: task.requiredParticipants || 1,
+          selectedParticipants: [],
+          currentSpinIndex: 0,
+          isSpinning: true,
+        },
+        isSpinning: false, // Don't set global spinning until individual spin starts
+        selectedParticipant: undefined,
+        selectedTask: undefined,
+      };
+      
+      console.log('🎮 START_MULTI_PARTICIPANT_TASK_SPIN new state', { 
+        hasCurrentTaskSpin: !!newState.currentTaskSpin,
+        currentTaskSpin: newState.currentTaskSpin 
+      });
+      
+      return newState;
+    }
+
+    case 'FINISH_SINGLE_PARTICIPANT_SPIN': {
+      const { participant } = action.payload;
+      console.log('🎮 FINISH_SINGLE_PARTICIPANT_SPIN', { participantName: participant.name });
+      
+      if (!state.currentTaskSpin) {
+        console.log('🎮 No currentTaskSpin, returning state unchanged');
+        return state;
+      }
+
+      const updatedSelectedParticipants = [...state.currentTaskSpin.selectedParticipants, participant];
+      const nextSpinIndex = state.currentTaskSpin.currentSpinIndex + 1;
+      const needsMoreParticipants = nextSpinIndex < state.currentTaskSpin.requiredParticipants;
+
+      console.log('🎮 FINISH_SINGLE_PARTICIPANT_SPIN update', {
+        selectedCount: updatedSelectedParticipants.length,
+        nextSpinIndex,
+        requiredParticipants: state.currentTaskSpin.requiredParticipants,
+        needsMoreParticipants,
+        globalIsSpinning: false
+      });
+
+      return {
+        ...state,
+        currentTaskSpin: {
+          ...state.currentTaskSpin,
+          selectedParticipants: updatedSelectedParticipants,
+          currentSpinIndex: nextSpinIndex,
+          isSpinning: needsMoreParticipants,
+        },
+        selectedParticipant: participant,
+        isSpinning: false, // Always reset global spinning state after individual spin
+      };
+    }
+
+    case 'COMPLETE_MULTI_PARTICIPANT_TASK_SPIN': {
+      if (!state.currentTaskSpin) {
+        return state;
+      }
+
+      const { task, selectedParticipants } = state.currentTaskSpin;
+
+      const historyEntry: TaskHistory = {
+        id: generateId(),
+        participants: selectedParticipants.map(p => ({ id: p.id, name: p.name })),
+        taskId: task.id,
+        taskName: task.name,
+        taskDescription: task.description,
+        selectedAt: new Date(),
+      };
+
+      const updatedTaskHistory = [historyEntry, ...state.taskHistory];
+      let updatedParticipants = state.participants;
 
       // Auto-remove participants if enabled
       if (state.autoRemoveParticipants) {
-        const participantIds = participants.map(p => p.id);
-        newState = {
-          ...newState,
-          participants: newState.participants.filter(p => !participantIds.includes(p.id)),
-        };
+        const participantIds = selectedParticipants.map(p => p.id);
+        updatedParticipants = updatedParticipants.filter(p => !participantIds.includes(p.id));
       }
 
-      return newState;
+      // Update the active project if it exists
+      const updatedProjects = state.activeProjectId ? 
+        state.projects.map(project =>
+          project.id === state.activeProjectId
+            ? { 
+                ...project, 
+                taskHistory: updatedTaskHistory, 
+                participants: updatedParticipants,
+                lastModified: new Date() 
+              }
+            : project
+        ) : state.projects;
+
+      return {
+        ...state,
+        currentTaskSpin: undefined,
+        isSpinning: false,
+        selectedParticipants: selectedParticipants,
+        selectedTask: task,
+        lastWinner: selectedParticipants[0], // First participant for compatibility
+        taskHistory: updatedTaskHistory,
+        participants: updatedParticipants,
+        projects: updatedProjects,
+      };
+    }
+
+    case 'CANCEL_MULTI_PARTICIPANT_TASK_SPIN': {
+      return {
+        ...state,
+        currentTaskSpin: undefined,
+        isSpinning: false,
+        selectedParticipant: undefined,
+        selectedTask: undefined,
+      };
     }
 
     case 'AUTO_REMOVE_PARTICIPANT': {
