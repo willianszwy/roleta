@@ -1,13 +1,5 @@
-import React, { createContext, useState, useCallback } from 'react';
-
-interface DropdownContextType {
-  activeDropdown: string | null;
-  setActiveDropdown: (id: string | null) => void;
-  isDropdownActive: (id: string) => boolean;
-  closeAllDropdowns: () => void;
-}
-
-export const DropdownContext = createContext<DropdownContextType | undefined>(undefined);
+import React, { useState, useCallback } from 'react';
+import { DropdownContext } from './DropdownContextDefinition';
 
 export function DropdownProvider({ children }: { children: React.ReactNode }) {
   const [activeDropdown, setActiveDropdownState] = useState<string | null>(null);

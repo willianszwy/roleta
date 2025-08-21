@@ -225,7 +225,7 @@ export const Modal: React.FC<ModalProps> = ({
           role="presentation"
         >
           <ModalContent
-            ref={modalRef as any}
+            ref={modalRef as React.RefObject<HTMLDivElement>}
             maxWidth={maxWidth}
             variants={modalVariants}
             initial="hidden"

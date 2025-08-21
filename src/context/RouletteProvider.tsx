@@ -4,7 +4,7 @@ import { RouletteContext } from './RouletteContext';
 import type { RouletteState, RouletteActions } from './RouletteContext';
 import { rouletteReducer } from './RouletteReducer';
 import { DropdownProvider } from './DropdownContext';
-import type { Participant, Task, Project } from '../types';
+import type { Participant, Task, Project, TaskHistory } from '../types';
 
 // Storage keys (only project-based system)
 const PROJECTS_KEY = 'roulette-projects';
@@ -96,24 +96,29 @@ export function RouletteProvider({ children }: RouletteProviderProps) {
       const legacySettings = loadFromStorage(LEGACY_SETTINGS_KEY, { autoRemoveParticipants: false });
 
     // Migrate legacy tasks to include requiredParticipants
-    const legacyTasks = legacyTasksRaw.map((task: any) => ({
+    const legacyTasks = legacyTasksRaw.map((task: Partial<Task> & { id: string; name: string; description?: string }) => ({
       ...task,
       requiredParticipants: task.requiredParticipants || 1,
+      createdAt: task.createdAt || new Date(),
     }));
 
-    // Migrate legacy task history to new format
+    // Migrate legacy task history to new format  
     const legacyTaskHistory = legacyTaskHistoryRaw.map((item: any) => {
       if (item.participants) {
         return item; // Already in new format
       }
       // Convert old format to new format
       return {
-        ...item,
+        id: item.id,
+        taskId: item.task?.id || 'unknown',
+        taskName: item.task?.name || 'Unknown Task',
+        taskDescription: item.task?.description,
+        selectedAt: item.timestamp,
         participants: [{
           id: item.participantId || 'unknown',
           name: item.participantName || 'Unknown'
         }],
-      };
+      } as TaskHistory;
     });
 
       // Create default project if legacy data exists or no projects exist

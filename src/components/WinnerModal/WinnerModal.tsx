@@ -225,7 +225,6 @@ export function WinnerModal({
 
             <button
               onClick={onClose}
-              autoFocus
               aria-label={t('a11y.closeModal')}
               style={{
                 background: 'rgba(102, 126, 234, 0.2)',

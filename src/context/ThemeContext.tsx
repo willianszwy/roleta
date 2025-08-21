@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import React from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import type { Theme, ThemeId, ThemeContextValue } from '../types/theme';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -9,8 +9,7 @@ import { VSCODE_THEME } from '../themes/vscode.theme';
 import { SLACK_THEME } from '../themes/slack.theme';
 import { NOTION_THEME } from '../themes/notion.theme';
 import { LINEAR_THEME } from '../themes/linear.theme';
-
-export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+import { ThemeContext } from './ThemeContextDefinition';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [themeId, setThemeId] = useLocalStorage<ThemeId>('taskroulette-theme', 'default');
