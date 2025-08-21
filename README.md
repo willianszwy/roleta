@@ -9,27 +9,35 @@ Uma aplicação moderna e interativa para distribuição justa de tarefas via ro
 
 ## ✨ Funcionalidades
 
-### 🎯 **Foco em Distribuição de Tarefas**
-- **Sistema Principal**: Distribuição justa de tarefas entre participantes
-- **Sistema de Fila**: Tarefas são atribuídas automaticamente em ordem
-- **Modo Participantes**: Sorteio clássico entre pessoas (secundário)
+### 🎯 **Sistema de Projetos Multi-Tarefa**
+- **Projetos Múltiplos**: Gerencie vários projetos independentes com dados isolados
+- **Tarefas Multi-Responsáveis**: Atribua 1-10 participantes por tarefa automaticamente
+- **Equipes Globais**: Crie equipes reutilizáveis entre diferentes projetos
+- **Sistema de Fila**: Tarefas são processadas automaticamente em ordem de prioridade
+
+### 🎯 **Distribuição Inteligente**
+- **Sorteios Consecutivos**: Para tarefas que precisam de múltiplos responsáveis
+- **Algoritmo Anti-Duplicação**: Evita selecionar o mesmo participante duas vezes
+- **Progresso Visual**: Acompanhe quantos participantes faltam ser sorteados
+- **Modal de Conclusão**: Lista completa dos responsáveis selecionados
 
 ### 🎨 **Interface & Design**
 - **Design Glassmorphism**: Interface moderna com efeitos de vidro e blur
-- **Layout Responsivo**: Adapta-se perfeitamente a desktop, tablet e mobile
-- **Animações Fluidas**: Transições suaves com Framer Motion
-- **Cores Inteligentes**: Sistema de 20 cores otimizadas para evitar repetições consecutivas
+- **Layout Responsivo**: Grid adaptativo (3→2→1 colunas) para todos os dispositivos
+- **Animações Fluidas**: Roleta gira suavemente por 4.5s com easing otimizado
+- **Modal Full-Screen**: Overlay completo usando React Portal para máxima compatibilidade
 
 ### 🎛️ **Configurações Avançadas**
-- **Modal de Vencedor**: Modal customizável com auto-fechamento configurável
-- **Remoção Automática**: Remove vencedores automaticamente de forma transparente
-- **Persistência Total**: Participantes, tarefas e histórico salvos localmente
+- **Context API + useReducer**: Gerenciamento de estado robusto e previsível  
+- **Persistência Automática**: Todos os dados salvos no localStorage com migração automática
+- **Modo Participantes**: Sorteio clássico simples (modo legacy)
+- **Remoção Automática**: Remove participantes vencedores automaticamente
 
 ### 🎉 **Experiência do Usuário**
-- **Efeitos Celebrativos**: Confete animado ao selecionar vencedores
-- **Feedback Visual**: Indicadores claros do próximo na fila
-- **Sistema Anti-Fraude**: Remoção transparente antes do giro (não durante)
-- **Histórico Paginado**: Performance otimizada para grandes volumes
+- **Efeitos Celebrativos**: Confete animado ao concluir tarefas
+- **Feedback Visual**: Indicadores claros de próximas tarefas e progresso
+- **Zero Race Conditions**: State machine elimina conflitos de estado
+- **Performance Otimizada**: Código limpo e build otimizado para produção
 
 ## 🚀 Demo
 
@@ -79,53 +87,82 @@ npm run lint     # Análise de código com ESLint
 
 ## 🎮 Como Usar
 
-### 📋 **Modo Participantes**
-1. **Adicione Participantes**: Digite nomes individuais ou em lote (um por linha)
-2. **Configure Opções**: Acesse as configurações para personalizar comportamento
-3. **Gire a Roleta**: Clique no botão "🎰 Girar Roleta" para iniciar
-4. **Veja o Resultado**: Modal mostra o vencedor com efeitos celebrativos
+### 🏗️ **Criando Projeto Multi-Tarefa**
+1. **Criar Projeto**: Use o seletor de projetos no header para criar um novo projeto
+2. **Adicionar Participantes**: Importe participantes individuais ou em massa
+3. **Criar Equipes Globais**: (Opcional) Organize participantes em equipes reutilizáveis  
+4. **Adicionar Tarefas**: Configure quantos participantes cada tarefa precisa (1-10)
 
-### 🎯 **Modo Tarefas**
-1. **Mude para Modo Tarefas**: Vá em Configurações → Modo → Tarefas
-2. **Adicione Participantes e Tarefas**: Use o painel lateral para gerenciar
-3. **Sorteie Responsáveis**: Sistema automaticamente sorteia para a primeira tarefa da fila
-4. **Acompanhe Progresso**: Veja quem foi sorteado para cada tarefa no histórico
+### 🎯 **Executando Sorteios Multi-Participante**
+1. **Sortear Tarefa**: Clique "Sortear Responsável" para iniciar primeira tarefa da fila
+2. **Acompanhar Progresso**: Veja barra de progresso e lista de selecionados
+3. **Sortear Participantes**: Continue clicando até completar todos os responsáveis necessários
+4. **Ver Conclusão**: Modal mostra todos os responsáveis sorteados para a tarefa
 
-### ⚙️ **Configurações Disponíveis**
-- **Modal de Vencedor**: Ativar/desativar modal de resultado
-- **Auto-Fechamento**: Configurar tempo de fechamento automático (1-10s)
-- **Remoção Automática**: Remove vencedores automaticamente após sorteio
-- **Modo de Sorteio**: Alternar entre Participantes e Tarefas
+### 📋 **Modo Participantes (Legacy)**
+1. **Alternar Modo**: Use as configurações para voltar ao modo clássico
+2. **Sorteio Simples**: Um participante por vez, interface tradicional
+3. **Ideal Para**: Sorteios simples, escolhas únicas, decisões rápidas
+
+### ⚙️ **Funcionalidades Avançadas**
+- **Projetos Independentes**: Cada projeto mantém seus próprios dados isolados
+- **Import/Export**: Equipes podem ser importadas para projetos específicos  
+- **Histórico Detalhado**: Rastreamento completo de todas as atribuições
+- **Persistência Robusta**: Sistema de migração automática de dados legados
 
 ## 🏗️ Arquitetura
 
 ```
 src/
 ├── components/              # Componentes React reutilizáveis
-│   ├── Roulette/           # Roleta modo participantes
-│   ├── TaskRoulette/       # Roleta modo tarefas (layout 2 colunas)
+│   ├── ProjectSelector/    # Seletor de projetos no header
+│   ├── TeamManager/        # Gerenciamento de equipes globais  
+│   ├── TaskRoulette/       # Roleta principal (layout 2 colunas)
+│   ├── Roulette/          # Roleta modo participantes (legacy)
 │   ├── ParticipantManager/ # Gerenciamento de participantes
-│   ├── TaskManager/        # Gerenciamento de tarefas
-│   ├── History/            # Histórico com paginação
-│   ├── TaskHistory/        # Histórico de tarefas sorteadas
-│   ├── WinnerModal/        # Modal de resultado glassmorphism
-│   ├── Settings/           # Painel de configurações
-│   └── SidePanel/          # Painel lateral responsivo
-├── hooks/                  # Hooks customizados
-│   ├── useRoulette.ts      # Estado modo participantes
-│   ├── useTaskRoulette.ts  # Estado modo tarefas
-│   └── useLocalStorage.ts  # Persistência localStorage
-├── types/                  # Definições TypeScript
-├── utils/                  # Funções utilitárias
-│   └── helpers.ts          # Algoritmos de rotação e cores
-└── styles/                 # Estilos globais glassmorphism
+│   ├── TaskManager/        # Gerenciamento de tarefas multi-responsáveis
+│   ├── TaskHistory/        # Histórico de tarefas com responsáveis
+│   ├── History/           # Histórico participantes (legacy)
+│   ├── WinnerModal/       # Modal glassmorphism com React Portal
+│   ├── Settings/          # Configurações e preferências
+│   └── SidePanel/         # Painel lateral responsivo unificado
+├── context/               # Estado global centralizado
+│   ├── RouletteContext.tsx # Context API principal  
+│   ├── RouletteProvider.tsx# Provider com persistência
+│   └── RouletteReducer.ts  # Reducer com actions atômicas
+├── hooks/                 # Hooks customizados
+│   ├── useLocalStorage.ts # Persistência localStorage robusta
+│   └── useA11y.ts        # Hooks de acessibilidade
+├── types/                 # Definições TypeScript completas
+│   └── index.ts          # Project, Team, TaskHistory types
+├── utils/                 # Funções utilitárias otimizadas  
+│   ├── helpers.ts        # Algoritmos de rotação e cores
+│   └── taskExportHelpers.ts # Importação/exportação de dados
+└── design-system/         # Sistema de design modular
+    ├── components/        # Componentes base reutilizáveis
+    ├── tokens.ts         # Design tokens do sistema
+    └── hooks/            # Hooks de design (breakpoints, toggle)
 ```
 
-### 🎨 **Design System**
-- **Glassmorphism**: `rgba(255, 255, 255, 0.08)` com `backdrop-filter: blur(15px)`
-- **Gradientes**: Sistema de cores harmoniosas predefinidas
-- **Responsividade**: Mobile-first com breakpoints em 768px e 1024px
-- **Animações**: Framer Motion com spring physics naturais
+### 🎨 **Arquitetura Técnica**
+
+#### **State Management**
+- **Context API + useReducer**: Estado centralizado e previsível
+- **Actions Atômicas**: Eliminam race conditions completamente  
+- **State Machine**: Estados `idle` → `spinning` → `completed` com timing perfeito
+- **Persistência Inteligente**: Auto-migração de dados legados para nova estrutura
+
+#### **Performance & UX**
+- **React Portal**: Modais renderizados fora da árvore DOM para overlay completo
+- **Lazy Loading**: Componentes carregados sob demanda
+- **Virtual Scrolling**: Listas grandes otimizadas para performance
+- **Debounced Inputs**: Evita re-renders desnecessários em formulários
+
+#### **Design System**
+- **Glassmorphism**: `rgba(255, 255, 255, 0.08)` + `backdrop-filter: blur(15px)`
+- **Grid Responsivo**: 3-col → 2-col → 1-col com breakpoints otimizados
+- **Animações Fluidas**: Framer Motion com timing de 4.5s e easing personalizado
+- **Tokens Design**: Sistema modular de cores, espaçamentos e tipografia
 
 ## 🤝 Contribuição
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Participant, Task, TaskHistory } from '../../types';
@@ -386,12 +387,15 @@ const CompletionModal = styled(motion.div)`
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
+  overflow: auto;
 `;
 
 const CompletionModalContent = styled.div`
@@ -508,18 +512,6 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   const [completedTaskData, setCompletedTaskData] = useState<{task: Task, participants: Participant[]} | null>(null);
   const selectedResultRef = useRef<{ participants: Participant[]; task: Task } | null>(null);
 
-  // Debug: Monitor currentTaskSpin prop changes
-  useEffect(() => {
-    console.log('🔄 TaskRoulette currentTaskSpin prop changed', { 
-      hasCurrentTaskSpin: !!currentTaskSpin, 
-      currentTaskSpin 
-    });
-  }, [currentTaskSpin]);
-
-  // Debug: Monitor spinState changes
-  useEffect(() => {
-    console.log('🎭 spinState changed:', spinState);
-  }, [spinState]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -555,14 +547,7 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // State machine logic
-  useEffect(() => {
-    if (!isSpinning && spinState === 'spinning') {
-      // External spin stopped, reset state
-      setSpinState('idle');
-      selectedResultRef.current = null;
-    }
-  }, [isSpinning, spinState]);
+  // State machine logic - removed conflicting logic that was resetting spinState too early
 
   // Handle completed state
   useEffect(() => {
@@ -575,18 +560,10 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   }, [spinState, onSpinComplete]);
 
   const handleSpin = React.useCallback(async () => {
-    console.log('🎯 handleSpin called', { 
-      participantsCount: participants.length, 
-      currentTask: currentTask?.name, 
-      requiredParticipants: currentTask?.requiredParticipants,
-      spinState 
-    });
-    
     if (participants.length === 0 || !currentTask || spinState !== 'idle') return;
 
     // Check if this is a multi-participant task
     if (currentTask.requiredParticipants > 1) {
-      console.log('🎯 Starting multi-participant flow for task:', currentTask.name);
       // Start multi-participant flow
       onStartMultiParticipantTaskSpin(currentTask);
       return;
@@ -609,24 +586,9 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   }, [participants, currentTask, spinState, onStartMultiParticipantTaskSpin, onSpin, rotation]);
 
   const handleSingleSpin = React.useCallback(async () => {
-    console.log('🔄 handleSingleSpin called', { 
-      currentTaskSpin: currentTaskSpin ? {
-        taskName: currentTaskSpin.task.name,
-        currentSpinIndex: currentTaskSpin.currentSpinIndex,
-        requiredParticipants: currentTaskSpin.requiredParticipants,
-        selectedCount: currentTaskSpin.selectedParticipants.length,
-        isSpinning: currentTaskSpin.isSpinning
-      } : null,
-      spinState,
-      isSpinning 
-    });
-
     if (!currentTaskSpin || spinState !== 'idle' || isSpinning) {
-      console.log('🚫 handleSingleSpin blocked', { currentTaskSpin: !!currentTaskSpin, spinState, isSpinning });
       return;
     }
-
-    console.log('🔄 Starting single spin...');
     setSpinState('spinning');
     
     // Set global spinning state for animation
@@ -661,18 +623,12 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
   }, [currentTaskSpin, spinState, isSpinning, participants, rotation]);
 
   const handleButtonClick = React.useCallback(() => {
-    console.log('🖱️ Button clicked!', { 
-      currentTaskSpin: !!currentTaskSpin,
-      isSpinning,
-      willCall: currentTaskSpin ? 'handleSingleSpin' : 'handleSpin',
-      disabled: isSpinning || (!currentTask && !currentTaskSpin)
-    });
     if (currentTaskSpin) {
       handleSingleSpin();
     } else {
       handleSpin();
     }
-  }, [currentTaskSpin, isSpinning, currentTask, handleSingleSpin, handleSpin]);
+  }, [currentTaskSpin, handleSingleSpin, handleSpin]);
 
   // Early return for empty state AFTER all hooks
   if (isEmpty) {
@@ -701,8 +657,8 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
         </TaskSidebar>
 
         {/* Completion Modal - must be shown even in empty state */}
-        <AnimatePresence>
-          {showCompletionModal && completedTaskData && (
+        {showCompletionModal && completedTaskData && createPortal(
+          <AnimatePresence>
             <CompletionModal
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -731,8 +687,9 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 </CompletionButton>
               </CompletionModalContent>
             </CompletionModal>
-          )}
-        </AnimatePresence>
+          </AnimatePresence>,
+          document.body
+        )}
       </RouletteContainer>
     );
   }
@@ -767,36 +724,18 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                 ease: [0.2, 0, 0.2, 1],
               }}
               onAnimationComplete={() => {
-                console.log('🎬 Animation completed', { 
-                  spinState, 
-                  currentTaskSpin: !!currentTaskSpin, 
-                  selectedResult: !!selectedResultRef.current,
-                  selectedResultData: selectedResultRef.current 
-                });
-                
                 // Check if this is multi-participant flow regardless of spinState
                 if (currentTaskSpin && selectedResultRef.current) {
-                  console.log('🎬 Multi-participant flow detected, processing...', {
-                    spinState,
-                    hasCurrentTaskSpin: !!currentTaskSpin,
-                    hasSelectedResult: !!selectedResultRef.current
-                  });
-                  
-                  console.log('🎬 Multi-participant flow animation complete');
                   // Multi-participant flow: finish single spin
                   const participant = selectedResultRef.current.participants[0];
-                  console.log('🎬 Finishing single participant spin for:', participant.name);
                   onFinishSingleParticipantSpin(participant);
                   selectedResultRef.current = null;
                   setSpinState('idle');
                   
                   // Check if we need more participants (using array length + 1 for the one we just added)
                   const totalSelected = currentTaskSpin.selectedParticipants.length + 1;
-                  console.log('🎬 Total selected after this spin:', totalSelected, 'of', currentTaskSpin.requiredParticipants);
                   
                   if (totalSelected >= currentTaskSpin.requiredParticipants) {
-                    console.log('🎬 All participants selected, completing task...');
-                    
                     // Store completion data for modal
                     setCompletedTaskData({
                       task: currentTaskSpin.task,
@@ -811,11 +750,8 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
                         onCompleteMultiParticipantTaskSpin();
                       }, 100);
                     }, 1000);
-                  } else {
-                    console.log('🎬 Need more participants, ready for next spin');
                   }
                 } else if (spinState === 'spinning') {
-                  console.log('🎬 Single participant flow animation complete');
                   // Single participant flow
                   setSpinState('completed');
                 }
@@ -900,24 +836,14 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
             (!currentTask && !currentTaskSpin)
           ) ? { scale: 0.98 } : {}}
         >
-          {(() => {
-            const buttonText = isSpinning 
-              ? t('tasks.drawing') 
-              : currentTaskSpin 
-              ? `Sortear ${currentTaskSpin.currentSpinIndex + 1}º participante` 
-              : currentTask 
-              ? t('tasks.drawResponsible') 
-              : t('tasks.noTasks');
-              
-            console.log('🔘 Button text render', { 
-              isSpinning, 
-              hasCurrentTaskSpin: !!currentTaskSpin,
-              currentSpinIndex: currentTaskSpin?.currentSpinIndex,
-              buttonText 
-            });
-            
-            return buttonText;
-          })()}
+          {isSpinning 
+            ? t('tasks.drawing') 
+            : currentTaskSpin 
+            ? `Sortear ${currentTaskSpin.currentSpinIndex + 1}º participante` 
+            : currentTask 
+            ? t('tasks.drawResponsible') 
+            : t('tasks.noTasks')
+          }
         </SpinButton>
 
       </RouletteSection>
@@ -967,8 +893,8 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
       </TaskSidebar>
 
       {/* Completion Modal */}
-      <AnimatePresence>
-        {showCompletionModal && completedTaskData && (
+      {showCompletionModal && completedTaskData && createPortal(
+        <AnimatePresence>
           <CompletionModal
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -997,8 +923,9 @@ export const TaskRoulette: React.FC<TaskRouletteProps> = ({
               </CompletionButton>
             </CompletionModalContent>
           </CompletionModal>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </RouletteContainer>
   );
 };
