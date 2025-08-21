@@ -118,6 +118,8 @@ export type TranslationKey =
   | 'settings.duration5s'
   | 'settings.duration8s'
   | 'settings.durationManual'
+  | 'settings.appearance'
+  | 'settings.selectTheme'
   
   // Modal/Dialog
   | 'modal.close'

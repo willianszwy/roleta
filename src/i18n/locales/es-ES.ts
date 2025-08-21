@@ -117,6 +117,8 @@ export const esES: Translation = {
   'settings.duration5s': '5 segundos',
   'settings.duration8s': '8 segundos',
   'settings.durationManual': 'Manual',
+  'settings.appearance': 'Apariencia',
+  'settings.selectTheme': 'Seleccionar tema',
   
   // Modal/Dialog
   'modal.close': 'Cerrar',

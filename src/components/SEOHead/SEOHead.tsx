@@ -1,5 +1,4 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useEffect } from 'react';
 import { useI18n } from '../../i18n';
 
 interface SEOHeadProps {
@@ -31,35 +30,65 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   const finalDescription = description || defaultDescription;
   const finalKeywords = keywords || defaultKeywords;
 
-  return (
-    <Helmet>
-      {/* Primary Meta Tags */}
-      <title>{finalTitle}</title>
-      <meta name="title" content={finalTitle} />
-      <meta name="description" content={finalDescription} />
-      <meta name="keywords" content={finalKeywords} />
-      {noIndex && <meta name="robots" content="noindex, nofollow" />}
+  useEffect(() => {
+    // Update document title
+    document.title = finalTitle;
+    
+    // Update or create meta tags
+    const updateMeta = (name: string, content: string, property?: boolean) => {
+      const selector = property ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+      let meta = document.querySelector(selector) as HTMLMetaElement;
       
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
-      <meta property="og:title" content={finalTitle} />
-      <meta property="og:description" content={finalDescription} />
-      <meta property="og:image" content={image} />
-      <meta property="og:image:alt" content={finalTitle} />
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property) {
+          meta.setAttribute('property', name);
+        } else {
+          meta.setAttribute('name', name);
+        }
+        document.head.appendChild(meta);
+      }
       
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
-      <meta property="twitter:title" content={finalTitle} />
-      <meta property="twitter:description" content={finalDescription} />
-      <meta property="twitter:image" content={image} />
-      <meta property="twitter:image:alt" content={finalTitle} />
-      
-      {/* Canonical URL */}
-      <link rel="canonical" href={url} />
-    </Helmet>
-  );
+      meta.setAttribute('content', content);
+    };
+    
+    // Primary Meta Tags
+    updateMeta('title', finalTitle);
+    updateMeta('description', finalDescription);
+    updateMeta('keywords', finalKeywords);
+    
+    if (noIndex) {
+      updateMeta('robots', 'noindex, nofollow');
+    }
+    
+    // Open Graph / Facebook
+    updateMeta('og:type', type, true);
+    updateMeta('og:url', url, true);
+    updateMeta('og:title', finalTitle, true);
+    updateMeta('og:description', finalDescription, true);
+    updateMeta('og:image', image, true);
+    updateMeta('og:image:alt', finalTitle, true);
+    
+    // Twitter
+    updateMeta('twitter:card', 'summary_large_image', true);
+    updateMeta('twitter:url', url, true);
+    updateMeta('twitter:title', finalTitle, true);
+    updateMeta('twitter:description', finalDescription, true);
+    updateMeta('twitter:image', image, true);
+    updateMeta('twitter:image:alt', finalTitle, true);
+    
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', url);
+    
+  }, [finalTitle, finalDescription, finalKeywords, image, url, type, noIndex]);
+
+  return null;
 };
 
 export default SEOHead;

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useI18n } from '../../i18n';
 import { LanguageSelector } from '../LanguageSelector';
+import { ThemeSwitcher } from '../ThemeSwitcher';
 
 const SettingsContainer = styled.div`
   padding: 0.5rem 0;
@@ -136,6 +137,16 @@ export function Settings({ config, onConfigChange, onResetSettings }: SettingsPr
         
         <SettingItem>
           <LanguageSelector variant="dropdown" showFlags={true} />
+        </SettingItem>
+      </SettingSection>
+
+      <SettingSection>
+        <SectionTitle>
+          {t('settings.appearance')}
+        </SectionTitle>
+        
+        <SettingItem>
+          <ThemeSwitcher compact={false} showPreview={true} />
         </SettingItem>
       </SettingSection>
 

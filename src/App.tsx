@@ -14,6 +14,7 @@ import { useRouletteContext } from './context/RouletteContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useScreenReaderAnnouncements } from './hooks/useA11y';
 import { ConfirmationProvider, AlertProvider } from './design-system';
+import { ThemeProvider } from './context/ThemeContext';
 import { useI18n } from './i18n';
 import type { Participant, Task } from './types';
 import type { SettingsConfig } from './components/Settings/Settings';
@@ -23,20 +24,21 @@ const AppContainer = styled.div`
   width: 100vw;
   position: relative;
   background: 
-    radial-gradient(ellipse 150vw 80vh at 20% 30%, rgba(102, 126, 234, 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 120vw 60vh at 80% 70%, rgba(139, 92, 246, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 130vw 50vh at 50% 100%, rgba(79, 172, 254, 0.08) 0%, transparent 60%),
-    linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, transparent 30%),
-    #0f0f23;
+    ${({ theme }) => theme.colors.background.tertiary},
+    ${({ theme }) => theme.colors.background.radial1},
+    ${({ theme }) => theme.colors.background.radial2},
+    ${({ theme }) => theme.colors.background.secondary},
+    ${({ theme }) => theme.colors.background.primary};
   background-attachment: fixed;
   padding: 1rem 0;
   overflow-x: hidden;
+  transition: background 0.3s ease;
   
   @media (max-width: 768px) {
     background: 
-      radial-gradient(ellipse 200vw 50vh at 50% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 70%),
-      radial-gradient(ellipse 150vw 40vh at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
-      #0f0f23;
+      ${({ theme }) => theme.colors.background.radial1},
+      ${({ theme }) => theme.colors.background.radial3},
+      ${({ theme }) => theme.colors.background.primary};
     background-attachment: scroll;
   }
 `;
@@ -47,15 +49,16 @@ const AppHeader = styled(motion.header)`
   left: 0;
   right: 0;
   height: 70px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: ${({ theme }) => theme.colors.glass.primary};
+  backdrop-filter: ${({ theme }) => theme.colors.glass.backdrop};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.glass.border};
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
   z-index: 100;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
   
   @media (min-width: 768px) {
     padding: 0 2.5rem;
@@ -70,11 +73,9 @@ const HeaderTitle = styled.h1`
   font-size: clamp(1.5rem, 3vw, 2.2rem);
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #8b5cf6 50%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-shadow: 0 4px 20px ${({ theme }) => theme.colors.interactive.primary}50;
+  transition: color 0.3s ease;
 `;
 
 const HeaderRightSection = styled.div`
@@ -90,12 +91,13 @@ const HeaderRightSection = styled.div`
 const HeaderMenuButton = styled(motion.button)`
   width: 48px;
   height: 48px;
-  background: rgba(255, 255, 255, 0.05);
+  background: ${({ theme }) => theme.colors.glass.secondary};
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid ${({ theme }) => theme.colors.glass.border};
   border-radius: 12px;
-  color: white;
+  color: ${({ theme }) => theme.colors.text.primary};
   cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -105,15 +107,15 @@ const HeaderMenuButton = styled(motion.button)`
   transition: all 0.3s ease;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(102, 126, 234, 0.4);
+    background: ${({ theme }) => theme.colors.glass.hover};
+    border-color: ${({ theme }) => theme.colors.interactive.primary};
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 6px 20px ${({ theme }) => theme.colors.interactive.primary}30;
   }
   
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.interactive.focus};
   }
   
   &:focus-visible {
@@ -125,7 +127,7 @@ const HeaderMenuButton = styled(motion.button)`
 const MenuLine = styled(motion.div)<{ isOpen: boolean }>`
   width: 18px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.9);
+  background: ${({ theme }) => theme.colors.text.primary};
   border-radius: 1px;
   transition: all 0.3s ease;
 `;
@@ -307,8 +309,9 @@ function App() {
   const togglePanel = () => setIsPanelOpen(!isPanelOpen);
 
   return (
-    <ConfirmationProvider>
-      <AlertProvider>
+    <ThemeProvider>
+      <ConfirmationProvider>
+        <AlertProvider>
         <SEOHead />
         <GlobalStyles />
         <SkipLinks />
@@ -451,8 +454,9 @@ function App() {
         {/* Live region for screen reader announcements */}
         <LiveRegion />
       </AppContainer>
-      </AlertProvider>
-    </ConfirmationProvider>
+        </AlertProvider>
+      </ConfirmationProvider>
+    </ThemeProvider>
   );
 }
 

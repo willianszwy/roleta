@@ -24,7 +24,6 @@
     "framer-motion": "^12.23.12",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-helmet-async": "^2.0.5",
     "react-spring": "^10.0.1",
     "styled-components": "^6.1.19"
   },

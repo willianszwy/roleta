@@ -117,6 +117,8 @@ export const ptBR: Translation = {
   'settings.duration5s': '5 segundos',
   'settings.duration8s': '8 segundos',
   'settings.durationManual': 'Manual',
+  'settings.appearance': 'Aparência',
+  'settings.selectTheme': 'Selecionar tema',
   
   // Modal/Dialog
   'modal.close': 'Fechar',
