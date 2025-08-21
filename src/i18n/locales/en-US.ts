@@ -228,6 +228,11 @@ export const enUS: Translation = {
   'pagination.page': 'Page {{current}} of {{total}}',
   'pagination.items': '({{showing}} of {{total}} items)',
 
+  // SEO
+  'seo.title': 'TaskRoulette - Fair Task Distribution via Roulette',
+  'seo.description': 'Modern application for fair task and responsibility distribution via interactive roulette. Manage teams, projects and assignments with responsive interface and smooth animations.',
+  'seo.keywords': 'task roulette, task distribution, responsibility assignment, team management, random picker, task assignment, collaborative project, react typescript, interactive roulette',
+
   // Common
   'common.cancel': 'Cancel',
   'common.create': 'Create',

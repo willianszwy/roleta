@@ -228,6 +228,11 @@ export const frFR: Translation = {
   'pagination.page': 'Page {{current}} de {{total}}',
   'pagination.items': '({{showing}} de {{total}} éléments)',
 
+  // SEO
+  'seo.title': 'TaskRoulette - Distribution Équitable de Tâches via Roulette',
+  'seo.description': 'Application moderne pour la distribution équitable de tâches et responsabilités via roulette interactive. Gérez équipes, projets et tirages avec interface responsive et animations fluides.',
+  'seo.keywords': 'task roulette, distribution tâches, tirage responsabilités, gestion équipe, sélecteur aléatoire, attribution tâches, projet collaboratif, react typescript, roulette interactive',
+
   // Common
   'common.cancel': 'Annuler',
   'common.create': 'Créer',

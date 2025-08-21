@@ -30,6 +30,7 @@ interface TaskRouletteProps {
 const RouletteContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 400px;
+  align-items: center;
   gap: 2rem;
   width: 100%;
   height: 100%;
@@ -45,6 +46,7 @@ const RouletteContainer = styled.div`
     grid-template-columns: 1fr;
     gap: 1rem;
     padding: 1rem;
+    align-items: flex-start;
   }
 `;
 

@@ -228,6 +228,11 @@ export const esES: Translation = {
   'pagination.page': 'Página {{current}} de {{total}}',
   'pagination.items': '({{showing}} de {{total}} elementos)',
 
+  // SEO
+  'seo.title': 'TaskRoulette - Distribución Justa de Tareas via Ruleta',
+  'seo.description': 'Aplicación moderna para distribución justa de tareas y responsabilidades via ruleta interactiva. Gestiona equipos, proyectos y sorteos con interfaz responsiva y animaciones fluidas.',
+  'seo.keywords': 'task roulette, distribución tareas, sorteo responsabilidades, gestión equipo, selector aleatorio, asignación tareas, proyecto colaborativo, react typescript, ruleta interactiva',
+
   // Common
   'common.cancel': 'Cancelar',
   'common.create': 'Crear',

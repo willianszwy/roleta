@@ -500,3 +500,600 @@ npm run test         # Executar testes
 - **System legacy** completamente removido
 
 **Próxima sessão**: Cleanup e melhorias de UX
+
+---
+
+# 🎨 **THEME SYSTEM IMPLEMENTATION PLAN - Next Session**
+
+## 📋 **OBJETIVO DA PRÓXIMA SESSÃO**
+
+Implementar um sistema completo de temas para o TaskRoulette, permitindo que usuários alterem entre diferentes esquemas de cores e estilos visuais.
+
+## 🏗️ **ARQUITETURA DO SISTEMA DE TEMAS**
+
+### 1. **Estrutura de Dados dos Temas**
+
+```typescript
+// src/types/theme.ts
+interface Theme {
+  id: string;
+  name: string;
+  colors: {
+    // Background gradients
+    background: {
+      primary: string;
+      secondary: string;
+      tertiary: string;
+      radial1: string;
+      radial2: string;
+      radial3: string;
+    };
+    
+    // Glass morphism
+    glass: {
+      primary: string;
+      secondary: string;
+      border: string;
+      hover: string;
+      backdrop: string;
+    };
+    
+    // Text colors
+    text: {
+      primary: string;
+      secondary: string;
+      muted: string;
+      contrast: string;
+    };
+    
+    // Status colors
+    status: {
+      success: string;
+      error: string;
+      warning: string;
+      info: string;
+    };
+    
+    // Interactive elements
+    interactive: {
+      primary: string;
+      primaryHover: string;
+      secondary: string;
+      secondaryHover: string;
+      disabled: string;
+      focus: string;
+    };
+    
+    // Roulette specific
+    roulette: {
+      segments: string[];
+      pointer: string;
+      center: string;
+    };
+  };
+  
+  // Typography & spacing (optional per theme)
+  typography?: {
+    fontFamily?: string;
+    fontSizes?: Record<string, string>;
+  };
+  
+  // Animations (optional per theme)
+  animations?: {
+    duration?: Record<string, string>;
+    easing?: Record<string, string>;
+  };
+}
+
+// Pre-defined themes
+type ThemeId = 'default' | 'github' | 'jira' | 'vscode' | 'slack' | 'notion' | 'linear' | 'figma';
+
+interface ThemeContextValue {
+  currentTheme: Theme;
+  themeId: ThemeId;
+  setTheme: (themeId: ThemeId) => void;
+  themes: Record<ThemeId, Theme>;
+}
+```
+
+### 2. **Context API para Gerenciamento de Temas**
+
+```typescript
+// src/context/ThemeContext.tsx
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [themeId, setThemeId] = useLocalStorage<ThemeId>('taskroulette-theme', 'default');
+  
+  const themes: Record<ThemeId, Theme> = {
+    default: DEFAULT_THEME,
+    github: GITHUB_THEME,
+    jira: JIRA_THEME,
+    vscode: VSCODE_THEME,
+    slack: SLACK_THEME,
+    notion: NOTION_THEME,
+    linear: LINEAR_THEME,
+    figma: FIGMA_THEME
+  };
+  
+  const currentTheme = themes[themeId];
+  
+  return (
+    <ThemeContext.Provider value={{ currentTheme, themeId, setTheme: setThemeId, themes }}>
+      <StyledThemeProvider theme={currentTheme}>
+        {children}
+      </StyledThemeProvider>
+    </ThemeContext.Provider>
+  );
+};
+
+// src/hooks/useTheme.ts
+export const useTheme = (): ThemeContextValue => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider');
+  }
+  return context;
+};
+```
+
+### 3. **Definições de Temas Pré-configurados**
+
+```typescript
+// src/themes/default.theme.ts
+export const DEFAULT_THEME: Theme = {
+  id: 'default',
+  name: 'TaskRoulette Original',
+  colors: {
+    background: {
+      primary: '#0f0f23',
+      secondary: 'linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, transparent 30%)',
+      tertiary: 'radial-gradient(ellipse 150vw 80vh at 20% 30%, rgba(102, 126, 234, 0.08) 0%, transparent 70%)',
+      // ... outros gradientes
+    },
+    glass: {
+      primary: 'rgba(255, 255, 255, 0.08)',
+      border: 'rgba(255, 255, 255, 0.15)',
+      // ... resto das cores glass
+    },
+    // ... resto das cores
+  }
+};
+
+// src/themes/github.theme.ts
+export const GITHUB_THEME: Theme = {
+  id: 'github',
+  name: 'GitHub',
+  colors: {
+    background: {
+      primary: '#0d1117',        // GitHub dark background
+      secondary: '#21262d',      // GitHub canvas subtle
+      tertiary: '#30363d',       // GitHub canvas default
+    },
+    glass: {
+      primary: 'rgba(33, 38, 45, 0.8)',
+      border: 'rgba(48, 54, 61, 0.8)',
+      hover: 'rgba(48, 54, 61, 0.9)',
+    },
+    text: {
+      primary: '#f0f6fc',        // GitHub fg default
+      secondary: '#7d8590',      // GitHub fg muted
+      muted: '#656d76',          // GitHub fg subtle
+    },
+    interactive: {
+      primary: '#238636',        // GitHub success emphasis
+      primaryHover: '#2ea043',
+      secondary: '#1f6feb',      // GitHub accent emphasis
+      secondaryHover: '#388bfd',
+    }
+    // ... resto das definições
+  }
+};
+
+// src/themes/jira.theme.ts  
+export const JIRA_THEME: Theme = {
+  id: 'jira',
+  name: 'Jira',
+  colors: {
+    background: {
+      primary: '#1d2125',        // Jira dark background
+      secondary: '#22272b',      // Jira surface overlay
+      tertiary: '#2c333a',       // Jira surface raised
+    },
+    glass: {
+      primary: 'rgba(34, 39, 43, 0.9)',
+      border: 'rgba(44, 51, 58, 0.8)',
+      hover: 'rgba(44, 51, 58, 0.9)',
+    },
+    text: {
+      primary: '#b3bac5',        // Jira text high emphasis
+      secondary: '#9fadbc',      // Jira text medium emphasis
+      muted: '#8590a2',          // Jira text low emphasis
+    },
+    interactive: {
+      primary: '#0052cc',        // Jira brand blue
+      primaryHover: '#0065ff',
+      secondary: '#00a3bf',      // Jira teal
+      secondaryHover: '#00b8d9',
+    }
+    // ... resto das definições
+  }
+};
+
+// src/themes/vscode.theme.ts
+export const VSCODE_THEME: Theme = {
+  id: 'vscode',
+  name: 'VS Code Dark',
+  colors: {
+    background: {
+      primary: '#1e1e1e',        // VS Code editor background
+      secondary: '#252526',      // VS Code sidebar background
+      tertiary: '#2d2d30',       // VS Code menu background
+    },
+    glass: {
+      primary: 'rgba(37, 37, 38, 0.9)',
+      border: 'rgba(45, 45, 48, 0.8)',
+      hover: 'rgba(45, 45, 48, 0.9)',
+    },
+    text: {
+      primary: '#cccccc',        // VS Code editor foreground
+      secondary: '#a6a6a6',      // VS Code descriptionForeground
+      muted: '#858585',          // VS Code disabledForeground
+    },
+    interactive: {
+      primary: '#0e639c',        // VS Code button background
+      primaryHover: '#1177bb',   // VS Code button hover
+      secondary: '#094771',      // VS Code input background
+      secondaryHover: '#0e639c',
+    }
+    // ... resto das definições
+  }
+};
+
+// src/themes/slack.theme.ts
+export const SLACK_THEME: Theme = {
+  id: 'slack',
+  name: 'Slack',
+  colors: {
+    background: {
+      primary: '#1a1d21',        // Slack dark primary
+      secondary: '#222529',      // Slack dark secondary
+      tertiary: '#2c2d30',       // Slack dark tertiary
+    },
+    glass: {
+      primary: 'rgba(34, 37, 41, 0.9)',
+      border: 'rgba(44, 45, 48, 0.8)',
+      hover: 'rgba(44, 45, 48, 0.9)',
+    },
+    text: {
+      primary: '#ffffff',        // Slack primary text
+      secondary: '#ababad',      // Slack secondary text
+      muted: '#868686',          // Slack tertiary text
+    },
+    interactive: {
+      primary: '#4a154b',        // Slack aubergine
+      primaryHover: '#611f69',
+      secondary: '#007a5a',      // Slack green
+      secondaryHover: '#148567',
+    }
+    // ... resto das definições
+  }
+};
+
+// src/themes/notion.theme.ts
+export const NOTION_THEME: Theme = {
+  id: 'notion',
+  name: 'Notion',
+  colors: {
+    background: {
+      primary: '#191919',        // Notion dark background
+      secondary: '#202020',      // Notion surface
+      tertiary: '#2a2a2a',       // Notion elevated surface
+    },
+    glass: {
+      primary: 'rgba(32, 32, 32, 0.9)',
+      border: 'rgba(42, 42, 42, 0.8)',
+      hover: 'rgba(42, 42, 42, 0.9)',
+    },
+    text: {
+      primary: '#ffffff',        // Notion primary text
+      secondary: '#9b9a97',      // Notion secondary text
+      muted: '#6f6e69',          // Notion tertiary text
+    },
+    interactive: {
+      primary: '#2383e2',        // Notion blue
+      primaryHover: '#1a73e8',
+      secondary: '#d9730d',      // Notion orange
+      secondaryHover: '#b8620a',
+    }
+    // ... resto das definições
+  }
+};
+```
+
+### 4. **Componente Theme Switcher**
+
+```typescript
+// src/components/ThemeSwitcher/ThemeSwitcher.tsx
+interface ThemeSwitcherProps {
+  compact?: boolean;
+  showPreview?: boolean;
+}
+
+export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ 
+  compact = false, 
+  showPreview = true 
+}) => {
+  const { themes, themeId, setTheme } = useTheme();
+  const { t } = useI18n();
+  
+  return (
+    <ThemeSwitcherContainer>
+      <ThemeLabel>{t('settings.theme')}</ThemeLabel>
+      
+      {compact ? (
+        <CompactSelector>
+          <select value={themeId} onChange={(e) => setTheme(e.target.value as ThemeId)}>
+            {Object.values(themes).map(theme => (
+              <option key={theme.id} value={theme.id}>
+                {theme.name}
+              </option>
+            ))}
+          </select>
+        </CompactSelector>
+      ) : (
+        <ThemeGrid>
+          {Object.values(themes).map(theme => (
+            <ThemeOption
+              key={theme.id}
+              $isActive={themeId === theme.id}
+              onClick={() => setTheme(theme.id as ThemeId)}
+            >
+              {showPreview && (
+                <ThemePreview>
+                  <PreviewCircle $color={theme.colors.interactive.primary} />
+                  <PreviewCircle $color={theme.colors.status.success} />
+                  <PreviewCircle $color={theme.colors.status.warning} />
+                </ThemePreview>
+              )}
+              <ThemeName>{theme.name}</ThemeName>
+            </ThemeOption>
+          ))}
+        </ThemeGrid>
+      )}
+    </ThemeSwitcherContainer>
+  );
+};
+```
+
+### 5. **Styled Components com Theme Support**
+
+```typescript
+// Exemplo de componente atualizado para usar temas
+// src/components/Roulette/Roulette.tsx
+
+const RouletteContainer = styled(motion.div)`
+  background: ${({ theme }) => theme.colors.glass.primary};
+  backdrop-filter: blur(15px);
+  border: 1px solid ${({ theme }) => theme.colors.glass.border};
+  border-radius: 50%;
+  box-shadow: 
+    0 8px 32px ${({ theme }) => `${theme.colors.glass.primary}40`},
+    inset 0 1px 0 ${({ theme }) => theme.colors.glass.border};
+  
+  // ... resto do styling
+`;
+
+const RouletteSegment = styled.div<{ $color: string; $isSelected: boolean }>`
+  background: ${({ $color, theme, $isSelected }) => 
+    $isSelected 
+      ? `linear-gradient(45deg, ${$color}, ${theme.colors.interactive.primaryHover})`
+      : $color
+  };
+  
+  // ... resto do styling
+`;
+```
+
+## 🎯 **IMPLEMENTAÇÃO STEP-BY-STEP**
+
+### **Fase 1: Estrutura Base (1-2 horas)**
+1. ✅ **Criar tipos TypeScript** (`src/types/theme.ts`)
+2. ✅ **Implementar ThemeContext** (`src/context/ThemeContext.tsx`)
+3. ✅ **Criar hook useTheme** (`src/hooks/useTheme.ts`)
+4. ✅ **Integrar no App.tsx** (ThemeProvider wrapper)
+
+### **Fase 2: Temas Pré-definidos (1-2 horas)**
+1. ✅ **Default theme** (tema atual extraído)
+2. ✅ **GitHub theme** (cinza/branco profissional)
+3. ✅ **Jira theme** (azul corporativo Atlassian)
+4. ✅ **VS Code Dark** (escuro desenvolvedor)
+5. ✅ **Slack theme** (roxo/branco colaborativo)
+6. ✅ **Notion theme** (clean minimalista)
+7. ✅ **Opcional**: Linear, Figma themes
+
+### **Fase 3: Theme Switcher UI (1 hora)**
+1. ✅ **Componente ThemeSwitcher** com preview
+2. ✅ **Integração no Settings** panel
+3. ✅ **Animações de transição** entre temas
+4. ✅ **Preview visual** dos temas
+
+### **Fase 4: Migration & Testing (1 hora)**
+1. ✅ **Atualizar componentes** para usar theme
+2. ✅ **Testes** do sistema de temas
+3. ✅ **Verificar acessibilidade** de cada tema
+4. ✅ **Persistent storage** da escolha do tema
+
+## 🎨 **TEMAS PROFISSIONAIS PLANEJADOS**
+
+### 1. **Default (TaskRoulette Original)**
+- **Cores**: Roxo/azul glassmorphism atual
+- **Vibe**: Moderno, profissional, original TaskRoulette
+- **Referência**: Design atual mantido como opção
+
+### 2. **GitHub Theme** 
+- **Cores**: `#0d1117` background, `#21262d` surfaces, `#f0f6fc` text
+- **Vibe**: Desenvolvedor, familiar, GitHub dark
+- **Interativo**: Verde `#238636` (success), Azul `#1f6feb` (accent)
+
+### 3. **Jira Theme**
+- **Cores**: `#1d2125` background, `#22272b` surfaces, `#b3bac5` text
+- **Vibe**: Corporativo, Atlassian, gestão de projetos
+- **Interativo**: Azul `#0052cc` (brand), Teal `#00a3bf` (secondary)
+
+### 4. **VS Code Dark**
+- **Cores**: `#1e1e1e` background, `#252526` sidebar, `#cccccc` text
+- **Vibe**: Desenvolvedor, IDE familiar, produtividade
+- **Interativo**: Azul `#0e639c` (primary), `#094771` (secondary)
+
+### 5. **Slack Theme**
+- **Cores**: `#1a1d21` background, `#222529` surfaces, `#ffffff` text
+- **Vibe**: Colaborativo, comunicação, workspace
+- **Interativo**: Roxo `#4a154b` (aubergine), Verde `#007a5a`
+
+### 6. **Notion Theme**
+- **Cores**: `#191919` background, `#202020` surfaces, `#ffffff` text
+- **Vibe**: Clean, produtividade, organização
+- **Interativo**: Azul `#2383e2`, Laranja `#d9730d`
+
+### 7. **Linear Theme** (Opcional)
+- **Cores**: Gradientes sutis, cinzas modernos, acentos vibrantes
+- **Vibe**: Issue tracking moderno, design-first
+- **Interativo**: Roxo/rosa gradients, alta precisão visual
+
+### 8. **Figma Theme** (Opcional)
+- **Cores**: Cinza escuro, superfícies limpas, acentos coloridos
+- **Vibe**: Design system, criativo, colaborativo
+- **Interativo**: Multi-color brand palette
+
+### **🎯 JUSTIFICATIVA DOS TEMAS PROFISSIONAIS**
+
+**Por que esses temas específicos?**
+
+1. **GitHub**: Desenvolvedores passam horas no GitHub - familiar e confortável
+2. **Jira**: Gerentes de projeto e equipes ágeis reconhecerão instantaneamente  
+3. **VS Code**: IDE mais popular - desenvolvedores se sentirão em casa
+4. **Slack**: Comunicação diária - tema colaborativo e conhecido
+5. **Notion**: Produtividade e organização - clean e funcional
+6. **Linear**: Ferramenta moderna de issue tracking - design contemporâneo
+7. **Figma**: Design systems e colaboração criativa - inspiração visual
+
+**Benefícios dos Temas Profissionais:**
+- ✅ **Familiaridade imediata** para usuários de cada plataforma
+- ✅ **Redução de friction cognitivo** - cores e padrões conhecidos
+- ✅ **Acessibilidade comprovada** - sistemas já testados em produção
+- ✅ **Profissionalismo** - adequados para ambientes corporativos
+- ✅ **Versatilidade** - cobrindo diferentes tipos de trabalho
+
+## 🔧 **CONSIDERAÇÕES TÉCNICAS**
+
+### **Performance**
+- ✅ **CSS Custom Properties** para mudanças instantâneas
+- ✅ **Lazy loading** de temas não utilizados
+- ✅ **Memoização** de styled components
+- ✅ **Preload** do tema salvo no localStorage
+
+### **Acessibilidade**
+- ✅ **Contrast ratios** WCAG 2.1 AA para todos os temas
+- ✅ **Teste com screen readers** em cada tema
+- ✅ **Focus indicators** visíveis em todos os temas
+- ✅ **Reduced motion** respeitado nas transições
+
+### **UX/UI**
+- ✅ **Transições suaves** entre mudanças de tema (0.3s)
+- ✅ **Preview thumbnails** no theme switcher
+- ✅ **Tema persistente** entre sessões
+- ✅ **Indicador visual** do tema ativo
+
+## 📋 **TODO LIST PARA PRÓXIMA SESSÃO**
+
+### **Phase 1: Setup & Architecture**
+- [ ] **Create theme types** (`src/types/theme.ts`)
+- [ ] **Implement ThemeContext** (`src/context/ThemeContext.tsx`) 
+- [ ] **Create useTheme hook** (`src/hooks/useTheme.ts`)
+- [ ] **Add ThemeProvider to App.tsx**
+
+### **Phase 2: Professional Theme Definitions**  
+- [ ] **Extract current theme** as DEFAULT_THEME
+- [ ] **Create GITHUB_THEME** (GitHub dark professional)
+- [ ] **Create JIRA_THEME** (Atlassian corporate blue)
+- [ ] **Create VSCODE_THEME** (developer IDE familiar)
+- [ ] **Create SLACK_THEME** (collaborative workspace)
+- [ ] **Create NOTION_THEME** (clean productivity focused)
+
+### **Phase 3: UI Components**
+- [ ] **Build ThemeSwitcher component** 
+- [ ] **Add to Settings panel**
+- [ ] **Theme preview thumbnails**
+- [ ] **Smooth transition animations**
+
+### **Phase 4: Integration & Testing**
+- [ ] **Update styled components** to use theme
+- [ ] **Test all themes** for accessibility  
+- [ ] **Verify responsive behavior**
+- [ ] **Add theme persistence** localStorage
+
+### **Phase 5: Polish & Validation**
+- [ ] **Run linting** and build checks
+- [ ] **Test color contrast** ratios
+- [ ] **Verify all components** work with each theme
+- [ ] **Add theme system documentation**
+
+## 🎯 **SUCCESS CRITERIA**
+
+### **Functional**
+- ✅ **7 working themes** with distinct visual identities
+- ✅ **Instant theme switching** without page reload
+- ✅ **Theme persistence** across browser sessions
+- ✅ **All components** properly themed
+
+### **Technical**
+- ✅ **Zero TypeScript errors**
+- ✅ **ESLint passing**
+- ✅ **Build successful**
+- ✅ **Performance unchanged** (no regression)
+
+### **UX/Accessibility**
+- ✅ **WCAG 2.1 AA compliance** for all themes
+- ✅ **Intuitive theme switcher** UI
+- ✅ **Smooth transitions** between themes  
+- ✅ **Visual feedback** for active theme
+
+## 🚀 **EXECUTION PLAN FOR NEXT SESSION**
+
+```bash
+# Commands to run during implementation
+npm run dev          # Development server
+npm run lint         # Code quality checks  
+npm run build        # Production build test
+npm run test         # Run tests after changes
+
+# File structure to create:
+src/
+├── types/
+│   └── theme.ts                    # Theme interfaces
+├── context/  
+│   └── ThemeContext.tsx            # Theme state management
+├── hooks/
+│   └── useTheme.ts                 # Theme consumption hook
+├── themes/
+│   ├── index.ts                    # Export all themes
+│   ├── default.theme.ts            # TaskRoulette original
+│   ├── github.theme.ts             # GitHub dark professional
+│   ├── jira.theme.ts               # Atlassian corporate
+│   ├── vscode.theme.ts             # VS Code developer
+│   ├── slack.theme.ts              # Slack collaborative
+│   ├── notion.theme.ts             # Notion productivity
+│   ├── linear.theme.ts             # Linear modern (optional)
+│   └── figma.theme.ts              # Figma creative (optional)
+└── components/
+    └── ThemeSwitcher/
+        ├── ThemeSwitcher.tsx       # Theme selection UI
+        └── __tests__/
+            └── ThemeSwitcher.test.tsx  # Component tests
+```
+
+**Estimated time**: 4-6 hours total
+**Priority**: High (major UX enhancement)  
+**Dependencies**: None (pure addition, no breaking changes)
+**Testing**: All themes tested across all components

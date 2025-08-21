@@ -9,6 +9,7 @@ import { SidePanel } from './components/SidePanel/SidePanel';
 import { WinnerModal } from './components/WinnerModal/WinnerModal';
 import { SkipLinks } from './components/SkipLinks/SkipLinks';
 import { ProjectSelector } from './components/ProjectSelector/ProjectSelector';
+import { SEOHead } from './components/SEOHead/SEOHead';
 import { useRouletteContext } from './context/RouletteContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useScreenReaderAnnouncements } from './hooks/useA11y';
@@ -308,6 +309,7 @@ function App() {
   return (
     <ConfirmationProvider>
       <AlertProvider>
+        <SEOHead />
         <GlobalStyles />
         <SkipLinks />
         <AppContainer role="application" aria-label="TaskRoulette - Distribuição de Tarefas">

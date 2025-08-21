@@ -229,6 +229,11 @@ export type TranslationKey =
   | 'pagination.page'
   | 'pagination.items'
 
+  // SEO
+  | 'seo.title'
+  | 'seo.description'
+  | 'seo.keywords'
+
   // Common
   | 'common.cancel'
   | 'common.create'

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Main application page -->
+  <url>
+    <loc>https://taskroulette.app/</loc>
+    <lastmod>2025-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    
+    <!-- Multi-language support -->
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://taskroulette.app/?lang=pt-BR" />
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://taskroulette.app/?lang=en-US" />
+    <xhtml:link rel="alternate" hreflang="es-ES" href="https://taskroulette.app/?lang=es-ES" />
+    <xhtml:link rel="alternate" hreflang="fr-FR" href="https://taskroulette.app/?lang=fr-FR" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://taskroulette.app/" />
+  </url>
+  
+  <!-- Task roulette base path -->
+  <url>
+    <loc>https://taskroulette.app/task-roulette/</loc>
+    <lastmod>2025-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://taskroulette.app/task-roulette/?lang=pt-BR" />
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://taskroulette.app/task-roulette/?lang=en-US" />
+    <xhtml:link rel="alternate" hreflang="es-ES" href="https://taskroulette.app/task-roulette/?lang=es-ES" />
+    <xhtml:link rel="alternate" hreflang="fr-FR" href="https://taskroulette.app/task-roulette/?lang=fr-FR" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://taskroulette.app/task-roulette/" />
+  </url>
+
+</urlset>

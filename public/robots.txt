@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://taskroulette.app/sitemap.xml
+
+# Specific paths for SEO optimization
+Allow: /task-roulette/
+Allow: /task-roulette/assets/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.svg
+Allow: /*.webp
+
+# Disallow admin or development files if any
+Disallow: /admin/
+Disallow: /*.log
+Disallow: /temp/
+Disallow: /test/
+
+# Crawl delay for politeness (optional)
+Crawl-delay: 1
