@@ -140,12 +140,21 @@ box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 - **Negative Result**: - (minus sign)
 - **Neutral/Empty**: · (center dot)
 
-### Layout Principles
-1. **Fixed header** with app title left, menu button right
-2. **Scrollable side panel** with proper overflow handling
-3. **Responsive breakpoints**: 768px (mobile), 1024px (tablet)
-4. **Consistent spacing**: 1rem, 1.5rem, 2rem scale
-5. **Glassmorphism effects** for all containers and panels
+#### Modal System (NEW - August 2025)
+- **ConfirmationModal**: Custom glassmorphism confirmations replacing window.confirm()
+- **AlertModal**: Custom glassmorphism alerts replacing window.alert()
+- **useConfirmation hook**: Promise-based confirmation system
+- **useAlert hook**: Promise-based alert system
+- **Zero native browser dialogs**: All modals follow design system
+- **Accessible**: Full ARIA support, focus management, keyboard navigation
+
+### Layout Principles (Updated August 2025)
+1. **Fixed header** with app title left, ProjectSelector + menu button right
+2. **HeaderRightSection**: Clean grouping of navigation elements
+3. **Scrollable side panel** with proper overflow handling
+4. **Responsive breakpoints**: 768px (mobile), 1024px (tablet)
+5. **Consistent spacing**: 1rem, 1.5rem, 2rem scale
+6. **Glassmorphism effects** for all containers and panels
 
 ### Animation Guidelines
 - **Framer Motion** for all component animations
@@ -393,7 +402,42 @@ npm run test         # Executar testes
 - **Server**: http://localhost:5177/task-roulette/
 - **Status**: 🟢 **PRODUCTION READY**  
 - **Última atualização**: Agosto 2025
-- **Versão**: v2.1.0 (Multi-Participant Tasks Complete)
+- **Versão**: v2.2.0 (UX/UI Improvements Complete)
+
+# 🎨 UX/UI IMPROVEMENTS - August 2025
+
+## ✅ **MELHORIAS IMPLEMENTADAS RECENTEMENTE**
+
+### 🚫 **Sistema de Modais Customizados**
+- **Problema resolvido**: Eliminados todos os `window.alert()` e `window.confirm()` nativos
+- **Implementação**: 
+  - `ConfirmationModal` + `useConfirmation` hook
+  - `AlertModal` + `useAlert` hook  
+  - Design glassmorphism consistente
+  - Acessibilidade completa (ARIA, focus trap, keyboard nav)
+- **Arquivos afetados**: 6 componentes atualizados
+- **Benefício**: Interface profissional e consistente
+
+### 📐 **Header Layout Reorganizado** 
+- **Problema resolvido**: ProjectSelector estava mal posicionado entre título e menu
+- **Implementação**: `HeaderRightSection` container para agrupar elementos à direita
+- **Layout final**: `[Título] ............ [ProjectSelector][MenuButton]`
+- **Benefício**: Hierarquia visual clara e navegação intuitiva
+
+### 🎨 **TaskManager Layout Otimizado**
+- **Problema resolvido**: UX confuso com botão entre campos de entrada
+- **Layout antigo**: `[Nome][Botão] / [Descrição][Pessoas]`
+- **Layout novo**: `[Nome] / [Descrição][Pessoas] / [Botão centralizado]`
+- **Benefício**: Fluxo visual intuitivo e melhor usabilidade
+
+### 🛠️ **Design System Expandido**
+- **Componentes adicionados**:
+  - `ConfirmationModal.tsx` - Confirmações customizadas
+  - `AlertModal.tsx` - Alertas customizados
+  - `useConfirmation.tsx` - Hook de confirmação
+  - `useAlert.tsx` - Hook de alerta
+- **Providers integrados**: `ConfirmationProvider` + `AlertProvider` no App.tsx
+- **Export**: Todos disponíveis via design-system index
 
 ---
 

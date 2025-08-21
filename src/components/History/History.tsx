@@ -6,6 +6,7 @@ import type { RouletteHistory } from '../../types';
 import { formatDate } from '../../utils/helpers';
 import { useI18n } from '../../i18n';
 import { useDropdown } from '../../context/useDropdown';
+import { useConfirmation } from '../../design-system';
 
 interface HistoryProps {
   history: RouletteHistory[];
@@ -261,6 +262,7 @@ export const History: React.FC<HistoryProps> = ({
   onClearHistory,
 }) => {
   const { t } = useI18n();
+  const { confirm } = useConfirmation();
   const { activeDropdown, setActiveDropdown, closeAllDropdowns } = useDropdown();
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [itemMenuPosition, setItemMenuPosition] = useState({ top: 0, left: 0 });
@@ -277,15 +279,31 @@ export const History: React.FC<HistoryProps> = ({
     [history]
   );
 
-  const handleRemoveFromRoulette = (participantId: string, participantName: string) => {
-    if (window.confirm(t('participants.remove') + ` "${participantName}"?`)) {
+  const handleRemoveFromRoulette = async (participantId: string, participantName: string) => {
+    const confirmed = await confirm({
+      title: t('modal.removeParticipant'),
+      message: `${t('participants.remove')} "${participantName}"?`,
+      confirmText: t('modal.remove'),
+      cancelText: t('modal.cancel'),
+      variant: 'danger'
+    });
+    
+    if (confirmed) {
       onRemoveFromRoulette(participantId);
     }
     closeAllDropdowns();
   };
 
-  const handleClearHistory = () => {
-    if (window.confirm(t('history.clearConfirm'))) {
+  const handleClearHistory = async () => {
+    const confirmed = await confirm({
+      title: t('modal.clearHistory'),
+      message: t('history.clearConfirm'),
+      confirmText: t('modal.clear'),
+      cancelText: t('modal.cancel'),
+      variant: 'warning'
+    });
+    
+    if (confirmed) {
       onClearHistory();
     }
     closeAllDropdowns();

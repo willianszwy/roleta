@@ -6,6 +6,7 @@ import type { Participant } from '../../types';
 import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
 import { useI18n } from '../../i18n';
 import { useDropdown } from '../../context/useDropdown';
+import { useConfirmation } from '../../design-system';
 
 interface ParticipantManagerProps {
   participants: Participant[];
@@ -292,6 +293,7 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
   onClear,
 }) => {
   const { t } = useI18n();
+  const { confirm } = useConfirmation();
   const { activeDropdown, setActiveDropdown, closeAllDropdowns } = useDropdown();
   const [inputValue, setInputValue] = useState('');
   const [bulkValue, setBulkValue] = useState('');
@@ -333,15 +335,31 @@ export const ParticipantManager: React.FC<ParticipantManagerProps> = React.memo(
     setBulkValue('');
   };
 
-  const handleRemove = (id: string, name: string) => {
-    if (window.confirm(t('participants.remove') + ` "${name}"?`)) {
+  const handleRemove = async (id: string, name: string) => {
+    const confirmed = await confirm({
+      title: t('modal.removeParticipant'),
+      message: `${t('participants.remove')} "${name}"?`,
+      confirmText: t('modal.remove'),
+      cancelText: t('modal.cancel'),
+      variant: 'danger'
+    });
+    
+    if (confirmed) {
       onRemove(id);
     }
     closeAllDropdowns();
   };
 
-  const handleClear = () => {
-    if (window.confirm(t('participants.clear') + '?')) {
+  const handleClear = async () => {
+    const confirmed = await confirm({
+      title: t('modal.clearParticipants'),
+      message: `${t('participants.clear')}?`,
+      confirmText: t('modal.clear'),
+      cancelText: t('modal.cancel'),
+      variant: 'warning'
+    });
+    
+    if (confirmed) {
       onClear();
     }
     closeAllDropdowns();

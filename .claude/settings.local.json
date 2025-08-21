@@ -26,7 +26,11 @@
       "Bash(npm run preview:*)",
       "Bash(taskkill:*)",
       "Bash(rg:*)",
-      "Bash(timeout 5 npm run dev)"
+      "Bash(timeout 5 npm run dev)",
+      "Bash(timeout 8 npm run dev)",
+      "Bash(git rm:*)",
+      "Bash(start http://localhost:5174/task-roulette/)",
+      "Bash(del:*)"
     ],
     "deny": []
   }

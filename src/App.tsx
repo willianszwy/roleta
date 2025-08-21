@@ -12,6 +12,7 @@ import { ProjectSelector } from './components/ProjectSelector/ProjectSelector';
 import { useRouletteContext } from './context/RouletteContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useScreenReaderAnnouncements } from './hooks/useA11y';
+import { ConfirmationProvider, AlertProvider } from './design-system';
 import { useI18n } from './i18n';
 import type { Participant, Task } from './types';
 import type { SettingsConfig } from './components/Settings/Settings';
@@ -73,6 +74,16 @@ const HeaderTitle = styled.h1`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+`;
+
+const HeaderRightSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+  }
 `;
 
 const HeaderMenuButton = styled(motion.button)`
@@ -295,10 +306,11 @@ function App() {
   const togglePanel = () => setIsPanelOpen(!isPanelOpen);
 
   return (
-    <>
-      <GlobalStyles />
-      <SkipLinks />
-      <AppContainer role="application" aria-label="TaskRoulette - Distribuição de Tarefas">
+    <ConfirmationProvider>
+      <AlertProvider>
+        <GlobalStyles />
+        <SkipLinks />
+        <AppContainer role="application" aria-label="TaskRoulette - Distribuição de Tarefas">
         <AppHeader
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -306,14 +318,16 @@ function App() {
           role="banner"
         >
           <HeaderTitle>{t('app.title')}</HeaderTitle>
-          <ProjectSelector
-            projects={state.projects}
-            activeProjectId={state.activeProjectId}
-            onSwitchProject={actions.switchProject}
-            onCreateProject={actions.createProject}
-            onDeleteProject={actions.deleteProject}
-          />
-          <HeaderMenuButton
+          
+          <HeaderRightSection>
+            <ProjectSelector
+              projects={state.projects}
+              activeProjectId={state.activeProjectId}
+              onSwitchProject={actions.switchProject}
+              onCreateProject={actions.createProject}
+              onDeleteProject={actions.deleteProject}
+            />
+            <HeaderMenuButton
             onClick={togglePanel}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -341,7 +355,8 @@ function App() {
                 y: isPanelOpen ? -8 : 0,
               }}
             />
-          </HeaderMenuButton>
+            </HeaderMenuButton>
+          </HeaderRightSection>
         </AppHeader>
         
         <Container>
@@ -434,7 +449,8 @@ function App() {
         {/* Live region for screen reader announcements */}
         <LiveRegion />
       </AppContainer>
-    </>
+      </AlertProvider>
+    </ConfirmationProvider>
   );
 }
 

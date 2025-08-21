@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import type { TaskHistory as TaskHistoryType } from '../../types';
 import { exportTaskHistory } from '../../utils/taskExportHelpers';
 import { useI18n } from '../../i18n';
+import { useConfirmation, useAlert } from '../../design-system';
 
 interface TaskHistoryProps {
   taskHistory: TaskHistoryType[];
@@ -297,16 +298,33 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   onClearHistory,
 }) => {
   const { t } = useI18n();
+  const { confirm } = useConfirmation();
+  const { alert } = useAlert();
   const [currentPage, setCurrentPage] = useState(0);
 
-  const handleClear = () => {
-    if (window.confirm(t('history.clearTaskConfirm'))) {
+  const handleClear = async () => {
+    const confirmed = await confirm({
+      title: t('modal.clearTaskHistory'),
+      message: t('history.clearTaskConfirm'),
+      confirmText: t('modal.clear'),
+      cancelText: t('modal.cancel'),
+      variant: 'warning'
+    });
+    
+    if (confirmed) {
       onClearHistory();
     }
   };
 
-  const handleExport = (format: 'csv' | 'json') => {
-    exportTaskHistory(taskHistory, format);
+  const handleExport = async (format: 'csv' | 'json') => {
+    await exportTaskHistory(taskHistory, format, async () => {
+      await alert({ 
+        title: t('modal.export'), 
+        message: t('modal.noDataToExport'), 
+        buttonText: t('modal.ok'),
+        variant: 'warning' 
+      });
+    });
   };
 
   // Memoize calculations to avoid recalculating on every render

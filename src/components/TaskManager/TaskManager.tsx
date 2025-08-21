@@ -6,6 +6,7 @@ import type { Task } from '../../types';
 import { Button, Input as DSInput, TextArea, tokens } from '../../design-system';
 import { useI18n } from '../../i18n';
 import { useDropdown } from '../../context/useDropdown';
+import { useConfirmation } from '../../design-system';
 
 interface TaskManagerProps {
   tasks: Task[];
@@ -47,8 +48,14 @@ const InputRow = styled.div`
   gap: ${tokens.spacing.sm};
 `;
 
-
-
+const FieldLabel = styled.div`
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
 
 const TasksList = styled.div`
   flex: 1;
@@ -308,6 +315,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   onClear,
 }) => {
   const { t } = useI18n();
+  const { confirm } = useConfirmation();
   const { activeDropdown, setActiveDropdown, closeAllDropdowns } = useDropdown();
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
@@ -353,15 +361,31 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     setBulkValue('');
   };
 
-  const handleRemove = (id: string, name: string) => {
-    if (window.confirm(t('tasks.remove') + ` "${name}"?`)) {
+  const handleRemove = async (id: string, name: string) => {
+    const confirmed = await confirm({
+      title: t('modal.removeTask'),
+      message: `${t('tasks.remove')} "${name}"?`,
+      confirmText: t('modal.remove'),
+      cancelText: t('modal.cancel'),
+      variant: 'danger'
+    });
+    
+    if (confirmed) {
       onRemove(id);
     }
     closeAllDropdowns();
   };
 
-  const handleClear = () => {
-    if (window.confirm(t('tasks.clear') + '?')) {
+  const handleClear = async () => {
+    const confirmed = await confirm({
+      title: t('modal.clearTasks'),
+      message: `${t('tasks.clear')}?`,
+      confirmText: t('modal.clear'),
+      cancelText: t('modal.cancel'),
+      variant: 'warning'
+    });
+    
+    if (confirmed) {
       onClear();
     }
     closeAllDropdowns();
@@ -427,27 +451,23 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       </Header>
       
       <AddForm onSubmit={handleSubmit}>
-        <InputRow>
+        {/* Primeira linha: Nome */}
+        <div style={{ marginBottom: '0.75rem' }}>
+          <FieldLabel>{t('tasks.nameLabel')}</FieldLabel>
+          <DSInput
+            type="text"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            placeholder={t('tasks.namePlaceholder')}
+            maxLength={50}
+            fullWidth
+          />
+        </div>
+        
+        {/* Segunda linha: Descrição e Pessoas */}
+        <InputRow style={{ marginBottom: '1rem' }}>
           <div style={{ flex: 1 }}>
-            <DSInput
-              type="text"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              placeholder={t('tasks.namePlaceholder')}
-              maxLength={50}
-              fullWidth
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={!taskName.trim()}
-            variant="primary"
-          >
-            {t('tasks.add')}
-          </Button>
-        </InputRow>
-        <InputRow>
-          <div style={{ flex: 1 }}>
+            <FieldLabel>{t('tasks.descriptionLabel')}</FieldLabel>
             <DSInput
               type="text"
               value={taskDescription}
@@ -457,18 +477,29 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               fullWidth
             />
           </div>
-          <div style={{ width: '120px' }}>
+          <div style={{ width: '140px' }}>
+            <FieldLabel>{t('tasks.participantsLabel')}</FieldLabel>
             <DSInput
               type="number"
               value={requiredParticipants}
               onChange={(e) => setRequiredParticipants(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
-              placeholder="Pessoas"
+              placeholder="1-10"
               min={1}
               max={10}
               fullWidth
             />
           </div>
         </InputRow>
+        
+        {/* Terceira linha: Botão */}
+        <Button
+          type="submit"
+          disabled={!taskName.trim()}
+          variant="primary"
+          style={{ width: '100%' }}
+        >
+          {t('tasks.add')}
+        </Button>
       </AddForm>
 
       <BulkActions style={{ marginBottom: '1rem' }}>

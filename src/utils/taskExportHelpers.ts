@@ -108,22 +108,37 @@ function formatTimeForExport(date: Date): string {
   });
 }
 
-export function exportTaskHistory(data: TaskHistory[], format: 'csv' | 'json' = 'csv'): void {
-  if (data.length === 0) {
-    alert('Não há dados para exportar!');
-    return;
-  }
+export function exportTaskHistory(
+  data: TaskHistory[], 
+  format: 'csv' | 'json' = 'csv',
+  onAlert?: (title: string, message: string) => Promise<void>
+): Promise<void> {
+  return new Promise((resolve) => {
+    const processExport = async () => {
+      if (data.length === 0) {
+        if (onAlert) {
+          await onAlert('Exportação', 'Não há dados para exportar!');
+        }
+        resolve();
+        return;
+      }
 
-  const now = new Date();
-  const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-  
-  if (format === 'csv') {
-    const csvContent = generateTaskCSV(data);
-    downloadTaskCSV(csvContent, `sorteio-tarefas-${timestamp}.csv`);
-  } else {
-    const jsonContent = generateTaskJSON(data);
-    downloadTaskJSON(jsonContent, `sorteio-tarefas-${timestamp}.json`);
-  }
+      const now = new Date();
+      const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+      
+      if (format === 'csv') {
+        const csvContent = generateTaskCSV(data);
+        downloadTaskCSV(csvContent, `sorteio-tarefas-${timestamp}.csv`);
+      } else {
+        const jsonContent = generateTaskJSON(data);
+        downloadTaskJSON(jsonContent, `sorteio-tarefas-${timestamp}.json`);
+      }
+        
+      resolve();
+    };
+    
+    processExport();
+  });
 }
 
 // Helper function to get summary statistics
