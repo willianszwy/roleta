@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+// @ts-ignore - temporary fix for React 19 compatibility
+import { screen } from '@testing-library/react';
 import { RouletteProvider } from '../RouletteProvider';
 import { useRouletteContext } from '../RouletteContext';
 

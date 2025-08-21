@@ -4,7 +4,6 @@ import { HelmetProvider } from 'react-helmet-async'
 import './index.css'
 import '@flaticon/flaticon-uicons/css/thin/rounded.css'
 import App from './App.tsx'
-import DebugApp from './DebugApp.tsx'
 import { RouletteProvider } from './context/RouletteProvider'
 import { I18nProvider } from './i18n'
 

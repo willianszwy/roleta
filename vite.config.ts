@@ -9,15 +9,7 @@ export default defineConfig({
   // Performance optimizations
   build: {
     // Enable minification
-    minify: 'terser',
-    
-    // Terser options for better compression
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true,
-      },
-    },
+    minify: 'esbuild',
     
     // Rollup options for better chunking
     rollupOptions: {

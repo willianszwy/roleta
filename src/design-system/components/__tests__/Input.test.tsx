@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+// @ts-ignore - temporary fix for React 19 compatibility
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Input, TextArea } from '../Input';
 
