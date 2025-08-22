@@ -2,7 +2,7 @@
 
 Uma aplicação moderna e interativa para distribuição justa de tarefas via roleta!
 
-[![Demo](https://img.shields.io/badge/🌐_Demo-Live-success)](https://willianszwy.github.io/roleta/)
+[![Demo](https://img.shields.io/badge/🌐_Demo-Live-success)](https://willianszwy.github.io/task-roulette/)
 [![React](https://img.shields.io/badge/React-19.1.1-61dafb)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178c6)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.1.2-646cff)](https://vitejs.dev/)
